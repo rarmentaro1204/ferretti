@@ -97,9 +97,10 @@ function stepOptions(){
         <span class="oc">+ ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
       return arr.length?`<div class="optgrp"><div class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})</div><div class="optchips">${arr.map(optChip).join('')}</div></div>`:'';}).join('');
-    const optBlock=opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
+    const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
+    const optBlock=loadHint+(opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
         <button class="btn ghost sm" data-addallopt="${si}" style="margin-left:8px">+ ${t('add_all_options')}</button></div>${optGroups}`
-      :(s.sparesOnly||s.custom?'':`<div class="hint" style="margin:8px 0">${t('no_options_machine')}</div>`);
+      :(s.sparesOnly||s.custom?'':`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${MATRIX_INFO.machines?t('no_options_machine'):t('no_options_machine')}</div>`));;
     const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${chipsOf(spares,'spare')}</div>`:'';
     const editor=s.sparesOnly?`<div style="margin:8px 0;display:grid;grid-template-columns:1fr;gap:6px">

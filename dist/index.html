@@ -417,7 +417,8 @@ const Y={
   a_use:"Utilizzo", a_area:"Area di navigazione", a_guests:"Ospiti a bordo", a_crew:"Equipaggio", a_flag:"Bandiera", a_port:"Porto / cantiere di consegna", a_interior:"Stile interni", a_notes:"Note sul programma",
   same_order_chk:"Stesso ordine dell'imbarcazione precedente (quotate insieme, i totali si sommano)",
   machine_name:"Nome imbarcazione", add_custom:"Aggiungi imbarcazione personalizzata", new_machine:"Nuova imbarcazione",
-  no_options_machine:"Nessun optional precaricato per questo modello: aggiungi righe libere per gruppo qui sotto.",
+  no_options_machine:"Nel listino caricato non ci sono optional per questo modello (il listino optional ufficiale disponibile è solo quello del 720): aggiungi righe libere per gruppo qui sotto.",
+  load_matrix_hint:"Optional del listino non caricati: clicca «Carica matrice optional» in alto e scegli 02_Matrice_Optional_Ferretti.xlsx (per i prezzi barca anche «Carica listino» con 01_Listino_Prezzi_Ferretti.xlsx).",
   og_motorizzazione:"Motorizzazione", og_coperta:"Coperta", og_interni:"Interni", og_elettronica:"Elettronica", og_comfort:"Comfort", og_servizi:"Servizi", og_altro:"Altro",
   opt_group:"Gruppo", accessories:"Optional e allestimenti", add_free_accessory:"Aggiungi riga libera",
   ph_acc_search:"Cerca un optional per codice o nome…", selectable_options:"Optional del modello (da sito, prezzo da definire)",
@@ -446,7 +447,8 @@ const Y={
   a_use:"Use", a_area:"Cruising area", a_guests:"Guests on board", a_crew:"Crew", a_flag:"Flag", a_port:"Delivery port / yard", a_interior:"Interior style", a_notes:"Programme notes",
   same_order_chk:"Same order as the previous yacht (quoted together, totals add up)",
   machine_name:"Yacht name", add_custom:"Add custom yacht", new_machine:"New yacht",
-  no_options_machine:"No pre-loaded option for this model: add free rows by group below.",
+  no_options_machine:"The loaded price list has no options for this model (the only official options list available is the 720's): add free rows by group below.",
+  load_matrix_hint:"Price-list options not loaded: click \"Carica matrice optional\" at the top and choose 02_Matrice_Optional_Ferretti.xlsx (for boat prices also \"Carica listino\" with 01_Listino_Prezzi_Ferretti.xlsx).",
   og_motorizzazione:"Engines", og_coperta:"Deck", og_interni:"Interiors", og_elettronica:"Electronics", og_comfort:"Comfort", og_servizi:"Services", og_altro:"Other",
   opt_group:"Group", accessories:"Options and outfitting", add_free_accessory:"Add free row",
   ph_acc_search:"Search an option by code or name…", selectable_options:"Model options (from website, price TBD)",
@@ -931,9 +933,10 @@ function stepOptions(){
         <span class="oc">+ ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
       return arr.length?`<div class="optgrp"><div class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})</div><div class="optchips">${arr.map(optChip).join('')}</div></div>`:'';}).join('');
-    const optBlock=opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
+    const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
+    const optBlock=loadHint+(opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
         <button class="btn ghost sm" data-addallopt="${si}" style="margin-left:8px">+ ${t('add_all_options')}</button></div>${optGroups}`
-      :(s.sparesOnly||s.custom?'':`<div class="hint" style="margin:8px 0">${t('no_options_machine')}</div>`);
+      :(s.sparesOnly||s.custom?'':`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${MATRIX_INFO.machines?t('no_options_machine'):t('no_options_machine')}</div>`));;
     const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${chipsOf(spares,'spare')}</div>`:'';
     const editor=s.sparesOnly?`<div style="margin:8px 0;display:grid;grid-template-columns:1fr;gap:6px">
