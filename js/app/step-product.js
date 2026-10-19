@@ -70,7 +70,7 @@ function stepProduct(){
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
 }
-let drawerOpen=true;
+let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
   const items=S.solutions.map((s,i)=>`<div class="ditem">
       ${s.img?`<img class="imgthumb" style="width:36px;height:36px" src="${s.img}">`:'<span style="width:36px"></span>'}

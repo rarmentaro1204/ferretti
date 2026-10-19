@@ -93,6 +93,14 @@ function repaginateQuote(){
     if(cont)queue.unshift(cont);
   }
 }
+// anteprima A4 (794 px) su schermi stretti: si riduce in scala per stare nella pagina (dopo l'impaginazione, che misura in px reali)
+function fitPreview(){
+  const p=document.querySelector('#view .pages');if(!p)return;
+  p.style.zoom='';p.style.padding='';
+  const avail=document.documentElement.clientWidth;
+  if(avail<860){p.style.padding='6px 0';p.style.zoom=Math.max(.3,(avail-8)/794).toFixed(3);}
+}
+window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===4)fitPreview();});
 function stepQuote(){
   const v=$('#view');
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
@@ -287,6 +295,7 @@ function stepQuote(){
     </div>
     <div class="pages">${html}</div>`;
   repaginateQuote();
+  fitPreview();
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
   // inline editing directly in the document preview

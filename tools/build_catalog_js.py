@@ -33,6 +33,9 @@ def velocita(vmax, vcro):
 
 def cabine(raw):
     """'4 cabins + 1 crew' -> '4 + 1' (neutro rispetto alla lingua; l'etichetta spiega ospiti + equipaggio)."""
+    solo = re.fullmatch(r"\s*([\d/]+)\s*cabins?\s*", str(raw or ""), re.I)
+    if solo:
+        return solo.group(1)
     m = re.match(r"\s*([\d/]+)\s*cabins?\s*\+\s*(\d+|crew)\s*(?:crew)?", str(raw or ""), re.I)
     return f"{m.group(1)} + {m.group(2)}" if m else str(raw or "").strip()
 

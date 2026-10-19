@@ -75,7 +75,7 @@ function stepOptions(){
   if(!S.solutions.length){v.innerHTML=`<div class="card"><h2>${t('step_options')}</h2><p class="hint">${t('add_product_first')}</p></div>`;return;}
   const LT=lineTotals();
   const solHtml=S.solutions.map((s,si)=>{
-    const accRows=s.accessories.map((a,ai)=>`<div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+    const accRows=s.accessories.map((a,ai)=>`<div class="accline" style="display:flex;gap:8px;align-items:center;margin-top:8px">
       <span style="position:relative;display:inline-block;width:40px;height:40px;flex:0 0 auto">
         ${a.img?`<img class="imgthumb" style="width:40px;height:40px" src="${a.img}">`:'<span class="imgthumb" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#c7ccd6">+</span>'}
         <input type="file" accept="image/*" title="${esc(t('change_image'))}" data-accimgadd="${si}-${ai}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:40px;height:40px">
