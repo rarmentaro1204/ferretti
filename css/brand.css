@@ -1,0 +1,34 @@
+/* ==========================================================================
+   FERRETTI YACHTS — design tokens (identità RICOSTRUITA dal sito ufficiale, vedi brand/BRAND_GUIDELINES.md)
+   Nero #212322 · Petrolio #003E4D · Pietra #D1CDC7 · Grigio #92989B · Font: Jost + Cormorant Garamond + Inter
+   I nomi delle variabili (--red, --yellow, --navy) sono storici: ora indicano accento petrolio, pietra e nero.
+   ========================================================================== */
+:root{
+  /* brand */
+  --red:#003E4D; --red-700:#002A35; --red-300:#2E6B7A; --red-100:#DCE7EA;     /* accento: petrolio */
+  --yellow:#D1CDC7; --yellow-700:#9E998F; --yellow-100:#F1EFEC;              /* pietra */
+  --navy:#212322; --navy2:#2E3130;                                           /* nero Ferretti */
+  /* neutri */
+  --ink:#212322; --line:#dedbd6; --soft:#f4f3f1; --muted:#6c7173; --white:#fff;
+  --steel:#57595B; --steelL:#92989B; --greybar:#ecebe8; --valtint:#bdbab4;
+  /* tipografia */
+  --font-body:'Inter','Helvetica Neue',Arial,sans-serif;
+  --font-title:'Jost','Inter',Arial,sans-serif;
+  --font-accent:'Cormorant Garamond',Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-body);color:var(--ink);background:#f6f5f3}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+.app-hide{display:none!important}
+
+/* titoli: Jost maiuscolo sottile, tracking stretto (come il sito) */
+.topbar h1,.card h2,.hbar .r,.hbar .l,.cover .ctitle,.gc-title,.load-title,.sol .head .nm,.cat .ttl{
+  font-family:var(--font-title);font-weight:400;letter-spacing:.04em;text-transform:uppercase}
+.topbar h1{font-size:17px;font-weight:500}.card h2{font-size:22px;font-weight:300;letter-spacing:.03em}.hbar .r{font-size:16px}.hbar .l{font-size:14px}
+.cover .ctitle{font-size:24px;font-weight:300}.cover .ctitle .nm{font-size:28px;font-weight:400}
+.gc-title{font-size:16px}.sol .head .nm{font-size:18px}.cat .ttl{font-size:15px}
+.hint,.cd{font-family:var(--font-body)}
+/* accenti */
+.step.active{border-color:var(--red)}
+.btn.prim{box-shadow:none}

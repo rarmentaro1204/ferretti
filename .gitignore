@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+.claude/settings.local.json
+
+# confronti con listini di terzi: contengono prezzi interni, non pubblicare su repo pubbliche
+data/*_vs_*.xlsx
+dist-lean/
+data/_t*.xlsx
+data-private/
+brochures/
+configuratore-offerte-codice.zip
