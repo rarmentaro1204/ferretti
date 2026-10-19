@@ -27,6 +27,12 @@ function setupLoader(){
     link.after(refresh);
     refresh.onclick=async()=>{ try{await idbSet('imgIndex',null);}catch(_){} if(DIRHANDLE)await loadFromDir(DIRHANDLE); };
   }
+  // i pulsanti dati/listini sono nascosti: un solo ingranaggio li mostra quando servono
+  [wrapList,wrapMat,wrapImg,wrapCli,wrapReg,$('#linkBtn'),$('#refreshImgBtn')].forEach(e=>{if(e)e.classList.add('data-tool');});
+  const gear=ce('button','btn sm');gear.id='dataToolsBtn';gear.textContent='⚙';gear.title='Dati e listini (carica listino, optional, immagini, clienti, registro)';
+  gear.style.cssText='background:transparent;border:1px solid #4a4a4a;color:#bbb;padding:6px 9px';
+  gear.onclick=()=>document.body.classList.toggle('show-tools');
+  bar.after(gear);
   $('#xlsxInput').onchange=handleXlsx;
   $('#imgInput').onchange=handleImages;
   $('#cliInput').onchange=handleClients;

@@ -295,3 +295,7 @@ body.exporting .app-noprint{display:none!important}
 .topbar{flex-wrap:wrap;row-gap:8px}
 .topbar .spacer{flex:1 1 20px}
 .stepper{flex-wrap:wrap}
+
+/* strumenti dati: nascosti finché non si preme l'ingranaggio */
+.data-tool{display:none!important}
+body.show-tools .data-tool{display:inline-flex!important}
