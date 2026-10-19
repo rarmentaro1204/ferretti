@@ -85,7 +85,7 @@ textarea{resize:vertical;min-height:80px}
 .sol .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .sol .head .nm{font-weight:800;color:var(--navy);font-size:16px}
 .sol .head .cd{font-size:12px;color:var(--muted)}
-.acc-row{display:grid;grid-template-columns:1.4fr 2.6fr .7fr 1fr .8fr auto;gap:8px;margin-top:8px;align-items:center}
+.acc-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2.6fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,.8fr) 30px;gap:8px;min-width:0;margin-top:8px;align-items:center}
 .mvbtns{display:inline-flex;gap:4px}
 .mvbtns .xbtn{background:var(--steel);font-size:10px}
 .mvbtns .xbtn:disabled{opacity:.3;cursor:default}
@@ -97,7 +97,8 @@ textarea{resize:vertical;min-height:80px}
 .chip.opt.chk{border-color:#d97706;background:#fff8ec}
 .acc-head{font-size:10.5px;font-weight:700;color:#6f6f6f;text-transform:uppercase;letter-spacing:.3px;margin-top:8px;padding-left:48px}
 .fl{display:flex;flex-direction:column;gap:3px;font-size:10.5px;font-weight:700;color:#6f6f6f;text-transform:uppercase;letter-spacing:.3px}
-.acc-row input{padding:8px 10px;border:1px solid var(--line);border-radius:7px}
+.acc-row>*{min-width:0}
+.acc-row input{width:100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:7px}
 @media(max-width:720px){.acc-row{grid-template-columns:1fr 1fr}}
 .chip{display:inline-flex;align-items:center;gap:6px;background:#efefef;color:var(--navy);
   border-radius:20px;padding:5px 11px;font-size:12px;font-weight:600;margin:3px 4px 0 0}
@@ -286,3 +287,11 @@ body.exporting .app-noprint{display:none!important}
 .pres-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}
 .pres-strip img{width:100%;height:38mm;object-fit:cover;display:block}
 .pres-link{margin-top:3mm;font-size:7.5px;color:var(--steel);word-break:break-all}
+
+.sol{min-width:0;overflow-x:clip}
+.sol .prodedit>div{min-width:0}
+
+/* barra superiore: va a capo sugli schermi stretti invece di uscire dalla pagina */
+.topbar{flex-wrap:wrap;row-gap:8px}
+.topbar .spacer{flex:1 1 20px}
+.stepper{flex-wrap:wrap}
