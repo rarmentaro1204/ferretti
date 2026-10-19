@@ -28,3 +28,13 @@ function footer(){return `<div class="foot">
   <span><b>Tel.</b> ${BRAND.tel}<br><b>Email.</b> ${BRAND.email}</span>
   <span><b>C.F./P.IVA</b> ${BRAND.vat}</span>
   <span class="web">${BRAND.web}</span><span class="notch"></span></div>`;}
+
+// Dati dell'emittente (intestazione e piè di pagina del documento): modificabili dal passo Cliente, salvati nel browser.
+const ISSUER_FIELDS=[['legalName','f_i_legal'],['address0','f_i_addr1'],['address1','f_i_addr2'],['tel','f_i_tel'],['email','f_i_mail'],['vat','f_i_vat'],['web','f_i_web']];
+const ISSUER_LS='yacht_issuer_v1';
+function issuerGet(k){return k==='address0'?BRAND.address[0]:k==='address1'?BRAND.address[1]:BRAND[k]||'';}
+function issuerSet(k,v){
+  if(k==='address0')BRAND.address[0]=v;else if(k==='address1')BRAND.address[1]=v;else BRAND[k]=v;
+  try{localStorage.setItem(ISSUER_LS,JSON.stringify(Object.fromEntries(ISSUER_FIELDS.map(([f])=>[f,issuerGet(f)]))));}catch(_){}
+}
+(function(){try{const o=JSON.parse(localStorage.getItem(ISSUER_LS)||'null');if(o)Object.keys(o).forEach(k=>{if(o[k]!=null)issuerSet(k,o[k]);});}catch(_){}})();

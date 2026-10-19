@@ -410,6 +410,16 @@ function footer(){return `<div class="foot">
   <span><b>Tel.</b> ${BRAND.tel}<br><b>Email.</b> ${BRAND.email}</span>
   <span><b>C.F./P.IVA</b> ${BRAND.vat}</span>
   <span class="web">${BRAND.web}</span><span class="notch"></span></div>`;}
+
+// Dati dell'emittente (intestazione e piè di pagina del documento): modificabili dal passo Cliente, salvati nel browser.
+const ISSUER_FIELDS=[['legalName','f_i_legal'],['address0','f_i_addr1'],['address1','f_i_addr2'],['tel','f_i_tel'],['email','f_i_mail'],['vat','f_i_vat'],['web','f_i_web']];
+const ISSUER_LS='yacht_issuer_v1';
+function issuerGet(k){return k==='address0'?BRAND.address[0]:k==='address1'?BRAND.address[1]:BRAND[k]||'';}
+function issuerSet(k,v){
+  if(k==='address0')BRAND.address[0]=v;else if(k==='address1')BRAND.address[1]=v;else BRAND[k]=v;
+  try{localStorage.setItem(ISSUER_LS,JSON.stringify(Object.fromEntries(ISSUER_FIELDS.map(([f])=>[f,issuerGet(f)]))));}catch(_){}
+}
+(function(){try{const o=JSON.parse(localStorage.getItem(ISSUER_LS)||'null');if(o)Object.keys(o).forEach(k=>{if(o[k]!=null)issuerSet(k,o[k]);});}catch(_){}})();
 </script>
 <script>
 /* Traduzioni UI e documento: it · en · es · fr · de */
@@ -420,6 +430,7 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
+  f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
   matrix_ok:"Matrice optional caricata: %n imbarcazioni", verify_price:"Prezzo da verificare", unit_price:"Prezzo unitario", months:"mesi",
   weeks_from_order:"settimane dalla firma del contratto", f_client:"Cliente / Armatore", spare_parts:"Parti di ricambio",
   spec_cabins:"Cabine (ospiti + equipaggio)", spec_speed:"Velocità max / crociera (standard)", spec_speed_opt:"Velocità max / crociera (optional)",
@@ -450,6 +461,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
   matrix_ok:"Optional matrix loaded: %n yachts", verify_price:"Price to be verified", unit_price:"Unit price", months:"months",
   weeks_from_order:"weeks from contract signing", f_client:"Customer / Owner", spare_parts:"Spare parts",
   spec_cabins:"Cabins (guests + crew)", spec_speed:"Max / cruising speed (standard)", spec_speed_opt:"Max / cruising speed (optional)",
@@ -530,7 +542,7 @@ let loadedFromFile=false, loadedFileName='';
 const yr=new Date().getFullYear();
 let step=0;
 const S={
-  rep:DATA.reps[0]||{name:'',email:'',phone:''},
+  rep:Object.assign({name:'',email:'',phone:''},DATA.reps[0]),   // copia: modificarlo non cambia l'elenco commerciali
   offerNum:BRAND.offerPrefix+String(yr).slice(2)+'-001',
   date:new Date().toLocaleDateString('it-IT'),
   client:'', contact:'', role:'', phone:'', email:'', subject:t('def_subject'),
@@ -637,7 +649,7 @@ let maxReached=0;
 /* ============== STEP 1: CUSTOMER ============== */
 function stepCustomer(){
   const v=$('#view');
-  const repOpts=DATA.reps.map(r=>`<option value="${esc(r.email)}"${r.email===S.rep.email?' selected':''}>${esc(r.name)}</option>`).join('');
+  const repOpts=DATA.reps.map(r=>`<option value="${esc(r.name)}">`).join('');
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_customer')}</h2><p class="hint">${t('hint_customer')}</p>
@@ -645,10 +657,15 @@ function stepCustomer(){
     ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">🔄 ${t('recall_offer')}</button>`:''}
     <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">📤 ${t('recall_upload')}</button>
     <div class="grid g3">
-      <label class="fld">${t('f_rep')}<select id="i_rep">${repOpts}</select></label>
-      <label class="fld">${t('f_repmail')}<input id="i_repmail" value="${esc(S.rep.email)}" readonly></label>
-      <label class="fld">${t('f_repphone')}<input id="i_repphone" value="${esc(S.rep.phone)}" readonly></label>
+      <label class="fld">${t('f_rep')}<input id="i_rep" list="repList" value="${esc(S.rep.name)}" autocomplete="off"><datalist id="repList">${repOpts}</datalist></label>
+      <label class="fld">${t('f_repmail')}<input id="i_repmail" value="${esc(S.rep.email)}"></label>
+      <label class="fld">${t('f_repphone')}<input id="i_repphone" value="${esc(S.rep.phone)}"></label>
     </div>
+    <details class="issuer" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;font-size:12.5px;color:#4a4a4a">${t('f_issuer')}</summary>
+      <div class="grid g3" style="margin-top:10px">
+        ${ISSUER_FIELDS.map(([k,lbl])=>`<label class="fld">${t(lbl)}<input data-issuer="${k}" value="${esc(issuerGet(k))}"></label>`).join('')}
+      </div>
+    </details>
     <div class="grid g3" style="margin-top:14px">
       <label class="fld">${t('f_offernum')}<input id="i_offernum" value="${esc(S.offerNum)}"></label>
       <label class="fld">${t('f_date')}<input id="i_date" value="${esc(S.date)}"></label>
@@ -667,7 +684,12 @@ function stepCustomer(){
     <label class="fld" style="margin-top:14px">${t('f_intro')}
       <textarea id="i_intro" placeholder="${esc(t('intro_default'))}">${esc(S.intro)}</textarea></label>
   </div>`;
-  $('#i_rep').onchange=e=>{const r=DATA.reps.find(x=>x.email===e.target.value);if(r){S.rep=r;$('#i_repmail').value=r.email;$('#i_repphone').value=r.phone;}};
+  // referente commerciale: tutto modificabile; se il nome coincide con un commerciale in elenco ne propone mail e telefono
+  S.rep=Object.assign({name:'',email:'',phone:''},S.rep);
+  $('#i_rep').oninput=e=>{S.rep.name=e.target.value;const r=DATA.reps.find(x=>x.name===e.target.value);if(r){S.rep.email=r.email||S.rep.email;S.rep.phone=r.phone||S.rep.phone;$('#i_repmail').value=S.rep.email;$('#i_repphone').value=S.rep.phone;}};
+  $('#i_repmail').oninput=e=>{S.rep.email=e.target.value;};
+  $('#i_repphone').oninput=e=>{S.rep.phone=e.target.value;};
+  v.querySelectorAll('[data-issuer]').forEach(inp=>inp.oninput=e=>issuerSet(inp.dataset.issuer,e.target.value));
   if($('#btnOffers'))$('#btnOffers').onclick=openOfferList;
   if($('#btnRecall'))$('#btnRecall').onclick=recallOffer;
   if($('#btnRecallUpload'))$('#btnRecallUpload').onclick=openRecallUploadModal;
@@ -2945,7 +2967,7 @@ function applyXlsxBuffer(buf,fileName){
       base.forEach((b,c)=>{if(!merged.has(c))merged.set(c,b);});   // modelli non presenti nel file: restano (senza prezzo)
       out.machines=[...merged.values()].map(m=>({...m,category:m.category||'OTHER',name:m.name||m.code}));
       DATA=out;loadedFromFile=true;loadedFileName=fileName;
-      S.rep=DATA.reps[0]||S.rep;
+      if(!S.rep||!S.rep.name||/^\[Commerciale/.test(S.rep.name))S.rep=Object.assign({name:'',email:'',phone:''},DATA.reps[0]);   // non sovrascrive un referente già modificato
       if($('#xlsxTxt'))$('#xlsxTxt').textContent='✓ '+fileName;
       curCat=null;search='';
       flash(t('load_ok').replace('%n',DATA.machines.length));

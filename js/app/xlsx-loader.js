@@ -76,7 +76,7 @@ function applyXlsxBuffer(buf,fileName){
       base.forEach((b,c)=>{if(!merged.has(c))merged.set(c,b);});   // modelli non presenti nel file: restano (senza prezzo)
       out.machines=[...merged.values()].map(m=>({...m,category:m.category||'OTHER',name:m.name||m.code}));
       DATA=out;loadedFromFile=true;loadedFileName=fileName;
-      S.rep=DATA.reps[0]||S.rep;
+      if(!S.rep||!S.rep.name||/^\[Commerciale/.test(S.rep.name))S.rep=Object.assign({name:'',email:'',phone:''},DATA.reps[0]);   // non sovrascrive un referente già modificato
       if($('#xlsxTxt'))$('#xlsxTxt').textContent='✓ '+fileName;
       curCat=null;search='';
       flash(t('load_ok').replace('%n',DATA.machines.length));

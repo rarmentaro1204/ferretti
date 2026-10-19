@@ -8,7 +8,7 @@ let loadedFromFile=false, loadedFileName='';
 const yr=new Date().getFullYear();
 let step=0;
 const S={
-  rep:DATA.reps[0]||{name:'',email:'',phone:''},
+  rep:Object.assign({name:'',email:'',phone:''},DATA.reps[0]),   // copia: modificarlo non cambia l'elenco commerciali
   offerNum:BRAND.offerPrefix+String(yr).slice(2)+'-001',
   date:new Date().toLocaleDateString('it-IT'),
   client:'', contact:'', role:'', phone:'', email:'', subject:t('def_subject'),

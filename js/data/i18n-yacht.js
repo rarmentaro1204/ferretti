@@ -2,6 +2,7 @@
 (function(){
 const Y={
  it:{
+  f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
   matrix_ok:"Matrice optional caricata: %n imbarcazioni", verify_price:"Prezzo da verificare", unit_price:"Prezzo unitario", months:"mesi",
   weeks_from_order:"settimane dalla firma del contratto", f_client:"Cliente / Armatore", spare_parts:"Parti di ricambio",
   spec_cabins:"Cabine (ospiti + equipaggio)", spec_speed:"Velocità max / crociera (standard)", spec_speed_opt:"Velocità max / crociera (optional)",
@@ -32,6 +33,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
   matrix_ok:"Optional matrix loaded: %n yachts", verify_price:"Price to be verified", unit_price:"Unit price", months:"months",
   weeks_from_order:"weeks from contract signing", f_client:"Customer / Owner", spare_parts:"Spare parts",
   spec_cabins:"Cabins (guests + crew)", spec_speed:"Max / cruising speed (standard)", spec_speed_opt:"Max / cruising speed (optional)",

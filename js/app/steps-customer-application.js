@@ -14,7 +14,7 @@ let maxReached=0;
 /* ============== STEP 1: CUSTOMER ============== */
 function stepCustomer(){
   const v=$('#view');
-  const repOpts=DATA.reps.map(r=>`<option value="${esc(r.email)}"${r.email===S.rep.email?' selected':''}>${esc(r.name)}</option>`).join('');
+  const repOpts=DATA.reps.map(r=>`<option value="${esc(r.name)}">`).join('');
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_customer')}</h2><p class="hint">${t('hint_customer')}</p>
@@ -22,10 +22,15 @@ function stepCustomer(){
     ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">🔄 ${t('recall_offer')}</button>`:''}
     <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">📤 ${t('recall_upload')}</button>
     <div class="grid g3">
-      <label class="fld">${t('f_rep')}<select id="i_rep">${repOpts}</select></label>
-      <label class="fld">${t('f_repmail')}<input id="i_repmail" value="${esc(S.rep.email)}" readonly></label>
-      <label class="fld">${t('f_repphone')}<input id="i_repphone" value="${esc(S.rep.phone)}" readonly></label>
+      <label class="fld">${t('f_rep')}<input id="i_rep" list="repList" value="${esc(S.rep.name)}" autocomplete="off"><datalist id="repList">${repOpts}</datalist></label>
+      <label class="fld">${t('f_repmail')}<input id="i_repmail" value="${esc(S.rep.email)}"></label>
+      <label class="fld">${t('f_repphone')}<input id="i_repphone" value="${esc(S.rep.phone)}"></label>
     </div>
+    <details class="issuer" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;font-size:12.5px;color:#4a4a4a">${t('f_issuer')}</summary>
+      <div class="grid g3" style="margin-top:10px">
+        ${ISSUER_FIELDS.map(([k,lbl])=>`<label class="fld">${t(lbl)}<input data-issuer="${k}" value="${esc(issuerGet(k))}"></label>`).join('')}
+      </div>
+    </details>
     <div class="grid g3" style="margin-top:14px">
       <label class="fld">${t('f_offernum')}<input id="i_offernum" value="${esc(S.offerNum)}"></label>
       <label class="fld">${t('f_date')}<input id="i_date" value="${esc(S.date)}"></label>
@@ -44,7 +49,12 @@ function stepCustomer(){
     <label class="fld" style="margin-top:14px">${t('f_intro')}
       <textarea id="i_intro" placeholder="${esc(t('intro_default'))}">${esc(S.intro)}</textarea></label>
   </div>`;
-  $('#i_rep').onchange=e=>{const r=DATA.reps.find(x=>x.email===e.target.value);if(r){S.rep=r;$('#i_repmail').value=r.email;$('#i_repphone').value=r.phone;}};
+  // referente commerciale: tutto modificabile; se il nome coincide con un commerciale in elenco ne propone mail e telefono
+  S.rep=Object.assign({name:'',email:'',phone:''},S.rep);
+  $('#i_rep').oninput=e=>{S.rep.name=e.target.value;const r=DATA.reps.find(x=>x.name===e.target.value);if(r){S.rep.email=r.email||S.rep.email;S.rep.phone=r.phone||S.rep.phone;$('#i_repmail').value=S.rep.email;$('#i_repphone').value=S.rep.phone;}};
+  $('#i_repmail').oninput=e=>{S.rep.email=e.target.value;};
+  $('#i_repphone').oninput=e=>{S.rep.phone=e.target.value;};
+  v.querySelectorAll('[data-issuer]').forEach(inp=>inp.oninput=e=>issuerSet(inp.dataset.issuer,e.target.value));
   if($('#btnOffers'))$('#btnOffers').onclick=openOfferList;
   if($('#btnRecall'))$('#btnRecall').onclick=recallOffer;
   if($('#btnRecallUpload'))$('#btnRecallUpload').onclick=openRecallUploadModal;
