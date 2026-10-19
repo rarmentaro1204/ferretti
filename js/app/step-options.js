@@ -1,5 +1,7 @@
 /* Configuratore Yacht — modulo "step-options" */
 const OPT_GROUP_ORDER=['Motorizzazione','Coperta','Interni','Elettronica','Comfort','Servizi','Altro'];
+// gruppi optional a tendina: chiusi di default, quelli aperti dall'utente restano aperti dopo ogni aggiornamento
+const OPT_OPEN=new Set();
 let OPT_CATALOG={};      // optional code -> {group,order,desc}
 let MATRIX_INFO={file:'',machines:0};
 function optGroupSlug(g){return String(g||'Altro').toLowerCase().replace(/[^a-z]+/g,'_').replace(/^_|_$/g,'');}
@@ -96,7 +98,7 @@ function stepOptions(){
     const optChip=o=>`<button class="chip opt${o.check?' chk':''}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${o.note?' — '+esc(o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
         <span class="oc">+ ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
-      return arr.length?`<div class="optgrp"><div class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})</div><div class="optchips">${arr.map(optChip).join('')}</div></div>`:'';}).join('');
+      return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
     const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
     const optBlock=loadHint+(opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
         <button class="btn ghost sm" data-addallopt="${si}" style="margin-left:8px">+ ${t('add_all_options')}</button></div>${optGroups}`
@@ -172,6 +174,7 @@ function stepOptions(){
     <label class="fld" style="margin-top:14px">${t('notes')}<textarea id="o_notes">${esc(S.notes)}</textarea></label>
   </div>${selectedDrawer()}`;
   wireDrawer();
+  v.querySelectorAll('details[data-optgrp]').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)OPT_OPEN.add(d.dataset.optgrp);else OPT_OPEN.delete(d.dataset.optgrp);}));
   $('#o_disc').oninput=e=>{S.discount=Math.max(0,Math.min(100,+e.target.value||0));};
   $('#o_disc2').oninput=e=>{S.discount2=Math.max(0,Math.min(100,+e.target.value||0));};
   $('#o_disc3').oninput=e=>{S.discount3=Math.max(0,Math.min(100,+e.target.value||0));};

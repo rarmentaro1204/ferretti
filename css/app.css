@@ -90,7 +90,11 @@ textarea{resize:vertical;min-height:80px}
 .mvbtns .xbtn{background:var(--steel);font-size:10px}
 .mvbtns .xbtn:disabled{opacity:.3;cursor:default}
 .optgrp{margin:6px 0 8px}
-.optgrp-t{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#fff;background:var(--steel);display:inline-block;padding:2px 9px;border-radius:4px;margin-bottom:5px}
+.optgrp-t{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#fff;background:var(--steel);display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;margin-bottom:5px;cursor:pointer;list-style:none}
+.optgrp-t::-webkit-details-marker{display:none}
+.optgrp-t::before{content:'▸';font-size:10px;transition:transform .15s}
+.optgrp[open]>.optgrp-t::before{transform:rotate(90deg)}
+.optgrp>.optchips{margin-top:6px}
 .optchips{display:flex;flex-wrap:wrap;gap:6px}
 .chip.opt{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;max-width:260px;padding:6px 10px;line-height:1.25}
 .chip.opt .oc{font-weight:800}.chip.opt .od{font-size:10.5px;color:#6f6f6f;font-weight:400;white-space:normal}.chip.opt .op{font-size:11px;color:var(--navy);font-weight:700}
