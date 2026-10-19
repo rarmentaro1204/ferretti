@@ -191,7 +191,7 @@ def main(pdf):
             if c.startswith("ENG-"):
                 riga.append(next((e[6] for e in eng if e[0] == c and e[7] == m["Codice"]), ""))
             else:
-                riga.append(next(o[6] for o in opt if o[0] == c) if m["Nome"] == "Ferretti Yachts 720" else "")
+                riga.append(next(o[6] for o in opt if o[0] == c))   # su richiesta: gli optional del listino 720 valgono per tutti i modelli
         ws.append(riga)
     w2 = wb.create_sheet("Catalogo_Optional")
     w2.append(["Codice", "Gruppo", "Ordine", "Descrizione", "Descrizione_IT", "Nota"])
