@@ -435,3 +435,9 @@ body.show-tools .data-tool{display:inline-flex!important}
 .supply td:first-child{width:36%;color:var(--muted);font-size:7.8px;letter-spacing:.14em}
 .excl-box{border:none;padding:0;margin-top:0}
 .excl-box ul{margin:2px 0;padding-left:16px;line-height:1.9;font-size:10.5px}
+
+/* optional selezionato: blu */
+.chip.opt.sel{background:#1f5ea8;border-color:#1f5ea8;color:#fff}
+.chip.opt.sel .od,.chip.opt.sel .op,.chip.opt.sel .oc{color:#fff}
+.chip.opt.sel .od{opacity:.85}
+.optgrp-n{background:#1f5ea8;color:#fff;border-radius:999px;padding:1px 7px;font-size:9.5px;margin-left:4px}

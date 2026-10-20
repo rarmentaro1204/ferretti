@@ -2,6 +2,7 @@
 const OPT_GROUP_ORDER=['Motorizzazione','Coperta','Interni','Elettronica','Comfort','Servizi','Altro'];
 // gruppi optional a tendina: chiusi di default, quelli aperti dall'utente restano aperti dopo ogni aggiornamento
 const OPT_OPEN=new Set();
+const INCOTERMS=['Ex Works','FAS','CIF','DAP','DDP'];   // delivery condition
 let OPT_CATALOG={};      // optional code -> {group,order,desc}
 let MATRIX_INFO={file:'',machines:0};
 function optGroupSlug(g){return String(g||'Altro').toLowerCase().replace(/[^a-z]+/g,'_').replace(/^_|_$/g,'');}
@@ -95,10 +96,11 @@ function stepOptions(){
     const showAll=showAllAcc[si];
     const chipsOf=(arr,kind)=>arr.map(o=>`<button class="chip" style="cursor:pointer" data-add${kind}="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('');
     // optionals of THIS machine (from the backend matrix), grouped Filtrazione / Struttura / Costruzione / ...
-    const optChip=o=>`<button class="chip opt${o.check?' chk':''}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${o.note?' — '+esc(o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
-        <span class="oc">+ ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
+    const isSel=o=>s.accessories.some(a=>a.code===o.code);
+    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${o.note?' — '+esc(o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
+        <span class="oc">${isSel(o)?'✓':'+'} ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
-      return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
+      return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})${arr.filter(isSel).length?` <span class="optgrp-n">${arr.filter(isSel).length} ✓</span>`:''}</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
     const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
     const optBlock=loadHint+(opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
         <button class="btn ghost sm" data-addallopt="${si}" style="margin-left:8px">+ ${t('add_all_options')}</button></div>${optGroups}`
@@ -164,9 +166,7 @@ function stepOptions(){
       </label>
       <label class="fld">${t('sc_validity')}<input id="o_val" value="${esc(S.validity)}"></label>
       <label class="fld">${t('sc_lead')}<input id="o_lead" value="${esc(S.lead)}"></label>
-      <label class="fld">${t('sc_delivery')}<input id="o_del" value="${esc(S.delivery)}" placeholder="${esc(t('def_delivery'))}"></label>
-      <label class="fld">${t('sc_packaging')}<input id="o_pack" value="${esc(S.packaging)}" placeholder="${esc(t('def_packaging'))}"></label>
-      <label class="fld">${t('sc_warranty')}<input id="o_war" value="${esc(S.warranty)}"></label>
+      <label class="fld">${t('sc_incoterm')}<select id="o_inc">${INCOTERMS.map(x=>`<option value="${x}"${(S.incoterm||INCOTERMS[0])===x?' selected':''}>${x}</option>`).join('')}</select></label>
       <label class="fld">${t('sc_payment')}<input id="o_pay" value="${esc(S.payment)}" placeholder="${esc(t('def_payment'))}"></label>
     </div>
     <label class="fld" style="margin-top:14px">${t('exclusions')}
@@ -179,8 +179,9 @@ function stepOptions(){
   $('#o_disc2').oninput=e=>{S.discount2=Math.max(0,Math.min(100,+e.target.value||0));};
   $('#o_disc3').oninput=e=>{S.discount3=Math.max(0,Math.min(100,+e.target.value||0));};
   const bind=(id,k)=>{$('#'+id).oninput=e=>S[k]=e.target.value;};
-  bind('o_val','validity');bind('o_lead','lead');bind('o_del','delivery');bind('o_pack','packaging');
-  bind('o_war','warranty');bind('o_pay','payment');bind('o_excl','exclusions');bind('o_notes','notes');
+  bind('o_val','validity');bind('o_lead','lead');
+  $('#o_inc').onchange=e=>{S.incoterm=e.target.value;};
+  bind('o_pay','payment');bind('o_excl','exclusions');bind('o_notes','notes');
   wireMove(v);
   v.querySelectorAll('[data-sameorder]').forEach(inp=>inp.onchange=e=>{S.solutions[+inp.dataset.sameorder].sameOrder=e.target.checked;stepOptions();});
   v.querySelectorAll('[data-acc]').forEach(inp=>inp.oninput=e=>{
@@ -204,7 +205,10 @@ function stepOptions(){
   }
   // optionals & spares chips (from the price lists)
   v.querySelectorAll('[data-addopt]').forEach(b=>b.onclick=()=>{
-    const[si,code]=b.dataset.addopt.split('|');const o=machineOptionals(S.solutions[si].code).find(x=>x.code===code);if(o)addItem(+si,o);});
+    const[si,code]=b.dataset.addopt.split('|');const o=machineOptionals(S.solutions[si].code).find(x=>x.code===code);if(!o)return;
+    const ai=S.solutions[si].accessories.findIndex(a=>a.code===code);
+    if(ai>=0){S.solutions[si].accessories.splice(ai,1);stepOptions();}   // secondo clic: deseleziona
+    else addItem(+si,o);});
   v.querySelectorAll('[data-addspare]').forEach(b=>b.onclick=()=>{
     const[si,code]=b.dataset.addspare.split('|');const o=machineSpares(S.solutions[si].code).find(x=>x.code===code);if(o)addItem(+si,o);});
   v.querySelectorAll('[data-addallopt]').forEach(b=>b.onclick=()=>{

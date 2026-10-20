@@ -2,6 +2,7 @@
 (function(){
 const Y={
  it:{
+  sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
   f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
   matrix_ok:"Matrice optional caricata: %n imbarcazioni", verify_price:"Prezzo da verificare", unit_price:"Prezzo unitario", months:"mesi",
@@ -34,6 +35,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
   f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
   matrix_ok:"Optional matrix loaded: %n yachts", verify_price:"Price to be verified", unit_price:"Unit price", months:"months",

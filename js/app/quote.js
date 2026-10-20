@@ -227,8 +227,7 @@ function stepQuote(){
   });
   // supply + general conditions page
   const sc=[['sc_validity',(S.validity||'30')+' '+t('days')+'.'],['sc_lead',S.lead?S.lead+' '+t('weeks_from_order')+'.':t('def_lead')],
-    ['sc_delivery',S.delivery||t('def_delivery')],['sc_packaging',S.packaging||t('def_packaging')],
-    ['sc_warranty',S.warranty?S.warranty+' '+t('months'):t('def_warranty')],['sc_payment',S.payment||t('def_payment')]];
+    ['sc_incoterm',S.incoterm||'Ex Works'],['sc_payment',S.payment||t('def_payment')]];
   const scRows=sc.map(([k,val])=>`<tr><td>${t(k)}</td><td>${esc(val)}</td></tr>`).join('');
   const exclItems=(S.exclusions||t('def_exclusions')).split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
   html+=`<div class="page"><div class="pad">
