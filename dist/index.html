@@ -398,6 +398,92 @@ body.show-tools .data-tool{display:inline-flex!important}
   .optchips .chip.opt{width:100%;max-width:none}
 }
 @media print{#view .pages{zoom:1!important;padding:0!important}}
+
+/* scheda imbarcazione in sola lettura nel passo Opzioni */
+.solro{display:flex;gap:12px;align-items:center;margin:8px 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.solro .imgthumb{width:84px;height:56px;object-fit:cover;border-radius:6px}
+.solro b{font-family:var(--font-title);font-weight:400;font-size:16px;letter-spacing:.03em;text-transform:uppercase}
+
+/* ============ DOCUMENTO A4 — design editoriale ============ */
+.page{font-family:var(--font-body);color:#262826}
+.plogo{margin-bottom:10mm}
+/* piè di pagina leggero */
+.page .foot{background:transparent;color:#7b807f;border-top:1px solid var(--line);height:34px;margin:0 15mm;padding:0;left:0;right:0;bottom:8mm;font-size:6.8px;letter-spacing:.02em}
+.page .foot b{color:var(--navy)}
+.page .foot .web{color:var(--red);font-weight:600;font-size:8px;margin-right:0;letter-spacing:.12em;text-transform:uppercase}
+.page .foot .notch{display:none}
+.page.terms .foot{margin:10mm 0 0;padding:9px 0;position:static}
+.page.pres .foot{position:absolute}
+/* titoli di sezione: tipografici, senza barre */
+.hbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:8mm 0 4mm;padding-bottom:5px;border-bottom:1px solid var(--navy)}
+.hbar .l{background:none;color:var(--muted);padding:0;font-size:8.5px;font-weight:500;letter-spacing:.24em;text-transform:uppercase}
+.hbar .r{background:none;color:var(--navy);padding:0;font-size:13px;font-weight:400;font-family:var(--font-title);letter-spacing:.04em;text-transform:uppercase;display:block}
+
+/* copertina */
+.page.cover{background:var(--navy);color:#fff}
+.cv-hero{position:absolute;top:0;left:0;width:100%;height:178mm;object-fit:cover;object-position:50% 60%}
+.cv-shade{position:absolute;top:0;left:0;right:0;height:180mm;background:linear-gradient(180deg,rgba(33,35,34,.55) 0%,rgba(33,35,34,0) 26%,rgba(33,35,34,0) 58%,#212322 100%)}
+.cv-top{position:absolute;top:16mm;left:16mm}
+.cv-main{position:absolute;left:16mm;right:16mm;bottom:50mm}
+.cv-eyebrow{font-size:9px;letter-spacing:.3em;text-transform:uppercase;opacity:.92}
+.cv-title{font-family:var(--font-title);font-weight:300;font-size:74px;line-height:1.02;letter-spacing:.01em;text-transform:uppercase;margin:4mm 0 3mm}
+.cv-client{font-family:var(--font-accent);font-style:italic;font-size:26px;opacity:.96}
+.cv-foot{position:absolute;left:16mm;right:16mm;bottom:14mm;display:flex;justify-content:space-between;align-items:flex-end;font-size:10px;line-height:1.7;border-top:1px solid rgba(255,255,255,.35);padding-top:4mm}
+.cv-foot span{display:block;font-size:7.5px;letter-spacing:.26em;opacity:.75}
+.cv-foot b{display:block;font-weight:500;font-size:12px}
+.cv-web{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase}
+.cover .symbol{opacity:.5}
+
+/* lettera */
+.lt-eyebrow{font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+.lt-subject{font-family:var(--font-accent);font-style:italic;font-size:30px;line-height:1.15;color:var(--red);margin:4mm 0 10mm;max-width:150mm}
+.lt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12mm;border-top:1px solid var(--navy);padding-top:5mm;margin-bottom:10mm}
+.lt-h{font-family:var(--font-title);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin-bottom:3mm}
+.lt-r{display:flex;flex-direction:column;font-size:11px;line-height:1.4;margin-bottom:2.5mm}
+.lt-r span{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.lt-body{font-size:11.5px;line-height:1.95;max-width:150mm}
+.lt-sign{margin-top:12mm;display:flex;flex-direction:column;gap:2px;font-size:10.5px}
+.lt-sign b{font-family:var(--font-accent);font-style:italic;font-weight:500;font-size:20px;color:var(--navy);margin:3mm 0 1mm}
+.lt-sign span{color:var(--muted)}
+
+/* scheda soluzione */
+.sl-eyebrow{font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--navy);margin-bottom:5mm}
+.sl-title{font-family:var(--font-title);font-weight:300;font-size:38px;line-height:1.05;letter-spacing:.015em;text-transform:uppercase;color:var(--navy);margin-bottom:5mm}
+.sl-note{font-size:11px;line-height:1.6;color:#555;margin-bottom:4mm}
+.sl-hero{display:block;width:100%;height:62mm;object-fit:cover;margin-bottom:5mm}
+.sl-figs{display:grid;grid-template-columns:repeat(4,1fr);gap:3.5mm 5mm;padding:4mm 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:6mm}
+.sl-figs div{display:flex;flex-direction:column;min-width:0}
+.sl-figs b{font-family:var(--font-title);font-weight:400;font-size:12.5px;color:var(--navy);line-height:1.2}
+.sl-figs span{font-size:6.8px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:1px}
+
+/* tabella prezzi: pulita, prezzi sempre su una riga */
+.ptable{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:0}
+.ptable th{background:none;color:var(--muted);padding:0 6px 6px;border-bottom:1.5px solid var(--navy);font-size:7.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.ptable td{padding:6px 6px;border-bottom:1px solid var(--line);color:#262826;vertical-align:top}
+.ptable td.pc{font-size:8.5px;color:var(--muted);white-space:nowrap;width:1%}
+.ptable td.pdesc{font-size:10.5px;color:#262826;max-width:none;line-height:1.35}
+.ptable .nw{white-space:nowrap}
+.ptable td.tt{font-weight:600;color:var(--navy)}
+.ptable th.r,.ptable td.r{text-align:right}
+.ptable th.c,.ptable td.c{text-align:center}
+.ptable th:last-child,.ptable td:last-child{padding-right:0}
+.ptable th:first-child,.ptable td:first-child{padding-left:0}
+
+/* totali */
+.totblock{margin-top:4mm;margin-left:auto;width:100mm}
+.totblock .totline{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:10.5px;color:#444;border-bottom:1px solid var(--line);background:none;white-space:nowrap}
+.totbar{background:none;color:var(--navy);display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0 0;margin-top:2mm;border-top:1.5px solid var(--navy);font-weight:400;white-space:nowrap}
+.totbar span:first-child{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.totbar span:last-child{font-family:var(--font-title);font-size:23px;font-weight:400;color:var(--red)}
+.totbar.pkg{background:none;margin-top:3mm}
+.totblock+.totbar.pkg{margin-left:auto;width:100mm}
+
+/* condizioni */
+.supply{margin-top:0}
+.supply td{border:none;border-bottom:1px solid var(--line);padding:7px 0;font-size:10.5px}
+.supply td:first-child{width:36%;color:var(--muted);font-size:7.8px;letter-spacing:.14em}
+.excl-box{border:none;padding:0;margin-top:0}
+.excl-box ul{margin:2px 0;padding-left:16px;line-height:1.9;font-size:10.5px}
 </style>
 </head>
 <body>
@@ -476,15 +562,16 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
+  cabins_short:"cabine",
   f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
   matrix_ok:"Matrice optional caricata: %n imbarcazioni", verify_price:"Prezzo da verificare", unit_price:"Prezzo unitario", months:"mesi",
   weeks_from_order:"settimane dalla firma del contratto", f_client:"Cliente / Armatore", spare_parts:"Parti di ricambio",
-  spec_cabins:"Cabine (ospiti + equipaggio)", spec_speed:"Velocità max / crociera (standard)", spec_speed_opt:"Velocità max / crociera (optional)",
+  spec_cabins:"Cabine (ospiti + equipaggio)", spec_speed:"Velocità max / crociera",
   spares_sale_desc_ph:"Nota facoltativa mostrata sopra la tabella dei ricambi (es. imbarcazione di riferimento)",
   hint_customer:"Referente commerciale, dati offerta e cliente (armatore o rappresentante).",
   step_application:"Programma di navigazione", hint_application:"Descrivi l'uso previsto dell'imbarcazione (facoltativo ma consigliato).",
   hint_product:"Scegli la gamma, poi aggiungi una o più imbarcazioni come soluzioni.",
-  hint_options:"Aggiungi optional e allestimenti (righe libere per gruppo, prezzo a 0 finché non c'è il listino) e condizioni commerciali.",
+  hint_options:"Scegli gli optional del listino o aggiungi righe libere per gruppo; poi imposta le condizioni commerciali. I dati tecnici della barca non si modificano.",
   pres_title:"I modelli proposti", pres_brochure:"Scheda ufficiale e brochure (su richiesta)",
   ph_subject:"offerta imbarcazione", def_subject:"Offerta imbarcazione", offer_n:"Offerta N.",
   intro_default:"Gentile Cliente,\n\nin seguito alla Vostra gradita richiesta, siamo lieti di sottoporVi la nostra migliore offerta per l'imbarcazione e gli allestimenti indicati, alle condizioni di seguito riportate.\n\nRestiamo a Vostra disposizione per ogni ulteriore chiarimento e cogliamo l'occasione per porgere i nostri migliori saluti.",
@@ -500,22 +587,23 @@ const Y={
   def_exclusions:"Trasporto, varo, immatricolazione, IVA", def_lead:"Da definire in base allo slot di produzione", def_warranty:"Come da condizioni generali",
   sc_lead:"Tempi di consegna", sc_packaging:"Preparazione / varo", sc_warranty:"Garanzia",
   spec_loa:"Lunghezza fuori tutto (LOA)", spec_beam:"Larghezza massima", spec_draft:"Pescaggio", spec_hull:"Lunghezza scafo (LH)",
-  spec_engine:"Motorizzazione standard", spec_engine_opt:"Motorizzazione optional",
+  spec_engine:"Motorizzazione",
   spec_disp_empty:"Dislocamento a vuoto", spec_disp_full:"Dislocamento a pieno carico", spec_fuel:"Serbatoi carburante", spec_water:"Serbatoi acqua", spec_persons:"Persone a bordo",
   protection_f:"Lunghezza", price_tbd:"Prezzo da definire", sign_dept:"Ufficio Commerciale",
   save_note:"<b>Come salvare:</b> clicca \"Stampa / Salva come PDF\", scegli \"Salva come PDF\" come stampante e salva nella cartella delle offerte.",
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  cabins_short:"cabins",
   f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
   matrix_ok:"Optional matrix loaded: %n yachts", verify_price:"Price to be verified", unit_price:"Unit price", months:"months",
   weeks_from_order:"weeks from contract signing", f_client:"Customer / Owner", spare_parts:"Spare parts",
-  spec_cabins:"Cabins (guests + crew)", spec_speed:"Max / cruising speed (standard)", spec_speed_opt:"Max / cruising speed (optional)",
+  spec_cabins:"Cabins (guests + crew)", spec_speed:"Max / cruising speed",
   spares_sale_desc_ph:"Optional note shown above the parts table (e.g. reference yacht)",
   hint_customer:"Sales contact, offer details and customer data (owner or representative).",
   step_application:"Cruising programme", hint_application:"Describe the intended use of the yacht (optional but recommended).",
   hint_product:"Pick a range, then add one or more yachts as solutions.",
-  hint_options:"Add options and outfitting (free rows by group, price 0 until the price list is available) and commercial terms.",
+  hint_options:"Pick options from the price list or add free rows by group, then set the commercial terms. The yacht's technical data cannot be edited.",
   pres_title:"Models offered", pres_brochure:"Official model page and brochure (on request)",
   ph_subject:"yacht offer", def_subject:"Yacht offer", offer_n:"Offer No.",
   intro_default:"Dear Customer,\n\nfollowing your kind request, we are pleased to submit our best offer for the yacht and outfitting listed, under the conditions set out below.\n\nWe remain at your disposal for any further clarification and take this opportunity to send our best regards.",
@@ -531,7 +619,7 @@ const Y={
   def_exclusions:"Transport, launching, registration, VAT", def_lead:"To be defined according to the production slot", def_warranty:"As per general conditions",
   sc_lead:"Delivery time", sc_packaging:"Preparation / launching", sc_warranty:"Warranty",
   spec_loa:"Length overall (LOA)", spec_beam:"Max beam", spec_draft:"Draft", spec_hull:"Hull length (LH)",
-  spec_engine:"Standard engines", spec_engine_opt:"Optional engines",
+  spec_engine:"Engines",
   spec_disp_empty:"Light displacement", spec_disp_full:"Full-load displacement", spec_fuel:"Fuel tanks", spec_water:"Water tanks", spec_persons:"People on board",
   protection_f:"Length", price_tbd:"Price TBD", sign_dept:"Sales Department",
   save_note:"<b>How to save:</b> click \"Print / Save as PDF\", choose \"Save as PDF\" as the printer, and save into the offers folder.",
@@ -552,7 +640,7 @@ const GENERAL_TERMS = {
 <script>
 /* GENERATO da tools/build_catalog_js.py — non modificare a mano. Fonte: catalogo_ferretti.xlsx */
 const CATALOGO_YACHT = [{"code": "1-285-426", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "Fino a 20 m", "protection": "", "name": "Ferretti Yachts 500", "desc": "Bello e confortevole, Ferretti Yachts 500 abbina un design elegante a un'atmosfera calda e familiare. Due mood di arredo interno offrono uno stile a bordo personalizzato e di totale benessere.", "desc_en": "Beautiful and comfortable, Ferretti Yachts 500 combines elegant design with a warm, family-friendly atmosphere. Two interior moods offer a personalised sense of style and wellbeing on board.", "story": "Bello e confortevole, Ferretti Yachts 500 abbina un design elegante a un'atmosfera calda e familiare. Due mood di arredo interno offrono uno stile a bordo personalizzato e di totale benessere.\n\nRiscoprire il piacere del tempo libero, da soli o con le persone più vicine, vuol dire vivere lo yacht come uno spazio esclusivo, autentico e multisensoriale.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: Classico o Contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "Beautiful and comfortable, Ferretti Yachts 500 combines elegant design with a warm, family-friendly atmosphere. Two interior moods offer a personalised sense of style and wellbeing on board.\n\nRediscovering the pleasure of leisure, by yourselves or with your nearest and dearest, means living your yacht like an exclusive, authentic multi-sensory habitat.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.\n\nThe experience on board is made even more homey by the possibility of choosing between two interior design moods: Classic or Contemporary, created by Italian design firm IDEAEITALIA.", "loa": "15,33 m", "beam": "4,33 m", "draft": "1,23 m", "hull": "13,85 m", "cabins": "2", "engine": "CUMMINS QSB 6.7", "speed": "30 / 25 kn", "engine_opt": "CUMMINS QSB 6.7", "speed_opt": "30 / 25 kn", "disp_empty": "18.500 kg", "disp_full": "22.000 kg", "fuel": "1.350 l", "water": "600 l", "persons": "12", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-285-426-PUB/n/Ferretti-Yachts-500", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99174.webp", "imageFile": "1-285-426.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-285-426-1.jpg", "brochure/1-285-426-2.jpg", "brochure/1-285-426-3.jpg", "brochure/1-285-426-4.jpg"], "tagline": "Just like home"}, {"code": "1-310-531", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "Fino a 20 m", "protection": "", "name": "Ferretti Yachts 580", "desc": "Emblema di Modern Luxury, il Ferretti Yachts 580 ha le caratteristiche perfette per vivere il mare in intimità e comfort, in stile Ferretti Yachts.", "desc_en": "An emblem of modern luxury, the Ferretti Yachts 580 has ideal features for an intimate and comfortable experience of the sea in perfect Ferretti Yachts style.", "story": "Emblema di Modern Luxury, il Ferretti Yachts 580 ha le caratteristiche perfette per vivere il mare in intimità e comfort, in stile Ferretti Yachts.\n\nSperimenta la sensazione dell'autentico Modern Luxury in questo flybridge perfetto per una crociera in un'atmosfera di intimità. Benvenuto nella Fine Time Machine.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "An emblem of modern luxury, the Ferretti Yachts 580 has ideal features for an intimate and comfortable experience of the sea in perfect Ferretti Yachts style.\n\nEmbrace the sensations of authentic modern luxury on the perfect flybridge for an intimate cruise. Welcome to the Fine Time Machine.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "18,24 m", "beam": "5 m", "draft": "1,5 m", "hull": "16,9 m", "cabins": "3", "engine": "VOLVO PENTA D13 900", "speed": "28 / 24 kn", "engine_opt": "VOLVO PENTA D13 1000", "speed_opt": "32 / 26 kn", "disp_empty": "31.000 kg", "disp_full": "37.000 kg", "fuel": "3.250 l", "water": "700 l", "persons": "14", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-310-531-PUB/n/Ferretti-Yachts-580", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99380.webp", "imageFile": "1-310-531.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-310-531-1.jpg", "brochure/1-310-531-2.jpg", "brochure/1-310-531-3.jpg", "brochure/1-310-531-4.jpg"], "tagline": "Just like home"}, {"code": "1-338-577", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "20–25 m", "protection": "", "name": "Ferretti Yachts 670", "desc": "Ferretti Yachts 670 celebra l’evoluzione continua del marchio, esprimendo la perfetta armonia tra comfort, vivibilità e raffinata eleganza. Il nuovo restyling svela dettagli esclusivi, dalle linee esterne ancora più eleganti all’hard top dal design inedito.", "desc_en": "Ferretti Yachts 670 celebrates the brand’s continuous evolution, expressing perfect harmony between comfort, liveability and refined beauty. This new restyling reveals exclusive details, from even more elegant exterior styling to the redesigned hard top.", "story": "Ferretti Yachts 670 celebra l’evoluzione continua del marchio, esprimendo la perfetta armonia tra comfort, vivibilità e raffinata eleganza. Il nuovo restyling svela dettagli esclusivi, dalle linee esterne ancora più eleganti all’hard top dal design inedito.\n\nUn'ode alla costante ricerca di perfezione di Ferretti Yachts, in cui ogni dettaglio parla di rinnovamento. Un nuovo capolavoro rivelato, che sorge come il sole.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "Ferretti Yachts 670 celebrates the brand’s continuous evolution, expressing perfect harmony between comfort, liveability and refined beauty. This new restyling reveals exclusive details, from even more elegant exterior styling to the redesigned hard top.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "20,24 m", "beam": "5,38 m", "draft": "1,68 m", "hull": "19,29 m", "cabins": "3/4 + crew", "engine": "MAN V8 1000", "speed": "28 / 25 kn", "engine_opt": "MAN V8 1200", "speed_opt": "32 / 28 kn", "disp_empty": "41.000 kg", "disp_full": "48.300 kg", "fuel": "3.800 l", "water": "1.000 l", "persons": "18", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-338-577-PUB/n/Ferretti-Yachts-670", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99338.webp", "imageFile": "1-338-577.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-338-577-1.jpg", "brochure/1-338-577-2.jpg", "brochure/1-338-577-3.jpg", "brochure/1-338-577-4.jpg"], "tagline": "Just like home"}, {"code": "1-389-642", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "20–25 m", "protection": "", "name": "Ferretti Yachts 720", "desc": "Ferretti Yachts 720 propone un nuovo modo di vivere il mare combinando linee eleganti, soluzioni abitative innovative e interni raffinati, per offrire un comfort di navigazione senza eguali e uno stile senza tempo.", "desc_en": "Ferretti Yachts 720 offers a new way to experience the sea, blending elegant lines, smart spaces and refined interiors for unmatched cruising comfort and timeless style.", "story": "Ferretti Yachts 720 propone un nuovo modo di vivere il mare combinando linee eleganti, soluzioni abitative innovative e interni raffinati, per offrire un comfort di navigazione senza eguali e uno stile senza tempo.\n\nUna sublime esperienza di autentico comfort di navigazione, in cui comodità, stile e libertà si uniscono in perfetta armonia.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "Ferretti Yachts 720 offers a new way to experience the sea, blending elegant lines, smart spaces and refined interiors for unmatched cruising comfort and timeless style.\n\nA sublime experience of genuine cruising comfort, where comfort, style and freedom come together in perfect harmony.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "22,5 m", "beam": "5,6 m", "draft": "1,8 m", "hull": "21 m", "cabins": "4 + 1", "engine": "MAN V8 1200", "speed": "28 / 24 kn", "engine_opt": "MAN V12 1400", "speed_opt": "32 / 28 kn", "disp_empty": "48.000 kg", "disp_full": "57.000 kg", "fuel": "4.600 l", "water": "1.000 l", "persons": "18", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-389-642-PUB/n/Ferretti-Yachts-720", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99402.webp", "imageFile": "1-389-642.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-389-642-1.jpg", "brochure/1-389-642-2.jpg", "brochure/1-389-642-3.jpg", "brochure/1-389-642-4.jpg"], "tagline": "Just like home"}, {"code": "1-384-633", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "20–25 m", "protection": "", "name": "Ferretti Yachts 800", "desc": "Ferretti Yachts 800 rivela una personalità decisa e punta a elevare il concetto stesso di crociera con soluzioni che abbinano eleganza e funzionalità, con particolare attenzione alla privacy.", "desc_en": "Ferretti Yachts 800 has a bold personality and aims to elevate the very concept of cruising through solutions that combine elegance and functionality with a special focus on privacy.", "story": "Ferretti Yachts 800 è stata progettato per portare la vita a bordo ad un livello superiore, grazie a spazi ottimizzati e ad una attenta distribuzione delle aree.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "Ferretti Yachts 800 is designed to offer a superior on-board lifestyle, thanks to optimised spaces and meticulous layout planning.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "24,47 m", "beam": "5,91 m", "draft": "", "hull": "23,51 m", "cabins": "4 + 3", "engine": "MAN V12 1550", "speed": "27 / 24 kn", "engine_opt": "MAN V12 1800", "speed_opt": "30 / 26 kn", "disp_empty": "67.000 kg", "disp_full": "77.000 kg", "fuel": "6.400 l", "water": "1.200 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-384-633-PUB/n/Ferretti-Yachts-800", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99507.webp", "imageFile": "1-384-633.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-384-633-1.jpg", "brochure/1-384-633-2.jpg", "brochure/1-384-633-3.jpg", "brochure/1-384-633-4.jpg"], "tagline": "Just like home"}, {"code": "1-302-457", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "25–30 m", "protection": "", "name": "Ferretti Yachts 860", "desc": "Un flybridge all’avanguardia per soluzioni progettuali e alta tecnologia, dove gli elementi stilistici e architettonici sono armonizzati in ogni minimo dettaglio.", "desc_en": "This flybridge yacht features cutting-edge design and technology solutions, where the stylistic and architectural elements work together in harmony right down to the tiniest detail", "story": "Un flybridge all’avanguardia per soluzioni progettuali e alta tecnologia, dove gli elementi stilistici e architettonici sono armonizzati in ogni minimo dettaglio.\n\nCome in una melodia, in cui le note di ogni singolo strumento sono armoniosamente orchestrate, Ferretti Yachts si prepara a dar vita a una nuova sinfonia.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "This flybridge yacht features cutting-edge design and technology solutions, where the stylistic and architectural elements work together in harmony right down to the tiniest detail\n\nComposing a melody in which the notes of each individual instrument are beautifully orchestrated. Ferretti Yachts gears up to bring a new symphony to life.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "26,95 m", "beam": "6,22 m", "draft": "2,08 m", "hull": "23,96 m", "cabins": "4 + 2", "engine": "MAN V12 1800", "speed": "28 / 24 kn", "engine_opt": "MAN V12 2000", "speed_opt": "31,5 / 27 kn", "disp_empty": "72.000 kg", "disp_full": "82.000 kg", "fuel": "7.000 l", "water": "1.400 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-302-457-PUB/n/Ferretti-Yachts-860", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99683.webp", "imageFile": "1-302-457.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-302-457-1.jpg", "brochure/1-302-457-2.jpg", "brochure/1-302-457-3.jpg", "brochure/1-302-457-4.jpg"], "tagline": "Just like home"}, {"code": "1-339-579", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "25–30 m", "protection": "", "name": "Ferretti Yachts 940", "desc": "Questo yacht trasforma ogni viaggio in un'esperienza indimenticabile. Il nuovo modello è infatti la perfetta sintesi di design e ampiezza, un luogo pensato per condividere momenti di festa e relax con gli ospiti, vivendo il mare al massimo.", "desc_en": "This yacht turns every journey into an unforgettable experience. The new model is in fact the perfect blend of design and spaciousness, somewhere to share festive moments and to relax with guests while enjoying the sea to the fullest.", "story": "Questo yacht trasforma ogni viaggio in un'esperienza indimenticabile. Il nuovo modello è infatti la perfetta sintesi di design e ampiezza, un luogo pensato per condividere momenti di festa e relax con gli ospiti, vivendo il mare al massimo.\n\nAbbraccia le onde, sentendoti completamente a casa. Ecco il tuo rifugio sull'acqua, un luogo in cui condividere risate, celebrare la vita e ammirare insieme indimenticabili panorami marini. La tua Villa Galleggiante.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: classico o contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "This yacht turns every journey into an unforgettable experience. The new model is in fact the perfect blend of design and spaciousness, somewhere to share festive moments and to relax with guests while enjoying the sea to the fullest.\n\nEmbrace the waves while feeling totally at home. This is your haven on the water, a place to share laughs, celebrate life and enjoy unforgettable sea views together: Your Floating Villa.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "28,97 m", "beam": "6,76 m", "draft": "2,3 m", "hull": "23,98 m", "cabins": "5 + 2", "engine": "MAN V12 2000", "speed": "25 / 21 kn", "engine_opt": "MAN V12X 2200", "speed_opt": "27 / 23 kn", "disp_empty": "85.000 kg", "disp_full": "98.000 kg", "fuel": "9.000 l", "water": "1.320 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-339-579-PUB/n/Ferretti-Yachts-940", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99261.webp", "imageFile": "1-339-579.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-339-579-1.jpg"], "tagline": "Just like home"}, {"code": "1-286-430", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "Oltre 30 m", "protection": "", "name": "Ferretti Yachts 1000", "desc": "Ferretti Yachts 1000 è la barca più grande mai costruita dal cantiere. Un omaggio al design e all'artigianalità italiana, che ridefinisce l'esperienza in mare con la massima espressione di comfort e benessere.", "desc_en": "Ferretti Yachts 1000 is the largest boat ever built by the shipyard, a tribute to Italian design and craftsmanship that redefines the sea experience with the utmost expression of comfort and wellbeing.", "story": "Ferretti Yachts 1000 è la barca più grande mai costruita dal cantiere. Un omaggio al design e all'artigianalità italiana, che ridefinisce l'esperienza in mare con la massima espressione di comfort e benessere.\n\nCi siamo spinti oltre, attraversando spazio e tempo, per scoprire e incarnare la nuova essenza di Ferretti Yachts: la quintessenza del benessere e dello stile.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: Classico o Contemporaneo, creati dallo studio di design italiano IDEAEITALIA.\n\n40.000 ore di sviluppo del concept. 4.250 ore di design navale. 9.650 ore di prototipazione sullo stampo. Un progetto monumentale sorretto da spirito innovativo e maestria artigianale. Per garantire la massima qualità e i dettagli più squisiti, abbiamo ripensato l'intero processo produttivo, unendo le più avanzate tecnologie all'esperta capacità artigianale e al sapere antico dei maestri d’ascia di Ferretti Group.", "story_en": "Ferretti Yachts 1000 is the largest boat ever built by the shipyard, a tribute to Italian design and craftsmanship that redefines the sea experience with the utmost expression of comfort and wellbeing.\n\nWe pushed further in space and time to discover and embody the new essence of Ferretti Yachts: the quintessence of wellbeing and style.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.\n\n40,000 hours of concept development. 4,250 hours of naval design. 9,650 hours of prototyping the moulds. A monumental project powered by innovative spirit and artisanal skill. To assure the finest quality and the most sublime detail, we rethought the whole production process, combining cutting-edge technology with the expert craftsmanship and time-honoured know-how of the Ferretti Group master shipwrights.", "loa": "30,13 m", "beam": "6,81 m", "draft": "2,29 m", "hull": "23,98 m", "cabins": "5 + 3", "engine": "MTU 16V 2000 M86", "speed": "24 / 20 kn", "engine_opt": "MTU 16V 2000 M96L", "speed_opt": "28 / 24 kn", "disp_empty": "98.000 kg", "disp_full": "111.000 kg", "fuel": "9.000 l", "water": "1.320 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-286-430-PUB/n/Ferretti-Yachts-1000", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99543.webp", "imageFile": "1-286-430.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-286-430-1.jpg", "brochure/1-286-430-2.jpg", "brochure/1-286-430-3.jpg", "brochure/1-286-430-4.jpg"], "tagline": "Just like home"}, {"code": "1-328-546", "family": "Gamma flybridge", "category": "Gamma flybridge", "subcategory": "Oltre 30 m", "protection": "", "name": "Ferretti Yachts 1000 SkyDeck", "desc": "Ferretti Yachts 1000 Skydeck presenta un ponte superiore completamente rinnovato per creare uno spazio racchiuso e protetto da vivere in ogni momento dell'anno, che trasmette la sensazione di poter toccare il cielo.", "desc_en": "The Skydeck edition of Ferretti Yachts 1000 features an upper deck redesigned to create an enclosed, sheltered space that can be enjoyed year-round and conveys the breathtaking feeling of being able to touch the sky.", "story": "Ferretti Yachts 1000 Skydeck presenta un ponte superiore completamente rinnovato per creare uno spazio racchiuso e protetto da vivere in ogni momento dell'anno, che trasmette la sensazione di poter toccare il cielo.\n\nFai spazio al cielo. Il tuo lounge sul ponte superiore diventa un'esclusiva area indoor, in cui interni ed esterni si fondono creando un effetto incantevole.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: Classico o Contemporaneo, creati dallo studio di design italiano IDEAEITALIA.", "story_en": "The Skydeck edition of Ferretti Yachts 1000 features an upper deck redesigned to create an enclosed, sheltered space that can be enjoyed year-round and conveys the breathtaking feeling of being able to touch the sky.\n\nMake room for the sky. Your upper-deck lounge becomes an exclusive indoor area where interiors and exteriors merge to mesmerising effect.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.", "loa": "30,13 m", "beam": "6,81 m", "draft": "2,29 m", "hull": "23,98 m", "cabins": "5 + 3", "engine": "MTU 16V 2000 M86", "speed": "24 / 20 kn", "engine_opt": "MTU 16V 2000 M96L", "speed_opt": "28 / 24 kn", "disp_empty": "98.000 kg", "disp_full": "111.000 kg", "fuel": "9.000 l", "water": "1.320 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Flybridge/Model/p/1-328-546-PUB/n/Ferretti-Yachts-1000-SkyDeck", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99743.webp", "imageFile": "1-328-546.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 1, "photos": ["brochure/1-328-546-1.jpg", "brochure/1-328-546-2.jpg", "brochure/1-328-546-3.jpg", "brochure/1-328-546-4.jpg"], "tagline": "Just like home"}, {"code": "1-337-576", "family": "Infynito", "category": "Infynito", "subcategory": "20–25 m", "protection": "", "name": "Ferretti Yachts INFYNITO 80", "desc": "Anima sostenibile, generose superfici esterne coperte e continuità tra interni ed esterni, INFYNITO 80 ridefinisce il modo in cui viviamo il mare.", "desc_en": "With a sustainable soul, generous protected outdoor spaces and seamless interior-exterior flow, INFYNITO 80 redefines how we live the sea.", "story": "Anima sostenibile, generose superfici esterne coperte e continuità tra interni ed esterni, INFYNITO 80 ridefinisce il modo in cui viviamo il mare.\n\nUno yacht nato per esplorare non solo nuove destinazioni, ma anche nuove possibilità. Un luogo che un tempo viveva solo nei nostri sogni, oggi è diventato realtà: vieni ad incontrare la tua immaginazione.\n\nL'esperienza a bordo diventa ancora più intima grazie alla possibilità di scegliere tra due mood di arredo interno: Classico o Contemporaneo, creati dallo studio di design italiano IDEAEITALIA.\n\nIl design degli interni di INFYNITO 80 mantiene vive le soluzioni sostenibili adottate per INFYNITO 90, vero plus di questa gamma: dal teak lamellare alle vernici ecologiche, dalle pelli rigenerate ai materiali riciclabili, tutto è pensato per offrire un’esperienza di viaggio nel pieno rispetto dell’ambiente.", "story_en": "With a sustainable soul, generous protected outdoor spaces and seamless interior-exterior flow, INFYNITO 80 redefines how we live the sea.\n\nA yacht born to explore not just new destinations, but new possibilities. A place that once lived only in our dreams now becomes reality: meet your imagination.\n\nThe experience on board becomes even more homely thanks to the possibility to choose between two interior design moods: Classic OR Contemporary, designed by the Italian studio IDEAEITALIA.\n\nINFYNITO 80 also features the Group's F.S.E.A. technology (Ferretti Sustainable Enhanced Architecture), a package of environmentally friendly cruising solutions. They include an integrated system that stores the solar energy collected by the photovoltaic panels installed on the hard top in an Energy Bank, which consists of 14 high-density lithium batteries that deliver more energy at the same time as guaranteeing a favourable weight-power ratio.", "loa": "23,7 m", "beam": "6,36 m", "draft": "1,92 m", "hull": "23,6 m", "cabins": "4 + 2", "engine": "MAN V8 1200", "speed": "20 / 15 kn", "engine_opt": "MAN V12 1400", "speed_opt": "22 / 17 kn", "disp_empty": "73.000 kg", "disp_full": "84.000 kg", "fuel": "8.000 l", "water": "1.200 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Infynito/Model/p/1-337-576-PUB/n/Ferretti-Yachts-INFYNITO-80", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99059.webp", "imageFile": "1-337-576.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 2, "photos": ["brochure/1-337-576-1.jpg", "brochure/1-337-576-2.jpg", "brochure/1-337-576-3.jpg", "brochure/1-337-576-4.jpg"], "tagline": ""}, {"code": "1-325-539", "family": "Infynito", "category": "Infynito", "subcategory": "25–30 m", "protection": "", "name": "Ferretti Yachts INFYNITO 90", "desc": "Qualunque sia la tua destinazione, Ferretti Yachts INFYNITO 90 è in grado di avverare i tuoi desideri accompagnandoti in distanze mai percorse e garantendo un’esperienza Just like home più intensa che mai. Ispirato agli explorer vessel è capace di percorrere lunghe distanze e viaggiare sia di giorno che di notte.", "desc_en": "Whatever your destination, Ferretti Yachts INFYNITO 90 can make your wishes come true, carrying you unheard of distances and delivering a more intense Just Like Home experience than ever before. Inspired by explorer vessels, she can cruise for long distances both by day and by night.", "story": "Qualunque sia la tua destinazione, Ferretti Yachts INFYNITO 90 è in grado di avverare i tuoi desideri accompagnandoti in distanze mai percorse e garantendo un’esperienza Just like home più intensa che mai. Ispirato agli explorer vessel è capace di percorrere lunghe distanze e viaggiare sia di giorno che di notte.\n\nINFYNITO 90, il primo modello della gamma INFYNITO, apre un nuovo capitolo della storia di Ferretti Yachts, tracciando il percorso per un'esperienza in mare sostenibile, elegante e senza limiti.\n\nTra gli elementi distintivi, spicca il pozzetto, spazioso e personalizzabile, che permette di sentirsi parte del mare e assaporare ogni attimo, ogni suono e ogni sfumatura di blu.\n\nNiente più limiti e confini, lo sguardo è libero di spaziare a 360 gradi. La barca e l’orizzonte si fondono grazie alla spettacolare All-season Terrace, un vero paradiso a bordo, per un'esperienza eccezionale e privata, in qualunque periodo dell’anno. Sei tu a scegliere: una deliziosa spa con jacuzzi, un bar privato per godere di momenti conviviali, o una sofisticata lounge da cui guardare l'infinito.", "story_en": "Whatever your destination, Ferretti Yachts INFYNITO 90 can make your wishes come true, carrying you unheard of distances and delivering a more intense Just Like Home experience than ever before. Inspired by explorer vessels, she can cruise for long distances both by day and by night.\n\nINFYNITO 90, the first model in the INFYNITO range, has opened a new chapter for Ferretti Yachts, paving the way for a sustainable, limitless and elegant way of living the sea.\n\nStand-out features include the spacious, customisable cockpit, which lets you feel like part of the sea and enjoy every moment, every sound and every shade of blue.\n\nWith no more limits and boundaries, the view sweeps far and wide. Boat and horizon come together on the spectacular All-Season Terrace, a true paradise on board for a stunning private experience at any time of year. You choose: a delightful spa with Jacuzzi, a private bar for convivial time in company, or a sophisticated lounge from which to gaze into infinity.", "loa": "26,95 m", "beam": "7,31 m", "draft": "2,02 m", "hull": "23,95 m", "cabins": "4 + 2", "engine": "MAN V12 1550", "speed": "20 / 15 kn", "engine_opt": "MAN V12 1800", "speed_opt": "22 / 17 kn", "disp_empty": "95.000 kg", "disp_full": "111.000 kg", "fuel": "12.500 l", "water": "1.800 l", "persons": "20", "url": "https://www.ferretti-yachts.com/it-it/Infynito/Model/p/1-325-539-PUB/n/Ferretti-Yachts-INFYNITO-90", "image": "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Ferretti/99019.webp", "imageFile": "1-325-539.webp", "atex": false, "marking": "", "application": "", "price": 0, "catOrder": 2, "photos": ["brochure/1-325-539-1.jpg", "brochure/1-325-539-2.jpg", "brochure/1-325-539-3.jpg", "brochure/1-325-539-4.jpg"], "tagline": ""}];
-const OPTIONALS_YACHT = {"1-285-426": [{"code": "CUMMINS QSB 6.7", "desc": "CUMMINS QSB 6.7 — 30 / 25 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-310-531": [{"code": "VOLVO PENTA D13 1000", "desc": "VOLVO PENTA D13 1000 — 32 / 26 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-338-577": [{"code": "MAN V8 1200", "desc": "MAN V8 1200 — 32 / 28 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-389-642": [{"code": "MAN V12 1400", "desc": "MAN V12 1400 — 32 / 28 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-384-633": [{"code": "MAN V12 1800", "desc": "MAN V12 1800 — 30 / 26 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-302-457": [{"code": "MAN V12 2000", "desc": "MAN V12 2000 — 31,5 / 27 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-339-579": [{"code": "MAN V12X 2200", "desc": "MAN V12X 2200 — 27 / 23 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-286-430": [{"code": "MTU 16V 2000 M96L", "desc": "MTU 16V 2000 M96L — 28 / 24 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-328-546": [{"code": "MTU 16V 2000 M96L", "desc": "MTU 16V 2000 M96L — 28 / 24 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-337-576": [{"code": "MAN V12 1400", "desc": "MAN V12 1400 — 22 / 17 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-325-539": [{"code": "MAN V12 1800", "desc": "MAN V12 1800 — 22 / 17 kn", "group": "Motorizzazione", "price": 0, "order": 1}]};
+const OPTIONALS_YACHT = {"1-285-426": [{"code": "ENG-500", "desc": "CUMMINS QSB 6.7 — 30 / 25 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-310-531": [{"code": "ENG-580", "desc": "VOLVO PENTA D13 1000 — 32 / 26 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-338-577": [{"code": "ENG-670", "desc": "MAN V8 1200 — 32 / 28 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-389-642": [{"code": "ENG-720", "desc": "MAN V12 1400 — 32 / 28 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-384-633": [{"code": "ENG-800", "desc": "MAN V12 1800 — 30 / 26 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-302-457": [{"code": "ENG-860", "desc": "MAN V12 2000 — 31,5 / 27 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-339-579": [{"code": "ENG-940", "desc": "MAN V12X 2200 — 27 / 23 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-286-430": [{"code": "ENG-1000", "desc": "MTU 16V 2000 M96L — 28 / 24 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-328-546": [{"code": "ENG-1000-SKYDECK", "desc": "MTU 16V 2000 M96L — 28 / 24 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-337-576": [{"code": "ENG-INFYNITO-80", "desc": "MAN V12 1400 — 22 / 17 kn", "group": "Motorizzazione", "price": 0, "order": 1}], "1-325-539": [{"code": "ENG-INFYNITO-90", "desc": "MAN V12 1800 — 22 / 17 kn", "group": "Motorizzazione", "price": 0, "order": 1}]};
 </script>
 <script>
 /* Dati di avvio. Le macchine arrivano da js/data/catalogo.js (generato da tools/build_catalog_js.py). */
@@ -600,7 +688,7 @@ const S={
   validity:'30', lead:'', delivery:'', packaging:'', warranty:'', payment:'',
   exclusions:'', notes:''
 };
-const STEPS=['customer','application','product','options','quote'];
+const STEPS=['customer','product','options','quote'];   // 1 Cliente · 2 Prodotto · 3 Opzioni · 4 Offerta
 
 /* ============== EXTERNAL RESOURCES (images, clients, registry) ============== */
 let IMGMAP={};        // normalizedCode -> File (loaded eagerly at folder-link time)
@@ -665,7 +753,7 @@ function priceOf(m){return Number(m.price)||0;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 const SPEC_FIELDS=[['loa','loa'],['beam','beam'],['draft','draft'],['hull','hull'],['cabins','cabins'],
-  ['engine','engine'],['speed','speed'],['engine_opt','engine_opt'],['speed_opt','speed_opt'],
+  ['engine','engine'],['speed','speed'],
   ['disp_empty','disp_empty'],['disp_full','disp_full'],['fuel','fuel'],['water','water'],['persons','persons']];
 // unità aggiunte in automatico per le imbarcazioni PERSONALIZZATE quando si digita solo un numero
 const SPEC_UNITS={loa:'m',beam:'m',draft:'m',hull:'m',disp_empty:'kg',disp_full:'kg',fuel:'l',water:'l'};
@@ -895,11 +983,11 @@ function renderSolList(){
 }
 function addCustomSolution(){
   S.solutions.push({code:'',name:t('new_machine'),desc:'',atex:false,unit:0,qty:1,img:'',imgs:[],specs:{},accessories:[],custom:true});
-  step=3;maxReached=Math.max(maxReached,3);render();
+  step=2;maxReached=Math.max(maxReached,2);render();
 }
 function addSparesSolution(){
   S.solutions.push({code:'',name:t('spares_sale_title'),desc:'',atex:false,unit:0,qty:1,img:'',imgs:[],specs:{},accessories:[],sparesOnly:true});
-  step=3;maxReached=Math.max(maxReached,3);render();
+  step=2;maxReached=Math.max(maxReached,2);render();
 }
 function addSolution(code){
   const m=DATA.machines.find(x=>x.code===code);if(!m)return;
@@ -985,7 +1073,7 @@ function handleMatrix(e){
       if(!applyMatrixWorkbook(wb,file.name)){flash(t('matrix_err'));return;}
       if($('#matTxt'))$('#matTxt').textContent='✓ '+file.name;
       flash(t('matrix_ok').replace('%n',MATRIX_INFO.machines));
-      if(step===3)render();
+      if(step===2)render();
     }catch(err){console.error(err);flash(t('matrix_err'));}
   };
   reader.readAsArrayBuffer(file);
@@ -1029,7 +1117,7 @@ function stepOptions(){
     const editor=s.sparesOnly?`<div style="margin:8px 0;display:grid;grid-template-columns:1fr;gap:6px">
         <input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('spares_sale_title')}">
         <textarea class="pe" data-sol="${si}-desc" placeholder="${t('spares_sale_desc_ph')}" style="min-height:56px">${esc(s.desc||'')}</textarea>
-      </div>`:`<details class="prodedit" open style="margin:8px 0">
+      </div>`:!s.custom?`<div class="solro">${imgs[0]?`<img class="imgthumb" src="${imgs[0]}">`:''}<div><b>${esc(s.name)}</b><div class="cd">${esc(s.code)} · ${esc([s.specs.loa,s.specs.cabins&&(s.specs.cabins+' '+t('cabins_short'))].filter(Boolean).join(' · '))}</div></div></div>`:`<details class="prodedit" open style="margin:8px 0">
       <summary style="cursor:pointer;font-size:12px;color:#4a4a4a;font-weight:700">✏️ ${t('edit_product')}</summary>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:6px;margin-top:8px;align-items:end">
         <label class="fl">${t('machine_name')}<input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('new_machine')}"></label>
@@ -1047,7 +1135,7 @@ function stepOptions(){
       ${si>0?`<label style="display:flex;align-items:center;gap:8px;margin:8px 0 2px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;background:${s.sameOrder?'#eaf6ef':'transparent'}">
         <input type="checkbox" data-sameorder="${si}" ${s.sameOrder?'checked':''}> ${t('same_order_chk')}</label>`:''}
       ${editor}
-      ${s.sparesOnly?'':`<div class="addbar" style="flex-wrap:wrap;gap:10px">
+      ${(s.sparesOnly||!s.custom)?'':`<div class="addbar" style="flex-wrap:wrap;gap:10px">
         <label class="btn ghost sm" style="display:inline-flex;align-items:center">➕ ${t('add_image')}
           <input type="file" accept="image/*" multiple style="display:none" data-imgadd="${si}"></label>
         ${imgs.map((u,ii)=>`<span style="position:relative;display:inline-block">
@@ -1191,7 +1279,11 @@ function lineTotals(){
     const rows=[];
     const mk=(o,d)=>{o.disc=itemDiscLabel(d);o.total=o.partial*itemMult(d);return o;};
     if(!s.sparesOnly)rows.push(mk({code:s.code,desc:s.tableDesc||s.name,unit:s.unit,qty:s.qty,partial:s.unit*s.qty,img:s.img},s.disc));
+    const seenAcc=new Set();
     s.accessories.forEach(a=>{
+      const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
+      if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
+      seenAcc.add(key);
       rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
     const listTot=rows.reduce((x,r)=>x+r.partial,0);
     return {s,rows,listTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
@@ -1222,6 +1314,23 @@ function totalsHtml(sd,pk,showPkg){
   if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${money(pk.net)}</span></div>`;
   return h;
 }
+
+// Motorizzazione e velocità cambiano solo se è selezionato l'optional motore (codice ENG-…): altrimenti restano quelle standard
+function engineOptSelected(s){return (s.accessories||[]).some(a=>/^ENG-/i.test(String(a.code||'')));}
+function effSpecs(s){
+  const sp=Object.assign({},s.specs||{});
+  if(!s.custom&&engineOptSelected(s)){
+    const m=DATA.machines.find(x=>x.code===s.code);
+    if(m&&m.engine_opt){sp.engine=m.engine_opt;if(m.speed_opt)sp.speed=m.speed_opt;}
+  }
+  return sp;
+}
+// dati tecnici in sola lettura: griglia di cifre (usata nella scheda soluzione)
+function figsHtml(s,keys){
+  const sp=effSpecs(s);
+  return keys.filter(k=>sp[k]!=null&&String(sp[k]).trim()!=='').map(k=>`<div><b>${esc(locSpec(sp[k]))}</b><span>${esc(t('spec_'+k))}</span></div>`).join('');
+}
+function heroOf(m,fallback){const ph=(m&&m.photos||[]).map(photoUrl);return ph[0]||fallback||'';}
 function specBullets(s){
   const out=[];
   SPEC_FIELDS.forEach(([k])=>{if(s.specs[k])out.push(`${t('spec_'+k)}: ${esc(s.specs[k])}`);});
@@ -1245,7 +1354,7 @@ function repaginateQuote(){
       if(!cont){
         cont=document.createElement('div');cont.className=p.className;
         const cpad=document.createElement('div');cpad.className='pad';
-        const logo=pad.querySelector(':scope > .plogo'),bar=pad.querySelector(':scope > .hbar');
+        const logo=pad.querySelector(':scope > .plogo'),bar=pad.querySelector(':scope > .hbar, :scope > .sl-eyebrow');
         if(logo)cpad.appendChild(logo.cloneNode(true));
         if(bar)cpad.appendChild(bar.cloneNode(true));
         const ct=table.cloneNode(false);const head=table.querySelector('tr');if(head)ct.appendChild(head.cloneNode(true));
@@ -1272,60 +1381,57 @@ function fitPreview(){
   const avail=document.documentElement.clientWidth;
   if(avail<860){p.style.padding='6px 0';p.style.zoom=Math.max(.3,(avail-8)/794).toFixed(3);}
 }
-window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===4)fitPreview();});
+window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
 function stepQuote(){
   const v=$('#view');
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
   if(REGISTRY.fileHandle&&!stepQuote._refreshing){stepQuote._refreshing=true;
-    reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===4)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}
+    reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===3)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}
   const {sols,packages}=lineTotals();
-  // cover: onde decorative in basso a sinistra
-  const symbol=COVER_SYMBOL;
+  // copertina: foto a tutta pagina del primo modello, titolo grande, riferimenti
+  const firstSol=S.solutions.find(x=>!x.sparesOnly&&!x.custom);
+  const firstM=firstSol&&DATA.machines.find(x=>x.code===firstSol.code);
+  const coverImg=heroOf(firstM,firstSol&&firstSol.img);
+  const coverNames=S.solutions.filter(x=>!x.sparesOnly).map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).filter((v,i,a)=>a.indexOf(v)===i);
   let html=`<div class="page cover">
-    ${symbol}
-    <div class="clogo">${logoDark(95)}</div>
-    <div class="ctitle">${t('offer_n')} ${esc(S.offerNum)}<div class="nm">${esc((S.client||'').toUpperCase())}</div></div>
-    <div class="contact"><b>${t('contact').toUpperCase()}</b>${esc(S.rep.name)}<br>
-      <a>${esc(S.rep.email)}</a><br>${esc(S.rep.phone)}</div>
-  </div>`;
-  // letter page
-  html+=`<div class="page"><div class="pad">
-    <div class="plogo">${logoLight(34)}</div>
-    <div class="info-grid">
-      <div class="info-l">
-        ${[[t('l_client'),esc((S.client||'').trim())],
-           [t('l_contact'),(S.contact||'').trim()?esc(S.contact.trim())+((S.role||'').trim()?' ('+esc(S.role.trim())+')':''):''],
-           [t('l_request'),esc((S.subject||'').trim())],
-           [t('l_phone'),esc((S.phone||'').trim())],
-           [t('l_email'),esc((S.email||'').trim())]]
-          .filter(([,val])=>val).map(([lbl,val])=>`<div class="ir"><b>${lbl}:</b> <span class="v">${val}</span></div>`).join('')}
-      </div>
-      <div class="info-r">
-        <div class="nm">${BRAND.legalName}</div>
-        ${[[t('l_writtenby'),esc((S.rep.name||'').trim())],
-           [t('l_office'),BRAND.office],
-           [t('l_ref'),esc((S.offerNum||'').trim())],
-           ['E-mail',esc((S.rep.email||'').trim())]]
-          .filter(([,val])=>val).map(([lbl,val])=>`<b>${lbl}:</b> <span class="v">${val}</span>`).join('<br>')}
-      </div>
+    ${coverImg?`<img class="cv-hero" src="${coverImg}">`:COVER_SYMBOL}
+    <div class="cv-shade"></div>
+    <div class="cv-top">${logoDark(80)}</div>
+    <div class="cv-main">
+      <div class="cv-eyebrow">${t('offer_n')} ${esc(S.offerNum)} · ${esc(S.date)}</div>
+      <div class="cv-title">${esc(coverNames.join(' · ')||t('step_quote'))}</div>
+      ${S.client?`<div class="cv-client">${esc(S.client)}</div>`:''}
     </div>
-    <div class="subj-bar">${t('l_subject')}: ${esc(S.subject||t('def_subject'))}</div>
-    <div class="date-bar">${t('l_date')}: ${esc(S.date)}</div>
-    <div class="letter-box">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
-    <div class="sign"><div><span>${BRAND.legalName}</span><span>${t('sign_dept')}</span><span>${esc(S.rep.name)}</span></div></div>
+    <div class="cv-foot"><div><span>${t('contact').toUpperCase()}</span><b>${esc(S.rep.name)}</b>${esc(S.rep.email)}${S.rep.phone?' · '+esc(S.rep.phone):''}</div><div class="cv-web">${esc(BRAND.web)}</div></div>
+  </div>`;
+  // lettera: impaginazione editoriale
+  const toRows=[[t('l_client'),esc((S.client||'').trim())],
+     [t('l_contact'),(S.contact||'').trim()?esc(S.contact.trim())+((S.role||'').trim()?' · '+esc(S.role.trim()):''):''],
+     [t('l_phone'),esc((S.phone||'').trim())],[t('l_email'),esc((S.email||'').trim())]].filter(([,v])=>v);
+  const fromRows=[[t('l_writtenby'),esc((S.rep.name||'').trim())],['E-mail',esc((S.rep.email||'').trim())],[t('f_repphone'),esc((S.rep.phone||'').trim())],[t('l_ref'),esc((S.offerNum||'').trim())]].filter(([,v])=>v);
+  html+=`<div class="page"><div class="pad lt">
+    <div class="plogo">${logoLight(34)}</div>
+    <div class="lt-eyebrow">${t('offer_n')} ${esc(S.offerNum)} · ${esc(S.date)}</div>
+    <div class="lt-subject">${esc(S.subject||t('def_subject'))}</div>
+    <div class="lt-grid">
+      <div><div class="lt-h">${t('l_client')}</div>${toRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+      <div><div class="lt-h">${esc(BRAND.legalName)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+    </div>
+    <div class="lt-body">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
+    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName)} · ${t('sign_dept')}</span></div>
     ${footer()}
   </div></div>`;
   // presentazione dei modelli offerti: una pagina A4 intera per modello (foto a tutta larghezza, testo del cantiere, dati principali)
   const presModels=[];
-  S.solutions.forEach(sl=>{if(sl.sparesOnly||sl.custom)return;const m=DATA.machines.find(x=>x.code===sl.code);if(m&&!presModels.some(x=>x.m.code===m.code))presModels.push({m,img:sl.img||imgUrlForCode(m.code)});});
+  S.solutions.forEach(sl=>{if(sl.sparesOnly||sl.custom)return;const m=DATA.machines.find(x=>x.code===sl.code);if(m&&!presModels.some(x=>x.m.code===m.code))presModels.push({m,sl,img:sl.img||imgUrlForCode(m.code)});});
   const clip=(txt,n)=>{txt=String(txt||'').trim();if(txt.length<=n)return txt;const c=txt.slice(0,n);const k=Math.max(c.lastIndexOf('. '),c.lastIndexOf('.\n'));return (k>n*0.5?c.slice(0,k+1):c.replace(/\s+\S*$/,'')+'…');};
-  presModels.forEach(({m,img})=>{
+  presModels.forEach(({m,sl,img})=>{
     const paras=String((LANG==='en'?(m.story_en||m.desc_en):(m.story||m.desc))||m.desc||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
     const lead=clip(paras[0]||'',260), rest=clip(paras.slice(1).join('\n\n'),(m.photos||[]).length>1?430:1100).split(/\n+/).filter(Boolean);
     const ph=(m.photos||[]).map(photoUrl);
     const hero=ph[0]||img, strip=ph.slice(1,4);
     const shortName=String(m.name).replace(/^Ferretti Yachts\s*/i,'');
-    const figs=[['spec_loa',m.loa],['spec_beam',m.beam],['spec_draft',m.draft],['spec_cabins',m.cabins],['spec_persons',m.persons],['spec_speed',m.speed],['spec_engine',m.engine],['spec_fuel',m.fuel],['spec_disp_full',m.disp_full]].filter(([,v])=>v)
+    const figs=[['spec_loa',m.loa],['spec_beam',m.beam],['spec_draft',m.draft],['spec_cabins',m.cabins],['spec_persons',m.persons],['spec_speed',effSpecs(sl).speed],['spec_engine',effSpecs(sl).engine],['spec_fuel',m.fuel],['spec_disp_full',m.disp_full]].filter(([,v])=>v)
       .map(([k,v])=>`<div><b>${esc(locSpec(v))}</b><span>${esc(t(k))}</span></div>`).join('');
     html+=`<div class="page pres">
       ${hero?`<img class="pres-hero" src="${hero}">`:'<div class="pres-hero"></div>'}
@@ -1353,72 +1459,31 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const bullets=specBullets(s);
-    const atexMarks='';  // EX / IECEx / XR Z22 badges removed for all ATEX machines
-    const priceRowsArr=rows.map((r,ri)=>{const im=r.img||imgUrlForCode(r.code);
-      const cell=im?`<img src="${im}">`:`<label class="addimg app-noprint" title="${esc(t('add_row_image'))}"><input type="file" accept="image/*" data-addrowimg="${i}|${ri}" hidden>+📷</label>`;
-      return `<tr><td class="pimg">${cell}</td><td>${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r">${money(r.partial)}</td><td class="c">${r.disc}%</td>
-      <td class="r">${money(r.total)}</td></tr>`;});
-    // split into page-sized chunks so a long accessories/spare-parts list flows onto extra pages
-    // instead of being silently clipped by the fixed-height, overflow:hidden .page container
-    // all rows go on the first page here: repaginateQuote() then moves rows (and the totals) onto
-    // continuation pages according to the REAL rendered height, so long descriptions never overflow
-    const ROWS_FIRST_PAGE=9999, ROWS_CONT_PAGE=9999;
-    const rowChunks=[];
-    { let idx=0;
-      rowChunks.push(priceRowsArr.slice(idx,idx+ROWS_FIRST_PAGE));idx+=ROWS_FIRST_PAGE;
-      while(idx<priceRowsArr.length){rowChunks.push(priceRowsArr.slice(idx,idx+ROWS_CONT_PAGE));idx+=ROWS_CONT_PAGE;}
-    }
-    const ptableHead=`<tr><th></th><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r nw ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
+      <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
+    // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
+    const rowChunks=[priceRowsArr];
+    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
       <th class="c">${t('qty')}</th><th class="r">${t('partial')}</th><th class="c">${t('discount')}</th>
       <th class="r">${t('total')}</th></tr>`;
-    // build title line like "W2 EX 1/2D Industrial vacuum cleaner : 230V 1,1kW"
-    const nameSpan=`<span class="ce" contenteditable="true" data-editname="${i}">${esc(s.name)}</span>`;
-    const titleLine=`<b>${nameSpan}</b>`;
-    const subLine=[s.specs.loa?t('spec_loa')+' '+locSpec(withUnit('loa',s.specs.loa,s.custom)):'',''].filter(Boolean).join(' – ');
+    const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
+    const hero=(m&&heroOf(m,s.img))||s.img||'';
+    const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
-      <div class="hbar"><div class="l">${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}</div><div class="r">${esc(s.name)}</div></div>`;
+      <div class="sl-eyebrow">${label}</div>`;
     if(s.sparesOnly){
-      html+=`<div style="margin:2mm 0 4mm">
-        <div class="prod-ttl"><b><span class="ce" contenteditable="true" data-editname="${i}">${esc(s.name)}</span></b></div>
-        ${s.desc||s.tableDesc?`<div class="prod-sub" style="margin-top:2mm">${esc(s.desc||s.tableDesc||'')}</div>`:''}
-      </div>`;
+      html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
     } else {
-    html+=`<div class="prod-grid">
-        ${s.img?`<div><img class="prod-img" src="${s.img}">${(s.imgs&&s.imgs.length>1)?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;width:185px">${s.imgs.slice(1).map(u=>`<img src="${u}" style="width:88px;height:88px;object-fit:contain;border:1px solid var(--line);background:#fff">`).join('')}</div>`:''}</div>`:`<div class="prod-img empty">${t('no_image')}</div>`}
-        <div>
-          <div class="atexrow"><div>
-            <div class="prod-ttl">${titleLine}</div>${subLine?`<div class="prod-sub">${esc(subLine)}</div>`:''}
-          </div>${atexMarks}</div>
-          <ul>${(s.custom?SPEC_FIELDS.map(x=>x[0]):SPEC_FIELDS.filter(([k])=>s.specs[k]!=null&&s.specs[k]!=='').map(x=>x[0]))
-              .filter(k=>!(s.hiddenSpecs&&s.hiddenSpecs[k]))
-              .map(k=>{const val=s.specs[k]||'';const u=unitFor(k,val,s.custom);const lbl=(s.specLabels&&s.specLabels[k])||t('spec_'+k);
-                return `<li><span class="ce" contenteditable="true" data-editlabel="${i}|${k}">${esc(lbl)}</span>: <span class="ce" contenteditable="true" data-editspec="${i}|${k}">${esc(locSpec(val))}</span>${u?' '+u:''}<span class="specdel app-noprint" data-delspec="${i}|${k}" title="${esc(t('remove_line'))}">×</span></li>`;}).join('')||'<li>—</li>'}
-            ${(s.extraSpecs||[]).map((es,ei)=>`<li><span class="ce" contenteditable="true" data-editextralabel="${i}|${ei}">${esc(es.label||'')}</span>: <span class="ce" contenteditable="true" data-editextratext="${i}|${ei}">${esc(es.text||'')}</span><span class="specdel app-noprint" data-delextra="${i}|${ei}" title="${esc(t('remove_line'))}">×</span></li>`).join('')}</ul>
-          <button class="btn ghost app-noprint" style="margin-top:6px;font-size:10.5px;padding:4px 10px" data-addextra="${i}">➕ ${t('add_custom_line')}</button>
-        </div>
-      </div>`;
+      const keys=['loa','beam','draft','hull','cabins','persons','engine','speed','disp_empty','disp_full','fuel','water'];
+      html+=`<div class="sl-title">${esc(s.name)}</div>
+      ${hero?`<img class="sl-hero" src="${hero}">`:''}
+      <div class="sl-figs">${figsHtml(s,keys)}</div>`;
     }
     html+=`<table class="ptable">${ptableHead}${rowChunks[0].join('')}</table>`;
-    if(rowChunks.length===1){
-      html+=`${totalsHtml(sd,pk,isPkgLast)}
+    html+=`${totalsHtml(sd,pk,isPkgLast)}
       ${footer()}
     </div></div>`;
-    }else{
-      html+=`</div></div>`; // close first page without totals — they land on the last continuation page
-      rowChunks.slice(1).forEach((chunk,ci)=>{
-        const isLast=ci===rowChunks.length-2;
-        html+=`<div class="page"><div class="pad">
-          <div class="plogo">${logoLight(30)}</div>
-          <div class="hbar"><div class="l">${solLabel(sd).toUpperCase()}</div><div class="r">${esc(s.name)}</div></div>
-          <table class="ptable">${ptableHead}${chunk.join('')}</table>
-          ${isLast?totalsHtml(sd,pk,isPkgLast):''}
-          ${footer()}
-        </div></div>`;
-      });
-    }
   });
   // supply + general conditions page
   const sc=[['sc_validity',(S.validity||'30')+' '+t('days')+'.'],['sc_lead',S.lead?S.lead+' '+t('weeks_from_order')+'.':t('def_lead')],
@@ -1507,7 +1572,7 @@ function render(){
   if(typeof DASH!=='undefined'&&DASH){renderDashboard();window.scrollTo(0,0);return;}
   maxReached=Math.max(maxReached,step);
   renderStepper();
-  try{[stepCustomer,stepApplication,stepProduct,stepOptions,stepQuote][step]();}
+  try{[stepCustomer,stepProduct,stepOptions,stepQuote][step]();}
   catch(err){
     console.error(err);
     $('#view').innerHTML=`<div class="card"><h2>⚠ Errore nel passaggio ${step+1}</h2><p class="hint">${esc(String(err&&err.message||err))}</p>
@@ -1581,7 +1646,7 @@ function handleImages(e){
   // backfill images for already-selected solutions
   S.solutions.forEach(s=>{if(!s.img){const u=imgUrlForCode(s.code);if(u){s.img=u;ensureImgs(s);if(!s.imgs.length)s.imgs.push(u);}}});
   S.solutions.forEach(s=>s.accessories.forEach(a=>{if(!a.img){const u=imgUrlForCode(a.code);if(u)a.img=u;}}));
-  if(step===2||step===3||step===4)render();
+  if(step===1||step===2||step===3)render();
 }
 function handleClients(e){
   const file=e.target.files[0];if(!file)return;
@@ -1666,7 +1731,7 @@ function handleRegistry(e){
       $('#regTxt').textContent='✓ '+t('registry');
       applyNextOfferNumber();
       flash(t('registry_loaded').replace('%n',nextProgressivo()));
-      if(step===0||step===4)render();
+      if(step===0||step===3)render();
     }catch(err){console.error(err);flash(t('load_err'));}
   };
   reader.readAsArrayBuffer(file);
@@ -2857,7 +2922,7 @@ function ghOpenDialog(){
     st.style.color='#555';st.textContent='Verifica in corso…';
     const ok=await ghConnect();
     st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Collegato: '+GH.msg:GH.msg;
-    if(ok){ghSaveCfg();await ghRefresh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===4)render();}
+    if(ok){ghSaveCfg();await ghRefresh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
   };
 }
 function ghInit(){

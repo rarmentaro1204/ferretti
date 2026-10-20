@@ -72,7 +72,7 @@ def main(xlsx):
         m["tagline"] = "Just like home" if serie.startswith("Gamma flybridge") else ""
         out.append(m)
         if m["engine_opt"]:
-            optionals[code] = [{"code": m["engine_opt"], "desc": m["engine_opt"] + (f" — {m['speed_opt']}" if m["speed_opt"] else ""), "group": "Motorizzazione", "price": 0, "order": 1}]
+            optionals[code] = [{"code": "ENG-" + m["name"].replace("Ferretti Yachts ", "").replace(" ", "-").upper(), "desc": m["engine_opt"] + (f" — {m['speed_opt']}" if m["speed_opt"] else ""), "group": "Motorizzazione", "price": 0, "order": 1}]
     dest = Path(__file__).resolve().parent.parent / "js" / "data" / "catalogo.js"
     dest.write_text("/* GENERATO da tools/build_catalog_js.py — non modificare a mano. Fonte: %s */\n"
                     "const CATALOGO_YACHT = %s;\nconst OPTIONALS_YACHT = %s;\n"

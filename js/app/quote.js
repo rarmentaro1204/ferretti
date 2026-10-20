@@ -19,7 +19,11 @@ function lineTotals(){
     const rows=[];
     const mk=(o,d)=>{o.disc=itemDiscLabel(d);o.total=o.partial*itemMult(d);return o;};
     if(!s.sparesOnly)rows.push(mk({code:s.code,desc:s.tableDesc||s.name,unit:s.unit,qty:s.qty,partial:s.unit*s.qty,img:s.img},s.disc));
+    const seenAcc=new Set();
     s.accessories.forEach(a=>{
+      const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
+      if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
+      seenAcc.add(key);
       rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
     const listTot=rows.reduce((x,r)=>x+r.partial,0);
     return {s,rows,listTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
@@ -50,6 +54,23 @@ function totalsHtml(sd,pk,showPkg){
   if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${money(pk.net)}</span></div>`;
   return h;
 }
+
+// Motorizzazione e velocità cambiano solo se è selezionato l'optional motore (codice ENG-…): altrimenti restano quelle standard
+function engineOptSelected(s){return (s.accessories||[]).some(a=>/^ENG-/i.test(String(a.code||'')));}
+function effSpecs(s){
+  const sp=Object.assign({},s.specs||{});
+  if(!s.custom&&engineOptSelected(s)){
+    const m=DATA.machines.find(x=>x.code===s.code);
+    if(m&&m.engine_opt){sp.engine=m.engine_opt;if(m.speed_opt)sp.speed=m.speed_opt;}
+  }
+  return sp;
+}
+// dati tecnici in sola lettura: griglia di cifre (usata nella scheda soluzione)
+function figsHtml(s,keys){
+  const sp=effSpecs(s);
+  return keys.filter(k=>sp[k]!=null&&String(sp[k]).trim()!=='').map(k=>`<div><b>${esc(locSpec(sp[k]))}</b><span>${esc(t('spec_'+k))}</span></div>`).join('');
+}
+function heroOf(m,fallback){const ph=(m&&m.photos||[]).map(photoUrl);return ph[0]||fallback||'';}
 function specBullets(s){
   const out=[];
   SPEC_FIELDS.forEach(([k])=>{if(s.specs[k])out.push(`${t('spec_'+k)}: ${esc(s.specs[k])}`);});
@@ -73,7 +94,7 @@ function repaginateQuote(){
       if(!cont){
         cont=document.createElement('div');cont.className=p.className;
         const cpad=document.createElement('div');cpad.className='pad';
-        const logo=pad.querySelector(':scope > .plogo'),bar=pad.querySelector(':scope > .hbar');
+        const logo=pad.querySelector(':scope > .plogo'),bar=pad.querySelector(':scope > .hbar, :scope > .sl-eyebrow');
         if(logo)cpad.appendChild(logo.cloneNode(true));
         if(bar)cpad.appendChild(bar.cloneNode(true));
         const ct=table.cloneNode(false);const head=table.querySelector('tr');if(head)ct.appendChild(head.cloneNode(true));
@@ -100,60 +121,57 @@ function fitPreview(){
   const avail=document.documentElement.clientWidth;
   if(avail<860){p.style.padding='6px 0';p.style.zoom=Math.max(.3,(avail-8)/794).toFixed(3);}
 }
-window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===4)fitPreview();});
+window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
 function stepQuote(){
   const v=$('#view');
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
   if(REGISTRY.fileHandle&&!stepQuote._refreshing){stepQuote._refreshing=true;
-    reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===4)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}
+    reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===3)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}
   const {sols,packages}=lineTotals();
-  // cover: onde decorative in basso a sinistra
-  const symbol=COVER_SYMBOL;
+  // copertina: foto a tutta pagina del primo modello, titolo grande, riferimenti
+  const firstSol=S.solutions.find(x=>!x.sparesOnly&&!x.custom);
+  const firstM=firstSol&&DATA.machines.find(x=>x.code===firstSol.code);
+  const coverImg=heroOf(firstM,firstSol&&firstSol.img);
+  const coverNames=S.solutions.filter(x=>!x.sparesOnly).map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).filter((v,i,a)=>a.indexOf(v)===i);
   let html=`<div class="page cover">
-    ${symbol}
-    <div class="clogo">${logoDark(95)}</div>
-    <div class="ctitle">${t('offer_n')} ${esc(S.offerNum)}<div class="nm">${esc((S.client||'').toUpperCase())}</div></div>
-    <div class="contact"><b>${t('contact').toUpperCase()}</b>${esc(S.rep.name)}<br>
-      <a>${esc(S.rep.email)}</a><br>${esc(S.rep.phone)}</div>
-  </div>`;
-  // letter page
-  html+=`<div class="page"><div class="pad">
-    <div class="plogo">${logoLight(34)}</div>
-    <div class="info-grid">
-      <div class="info-l">
-        ${[[t('l_client'),esc((S.client||'').trim())],
-           [t('l_contact'),(S.contact||'').trim()?esc(S.contact.trim())+((S.role||'').trim()?' ('+esc(S.role.trim())+')':''):''],
-           [t('l_request'),esc((S.subject||'').trim())],
-           [t('l_phone'),esc((S.phone||'').trim())],
-           [t('l_email'),esc((S.email||'').trim())]]
-          .filter(([,val])=>val).map(([lbl,val])=>`<div class="ir"><b>${lbl}:</b> <span class="v">${val}</span></div>`).join('')}
-      </div>
-      <div class="info-r">
-        <div class="nm">${BRAND.legalName}</div>
-        ${[[t('l_writtenby'),esc((S.rep.name||'').trim())],
-           [t('l_office'),BRAND.office],
-           [t('l_ref'),esc((S.offerNum||'').trim())],
-           ['E-mail',esc((S.rep.email||'').trim())]]
-          .filter(([,val])=>val).map(([lbl,val])=>`<b>${lbl}:</b> <span class="v">${val}</span>`).join('<br>')}
-      </div>
+    ${coverImg?`<img class="cv-hero" src="${coverImg}">`:COVER_SYMBOL}
+    <div class="cv-shade"></div>
+    <div class="cv-top">${logoDark(80)}</div>
+    <div class="cv-main">
+      <div class="cv-eyebrow">${t('offer_n')} ${esc(S.offerNum)} · ${esc(S.date)}</div>
+      <div class="cv-title">${esc(coverNames.join(' · ')||t('step_quote'))}</div>
+      ${S.client?`<div class="cv-client">${esc(S.client)}</div>`:''}
     </div>
-    <div class="subj-bar">${t('l_subject')}: ${esc(S.subject||t('def_subject'))}</div>
-    <div class="date-bar">${t('l_date')}: ${esc(S.date)}</div>
-    <div class="letter-box">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
-    <div class="sign"><div><span>${BRAND.legalName}</span><span>${t('sign_dept')}</span><span>${esc(S.rep.name)}</span></div></div>
+    <div class="cv-foot"><div><span>${t('contact').toUpperCase()}</span><b>${esc(S.rep.name)}</b>${esc(S.rep.email)}${S.rep.phone?' · '+esc(S.rep.phone):''}</div><div class="cv-web">${esc(BRAND.web)}</div></div>
+  </div>`;
+  // lettera: impaginazione editoriale
+  const toRows=[[t('l_client'),esc((S.client||'').trim())],
+     [t('l_contact'),(S.contact||'').trim()?esc(S.contact.trim())+((S.role||'').trim()?' · '+esc(S.role.trim()):''):''],
+     [t('l_phone'),esc((S.phone||'').trim())],[t('l_email'),esc((S.email||'').trim())]].filter(([,v])=>v);
+  const fromRows=[[t('l_writtenby'),esc((S.rep.name||'').trim())],['E-mail',esc((S.rep.email||'').trim())],[t('f_repphone'),esc((S.rep.phone||'').trim())],[t('l_ref'),esc((S.offerNum||'').trim())]].filter(([,v])=>v);
+  html+=`<div class="page"><div class="pad lt">
+    <div class="plogo">${logoLight(34)}</div>
+    <div class="lt-eyebrow">${t('offer_n')} ${esc(S.offerNum)} · ${esc(S.date)}</div>
+    <div class="lt-subject">${esc(S.subject||t('def_subject'))}</div>
+    <div class="lt-grid">
+      <div><div class="lt-h">${t('l_client')}</div>${toRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+      <div><div class="lt-h">${esc(BRAND.legalName)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+    </div>
+    <div class="lt-body">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
+    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName)} · ${t('sign_dept')}</span></div>
     ${footer()}
   </div></div>`;
   // presentazione dei modelli offerti: una pagina A4 intera per modello (foto a tutta larghezza, testo del cantiere, dati principali)
   const presModels=[];
-  S.solutions.forEach(sl=>{if(sl.sparesOnly||sl.custom)return;const m=DATA.machines.find(x=>x.code===sl.code);if(m&&!presModels.some(x=>x.m.code===m.code))presModels.push({m,img:sl.img||imgUrlForCode(m.code)});});
+  S.solutions.forEach(sl=>{if(sl.sparesOnly||sl.custom)return;const m=DATA.machines.find(x=>x.code===sl.code);if(m&&!presModels.some(x=>x.m.code===m.code))presModels.push({m,sl,img:sl.img||imgUrlForCode(m.code)});});
   const clip=(txt,n)=>{txt=String(txt||'').trim();if(txt.length<=n)return txt;const c=txt.slice(0,n);const k=Math.max(c.lastIndexOf('. '),c.lastIndexOf('.\n'));return (k>n*0.5?c.slice(0,k+1):c.replace(/\s+\S*$/,'')+'…');};
-  presModels.forEach(({m,img})=>{
+  presModels.forEach(({m,sl,img})=>{
     const paras=String((LANG==='en'?(m.story_en||m.desc_en):(m.story||m.desc))||m.desc||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
     const lead=clip(paras[0]||'',260), rest=clip(paras.slice(1).join('\n\n'),(m.photos||[]).length>1?430:1100).split(/\n+/).filter(Boolean);
     const ph=(m.photos||[]).map(photoUrl);
     const hero=ph[0]||img, strip=ph.slice(1,4);
     const shortName=String(m.name).replace(/^Ferretti Yachts\s*/i,'');
-    const figs=[['spec_loa',m.loa],['spec_beam',m.beam],['spec_draft',m.draft],['spec_cabins',m.cabins],['spec_persons',m.persons],['spec_speed',m.speed],['spec_engine',m.engine],['spec_fuel',m.fuel],['spec_disp_full',m.disp_full]].filter(([,v])=>v)
+    const figs=[['spec_loa',m.loa],['spec_beam',m.beam],['spec_draft',m.draft],['spec_cabins',m.cabins],['spec_persons',m.persons],['spec_speed',effSpecs(sl).speed],['spec_engine',effSpecs(sl).engine],['spec_fuel',m.fuel],['spec_disp_full',m.disp_full]].filter(([,v])=>v)
       .map(([k,v])=>`<div><b>${esc(locSpec(v))}</b><span>${esc(t(k))}</span></div>`).join('');
     html+=`<div class="page pres">
       ${hero?`<img class="pres-hero" src="${hero}">`:'<div class="pres-hero"></div>'}
@@ -181,72 +199,31 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const bullets=specBullets(s);
-    const atexMarks='';  // EX / IECEx / XR Z22 badges removed for all ATEX machines
-    const priceRowsArr=rows.map((r,ri)=>{const im=r.img||imgUrlForCode(r.code);
-      const cell=im?`<img src="${im}">`:`<label class="addimg app-noprint" title="${esc(t('add_row_image'))}"><input type="file" accept="image/*" data-addrowimg="${i}|${ri}" hidden>+📷</label>`;
-      return `<tr><td class="pimg">${cell}</td><td>${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r">${money(r.partial)}</td><td class="c">${r.disc}%</td>
-      <td class="r">${money(r.total)}</td></tr>`;});
-    // split into page-sized chunks so a long accessories/spare-parts list flows onto extra pages
-    // instead of being silently clipped by the fixed-height, overflow:hidden .page container
-    // all rows go on the first page here: repaginateQuote() then moves rows (and the totals) onto
-    // continuation pages according to the REAL rendered height, so long descriptions never overflow
-    const ROWS_FIRST_PAGE=9999, ROWS_CONT_PAGE=9999;
-    const rowChunks=[];
-    { let idx=0;
-      rowChunks.push(priceRowsArr.slice(idx,idx+ROWS_FIRST_PAGE));idx+=ROWS_FIRST_PAGE;
-      while(idx<priceRowsArr.length){rowChunks.push(priceRowsArr.slice(idx,idx+ROWS_CONT_PAGE));idx+=ROWS_CONT_PAGE;}
-    }
-    const ptableHead=`<tr><th></th><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r nw ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
+      <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
+    // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
+    const rowChunks=[priceRowsArr];
+    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
       <th class="c">${t('qty')}</th><th class="r">${t('partial')}</th><th class="c">${t('discount')}</th>
       <th class="r">${t('total')}</th></tr>`;
-    // build title line like "W2 EX 1/2D Industrial vacuum cleaner : 230V 1,1kW"
-    const nameSpan=`<span class="ce" contenteditable="true" data-editname="${i}">${esc(s.name)}</span>`;
-    const titleLine=`<b>${nameSpan}</b>`;
-    const subLine=[s.specs.loa?t('spec_loa')+' '+locSpec(withUnit('loa',s.specs.loa,s.custom)):'',''].filter(Boolean).join(' – ');
+    const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
+    const hero=(m&&heroOf(m,s.img))||s.img||'';
+    const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
-      <div class="hbar"><div class="l">${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}</div><div class="r">${esc(s.name)}</div></div>`;
+      <div class="sl-eyebrow">${label}</div>`;
     if(s.sparesOnly){
-      html+=`<div style="margin:2mm 0 4mm">
-        <div class="prod-ttl"><b><span class="ce" contenteditable="true" data-editname="${i}">${esc(s.name)}</span></b></div>
-        ${s.desc||s.tableDesc?`<div class="prod-sub" style="margin-top:2mm">${esc(s.desc||s.tableDesc||'')}</div>`:''}
-      </div>`;
+      html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
     } else {
-    html+=`<div class="prod-grid">
-        ${s.img?`<div><img class="prod-img" src="${s.img}">${(s.imgs&&s.imgs.length>1)?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;width:185px">${s.imgs.slice(1).map(u=>`<img src="${u}" style="width:88px;height:88px;object-fit:contain;border:1px solid var(--line);background:#fff">`).join('')}</div>`:''}</div>`:`<div class="prod-img empty">${t('no_image')}</div>`}
-        <div>
-          <div class="atexrow"><div>
-            <div class="prod-ttl">${titleLine}</div>${subLine?`<div class="prod-sub">${esc(subLine)}</div>`:''}
-          </div>${atexMarks}</div>
-          <ul>${(s.custom?SPEC_FIELDS.map(x=>x[0]):SPEC_FIELDS.filter(([k])=>s.specs[k]!=null&&s.specs[k]!=='').map(x=>x[0]))
-              .filter(k=>!(s.hiddenSpecs&&s.hiddenSpecs[k]))
-              .map(k=>{const val=s.specs[k]||'';const u=unitFor(k,val,s.custom);const lbl=(s.specLabels&&s.specLabels[k])||t('spec_'+k);
-                return `<li><span class="ce" contenteditable="true" data-editlabel="${i}|${k}">${esc(lbl)}</span>: <span class="ce" contenteditable="true" data-editspec="${i}|${k}">${esc(locSpec(val))}</span>${u?' '+u:''}<span class="specdel app-noprint" data-delspec="${i}|${k}" title="${esc(t('remove_line'))}">×</span></li>`;}).join('')||'<li>—</li>'}
-            ${(s.extraSpecs||[]).map((es,ei)=>`<li><span class="ce" contenteditable="true" data-editextralabel="${i}|${ei}">${esc(es.label||'')}</span>: <span class="ce" contenteditable="true" data-editextratext="${i}|${ei}">${esc(es.text||'')}</span><span class="specdel app-noprint" data-delextra="${i}|${ei}" title="${esc(t('remove_line'))}">×</span></li>`).join('')}</ul>
-          <button class="btn ghost app-noprint" style="margin-top:6px;font-size:10.5px;padding:4px 10px" data-addextra="${i}">➕ ${t('add_custom_line')}</button>
-        </div>
-      </div>`;
+      const keys=['loa','beam','draft','hull','cabins','persons','engine','speed','disp_empty','disp_full','fuel','water'];
+      html+=`<div class="sl-title">${esc(s.name)}</div>
+      ${hero?`<img class="sl-hero" src="${hero}">`:''}
+      <div class="sl-figs">${figsHtml(s,keys)}</div>`;
     }
     html+=`<table class="ptable">${ptableHead}${rowChunks[0].join('')}</table>`;
-    if(rowChunks.length===1){
-      html+=`${totalsHtml(sd,pk,isPkgLast)}
+    html+=`${totalsHtml(sd,pk,isPkgLast)}
       ${footer()}
     </div></div>`;
-    }else{
-      html+=`</div></div>`; // close first page without totals — they land on the last continuation page
-      rowChunks.slice(1).forEach((chunk,ci)=>{
-        const isLast=ci===rowChunks.length-2;
-        html+=`<div class="page"><div class="pad">
-          <div class="plogo">${logoLight(30)}</div>
-          <div class="hbar"><div class="l">${solLabel(sd).toUpperCase()}</div><div class="r">${esc(s.name)}</div></div>
-          <table class="ptable">${ptableHead}${chunk.join('')}</table>
-          ${isLast?totalsHtml(sd,pk,isPkgLast):''}
-          ${footer()}
-        </div></div>`;
-      });
-    }
   });
   // supply + general conditions page
   const sc=[['sc_validity',(S.validity||'30')+' '+t('days')+'.'],['sc_lead',S.lead?S.lead+' '+t('weeks_from_order')+'.':t('def_lead')],

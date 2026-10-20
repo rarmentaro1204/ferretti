@@ -104,11 +104,11 @@ function renderSolList(){
 }
 function addCustomSolution(){
   S.solutions.push({code:'',name:t('new_machine'),desc:'',atex:false,unit:0,qty:1,img:'',imgs:[],specs:{},accessories:[],custom:true});
-  step=3;maxReached=Math.max(maxReached,3);render();
+  step=2;maxReached=Math.max(maxReached,2);render();
 }
 function addSparesSolution(){
   S.solutions.push({code:'',name:t('spares_sale_title'),desc:'',atex:false,unit:0,qty:1,img:'',imgs:[],specs:{},accessories:[],sparesOnly:true});
-  step=3;maxReached=Math.max(maxReached,3);render();
+  step=2;maxReached=Math.max(maxReached,2);render();
 }
 function addSolution(code){
   const m=DATA.machines.find(x=>x.code===code);if(!m)return;

@@ -64,7 +64,7 @@ function handleMatrix(e){
       if(!applyMatrixWorkbook(wb,file.name)){flash(t('matrix_err'));return;}
       if($('#matTxt'))$('#matTxt').textContent='✓ '+file.name;
       flash(t('matrix_ok').replace('%n',MATRIX_INFO.machines));
-      if(step===3)render();
+      if(step===2)render();
     }catch(err){console.error(err);flash(t('matrix_err'));}
   };
   reader.readAsArrayBuffer(file);
@@ -108,7 +108,7 @@ function stepOptions(){
     const editor=s.sparesOnly?`<div style="margin:8px 0;display:grid;grid-template-columns:1fr;gap:6px">
         <input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('spares_sale_title')}">
         <textarea class="pe" data-sol="${si}-desc" placeholder="${t('spares_sale_desc_ph')}" style="min-height:56px">${esc(s.desc||'')}</textarea>
-      </div>`:`<details class="prodedit" open style="margin:8px 0">
+      </div>`:!s.custom?`<div class="solro">${imgs[0]?`<img class="imgthumb" src="${imgs[0]}">`:''}<div><b>${esc(s.name)}</b><div class="cd">${esc(s.code)} · ${esc([s.specs.loa,s.specs.cabins&&(s.specs.cabins+' '+t('cabins_short'))].filter(Boolean).join(' · '))}</div></div></div>`:`<details class="prodedit" open style="margin:8px 0">
       <summary style="cursor:pointer;font-size:12px;color:#4a4a4a;font-weight:700">✏️ ${t('edit_product')}</summary>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:6px;margin-top:8px;align-items:end">
         <label class="fl">${t('machine_name')}<input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('new_machine')}"></label>
@@ -126,7 +126,7 @@ function stepOptions(){
       ${si>0?`<label style="display:flex;align-items:center;gap:8px;margin:8px 0 2px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;background:${s.sameOrder?'#eaf6ef':'transparent'}">
         <input type="checkbox" data-sameorder="${si}" ${s.sameOrder?'checked':''}> ${t('same_order_chk')}</label>`:''}
       ${editor}
-      ${s.sparesOnly?'':`<div class="addbar" style="flex-wrap:wrap;gap:10px">
+      ${(s.sparesOnly||!s.custom)?'':`<div class="addbar" style="flex-wrap:wrap;gap:10px">
         <label class="btn ghost sm" style="display:inline-flex;align-items:center">➕ ${t('add_image')}
           <input type="file" accept="image/*" multiple style="display:none" data-imgadd="${si}"></label>
         ${imgs.map((u,ii)=>`<span style="position:relative;display:inline-block">

@@ -4,7 +4,7 @@ function render(){
   if(typeof DASH!=='undefined'&&DASH){renderDashboard();window.scrollTo(0,0);return;}
   maxReached=Math.max(maxReached,step);
   renderStepper();
-  try{[stepCustomer,stepApplication,stepProduct,stepOptions,stepQuote][step]();}
+  try{[stepCustomer,stepProduct,stepOptions,stepQuote][step]();}
   catch(err){
     console.error(err);
     $('#view').innerHTML=`<div class="card"><h2>⚠ Errore nel passaggio ${step+1}</h2><p class="hint">${esc(String(err&&err.message||err))}</p>

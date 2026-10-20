@@ -20,7 +20,7 @@ const S={
   validity:'30', lead:'', delivery:'', packaging:'', warranty:'', payment:'',
   exclusions:'', notes:''
 };
-const STEPS=['customer','application','product','options','quote'];
+const STEPS=['customer','product','options','quote'];   // 1 Cliente · 2 Prodotto · 3 Opzioni · 4 Offerta
 
 /* ============== EXTERNAL RESOURCES (images, clients, registry) ============== */
 let IMGMAP={};        // normalizedCode -> File (loaded eagerly at folder-link time)
@@ -85,7 +85,7 @@ function priceOf(m){return Number(m.price)||0;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 const SPEC_FIELDS=[['loa','loa'],['beam','beam'],['draft','draft'],['hull','hull'],['cabins','cabins'],
-  ['engine','engine'],['speed','speed'],['engine_opt','engine_opt'],['speed_opt','speed_opt'],
+  ['engine','engine'],['speed','speed'],
   ['disp_empty','disp_empty'],['disp_full','disp_full'],['fuel','fuel'],['water','water'],['persons','persons']];
 // unità aggiunte in automatico per le imbarcazioni PERSONALIZZATE quando si digita solo un numero
 const SPEC_UNITS={loa:'m',beam:'m',draft:'m',hull:'m',disp_empty:'kg',disp_full:'kg',fuel:'l',water:'l'};

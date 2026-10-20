@@ -49,7 +49,7 @@ function handleImages(e){
   // backfill images for already-selected solutions
   S.solutions.forEach(s=>{if(!s.img){const u=imgUrlForCode(s.code);if(u){s.img=u;ensureImgs(s);if(!s.imgs.length)s.imgs.push(u);}}});
   S.solutions.forEach(s=>s.accessories.forEach(a=>{if(!a.img){const u=imgUrlForCode(a.code);if(u)a.img=u;}}));
-  if(step===2||step===3||step===4)render();
+  if(step===1||step===2||step===3)render();
 }
 function handleClients(e){
   const file=e.target.files[0];if(!file)return;
@@ -134,7 +134,7 @@ function handleRegistry(e){
       $('#regTxt').textContent='✓ '+t('registry');
       applyNextOfferNumber();
       flash(t('registry_loaded').replace('%n',nextProgressivo()));
-      if(step===0||step===4)render();
+      if(step===0||step===3)render();
     }catch(err){console.error(err);flash(t('load_err'));}
   };
   reader.readAsArrayBuffer(file);
