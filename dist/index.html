@@ -553,9 +553,10 @@ function footer(){return `<div class="foot">
 const ISSUER_FIELDS=[['legalName','f_i_legal'],['address0','f_i_addr1'],['address1','f_i_addr2'],['tel','f_i_tel'],['email','f_i_mail'],['vat','f_i_vat'],['web','f_i_web']];
 const ISSUER_LS='yacht_issuer_v1';
 function issuerGet(k){return k==='address0'?BRAND.address[0]:k==='address1'?BRAND.address[1]:BRAND[k]||'';}
-function issuerSet(k,v){
+function issuerSet(k,v,silent){
   if(k==='address0')BRAND.address[0]=v;else if(k==='address1')BRAND.address[1]=v;else BRAND[k]=v;
   try{localStorage.setItem(ISSUER_LS,JSON.stringify(Object.fromEntries(ISSUER_FIELDS.map(([f])=>[f,issuerGet(f)]))));}catch(_){}
+  if(!silent&&typeof setQueue==='function')setQueue();   // copia anche su GitHub
 }
 (function(){try{const o=JSON.parse(localStorage.getItem(ISSUER_LS)||'null');if(o)Object.keys(o).forEach(k=>{if(o[k]!=null)issuerSet(k,o[k]);});}catch(_){}})();
 </script>
@@ -831,6 +832,7 @@ function stepCustomer(){
   $('#i_rep').oninput=e=>{S.rep.name=e.target.value;const r=DATA.reps.find(x=>x.name===e.target.value);if(r){S.rep.email=r.email||S.rep.email;S.rep.phone=r.phone||S.rep.phone;$('#i_repmail').value=S.rep.email;$('#i_repphone').value=S.rep.phone;}};
   $('#i_repmail').oninput=e=>{S.rep.email=e.target.value;};
   $('#i_repphone').oninput=e=>{S.rep.phone=e.target.value;};
+  ['#i_rep','#i_repmail','#i_repphone'].forEach(id=>$(id).addEventListener('change',()=>{if(typeof repRemember==='function')repRemember();}));
   v.querySelectorAll('[data-issuer]').forEach(inp=>inp.oninput=e=>issuerSet(inp.dataset.issuer,e.target.value));
   if($('#btnOffers'))$('#btnOffers').onclick=openOfferList;
   if($('#btnRecall'))$('#btnRecall').onclick=recallOffer;
@@ -2016,7 +2018,7 @@ async function saveOfferComplete(){
     const {saved:regOk,num,row:regRow,ghSaved}=await writeRegistryEntry();
     if(ghSaved&&pdfBlob){ try{pdfOk=(await ghUploadPdf(regRow,pdfBlob))||pdfOk;}catch(e){console.error(e);} }
     let clientRes={target:'none'};
-    if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} }
+    if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
       const parts=[t('offer_saved_file').replace('%n',num)];
       parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));
@@ -2765,7 +2767,7 @@ function installDemo(){
 const GH_LS='yacht_github_v1', GH_CACHE='yacht_github_cache_v1';
 const GH={cfg:{owner:'',repo:'',branch:'main',dir:'offerte',token:''},ok:false,msg:'',busy:false};
 // valori predefiniti (modificabili): proprietario e repo privata delle offerte
-const GH_DEFAULT={owner:'rarmentaro1204',repo:'dprc-offerte',branch:'main',dir:'offerte'};
+const GH_DEFAULT={owner:'rarmentaro1204',repo:'ferretti-offerte',branch:'main',dir:'offerte'};
 function ghLoadCfg(){
   Object.assign(GH.cfg,GH_DEFAULT);
   try{const c=JSON.parse(localStorage.getItem(GH_LS)||'null');if(c)Object.keys(c).forEach(k=>{if(c[k])GH.cfg[k]=c[k];});}catch(_){}
@@ -2905,9 +2907,9 @@ function ghOpenDialog(){
   const c=GH.cfg;
   o.innerHTML=`<div class="load-card" style="width:min(560px,94vw);max-height:88vh;overflow:auto;text-align:left">
     <div class="load-title">Collega GitHub</div>
-    <div class="load-status" style="min-height:0">Le offerte (dati + PDF) vengono salvate in una repo <b>privata</b>. Collegamento una sola volta: poi è automatico.</div>
+    <div class="load-status" style="min-height:0">Le offerte (dati + PDF) e le impostazioni (dati emittente, commerciali, ultime condizioni, clienti) vengono salvate in una repo <b>privata</b>. Collegamento una sola volta per computer: poi è automatico.</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0 12px">
-      1. Crea una repo <b>privata</b> (es. <code>dprc-offerte</code>).<br>
+      1. Crea una repo <b>privata</b> (es. <code>ferretti-offerte</code>).<br>
       2. GitHub → Settings → Developer settings → <i>Fine-grained tokens</i> → solo quella repo, permesso <b>Contents: Read and write</b>.<br>
       3. Incolla qui sotto proprietario, repo e token.</div>
     <div class="grid g2">
@@ -2933,15 +2935,99 @@ function ghOpenDialog(){
     st.style.color='#555';st.textContent='Verifica in corso…';
     const ok=await ghConnect();
     st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Collegato: '+GH.msg:GH.msg;
-    if(ok){ghSaveCfg();await ghRefresh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
+    if(ok){ghSaveCfg();await ghRefresh();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
   };
 }
 function ghInit(){
   ghLoadCfg();
   const b=$('#ghBtn');if(b)b.onclick=ghOpenDialog;
   ghRenderBtn();
-  if(ghHasCfg())ghConnect(true).then(ok=>{if(ok)ghRefresh();});     // collegamento automatico all'apertura
+  if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});     // collegamento automatico all'apertura
 }
+</script>
+<script>
+/* Configuratore Yacht — modulo "settings"
+   Impostazioni che devono restare salvate: dati emittente, commerciali, ultime condizioni usate, clienti inseriti.
+   - Copia locale nel browser (localStorage) e, se GitHub è collegato (repo PRIVATA verificata), anche in <repo>/config/impostazioni.json.
+   - All'apertura si leggono da GitHub: si ritrovano su qualunque computer collegato alla stessa repo. */
+const SET_LS='yacht_settings_v1';
+const SET={issuer:{},reps:[],rep:null,terms:{},clients:[],savedAt:0};
+const SET_PATH='config/impostazioni.json';
+const isPlaceholderRep=r=>/^\s*\[/.test(String(r&&r.name||''));
+function setLoadLocal(){try{const o=JSON.parse(localStorage.getItem(SET_LS)||'null');if(o)Object.assign(SET,o);}catch(_){}}
+function setSaveLocal(){try{localStorage.setItem(SET_LS,JSON.stringify(SET));}catch(_){}}
+// elenco commerciali: quelli salvati sostituiscono i segnaposto
+function mergeRepsFromSettings(list){
+  const out=(list||[]).filter(r=>!isPlaceholderRep(r)||!SET.reps.length);
+  SET.reps.forEach(r=>{if(r&&r.name&&!out.some(x=>x.name===r.name))out.push({name:r.name,email:r.email||'',phone:r.phone||'',role:r.role||''});});
+  return out.length?out:list;
+}
+function setApplyAll(){
+  Object.keys(SET.issuer||{}).forEach(k=>{if(SET.issuer[k]!=null)issuerSet(k,SET.issuer[k],true);});
+  DATA.reps=mergeRepsFromSettings(DATA.reps);
+  if(SET.rep&&SET.rep.name&&(!S.rep||!S.rep.name||isPlaceholderRep(S.rep)))S.rep=Object.assign({name:'',email:'',phone:''},SET.rep);
+  // condizioni: solo se ancora quelle predefinite (non si sovrascrive quello che l'utente ha già digitato)
+  const T=SET.terms||{};
+  if(T.validity&&(S.validity==='30'||!S.validity))S.validity=T.validity;
+  if(T.lead!=null&&!S.lead)S.lead=T.lead;
+  if(T.payment&&!S.payment)S.payment=T.payment;
+  if(T.incoterm&&(S.incoterm==='Ex Works'||!S.incoterm))S.incoterm=T.incoterm;
+  if(T.exclusions&&!S.exclusions)S.exclusions=T.exclusions;
+  (SET.clients||[]).forEach(c=>{if(c&&c.company&&!CLIENTS.some(x=>String(x.company).toLowerCase()===String(c.company).toLowerCase()))CLIENTS.push(c);});
+}
+let _setT;
+function setQueue(){
+  SET.issuer=Object.fromEntries(ISSUER_FIELDS.map(([f])=>[f,issuerGet(f)]));
+  SET.savedAt=Date.now();setSaveLocal();
+  clearTimeout(_setT);_setT=setTimeout(setPushGh,1500);
+}
+function repRemember(){
+  const r=S.rep;if(!r||!String(r.name||'').trim())return;
+  const i=SET.reps.findIndex(x=>x.name===r.name);
+  const item={name:r.name,email:r.email||'',phone:r.phone||'',role:r.role||''};
+  if(i>=0)SET.reps[i]=item;else SET.reps.push(item);
+  SET.rep=item;setQueue();
+}
+// dopo il salvataggio di un'offerta: ricorda condizioni usate e cliente
+function settingsAfterSave(){
+  SET.terms={validity:S.validity,lead:S.lead,payment:S.payment,incoterm:S.incoterm,exclusions:S.exclusions};
+  if(String(S.client||'').trim()){
+    const item={company:S.client.trim(),contact:S.contact||'',role:S.role||'',phone:S.phone||'',email:S.email||''};
+    const i=SET.clients.findIndex(c=>String(c.company).toLowerCase()===item.company.toLowerCase());
+    if(i>=0)SET.clients[i]=item;else SET.clients.push(item);
+    setApplyAll();
+  }
+  repRemember();
+}
+async function setPushGh(){
+  if(!GH.ok)return false;
+  try{
+    const url=`${ghRepoPath()}/contents/${SET_PATH.split('/').map(encodeURIComponent).join('/')}`;
+    for(let k=0;k<3;k++){
+      const cur=await ghApi(`${url}?ref=${encodeURIComponent(GH.cfg.branch)}`);
+      const sha=cur.ok?cur.body.sha:undefined;
+      const r=await ghPut(SET_PATH,ghB64(JSON.stringify({version:1,savedAt:SET.savedAt||Date.now(),issuer:SET.issuer,reps:SET.reps,rep:SET.rep,terms:SET.terms,clients:SET.clients},null,1)),'Impostazioni configuratore',sha);
+      if(r.ok)return true;
+      if(r.status!==409&&r.status!==422)return false;
+    }
+  }catch(e){console.warn('impostazioni non salvate su GitHub',e);}
+  return false;
+}
+async function setPullGh(){
+  if(!GH.ok)return;
+  try{
+    const r=await ghApi(`${ghRepoPath()}/contents/${SET_PATH.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(GH.cfg.branch)}`);
+    if(!r.ok){ if(r.status===404)setQueue(); return; }   // prima volta: crea il file con le impostazioni correnti
+    const remote=JSON.parse(ghFromB64(r.body.content));
+    if((remote.savedAt||0)>=(SET.savedAt||0)){
+      ['issuer','reps','rep','terms','clients'].forEach(k=>{if(remote[k]!=null)SET[k]=remote[k];});
+      SET.savedAt=remote.savedAt||0;setSaveLocal();
+    }else setQueue();   // il locale è più recente: aggiorna GitHub
+    setApplyAll();
+    if(typeof step!=='undefined'&&step===0)render();
+  }catch(e){console.warn('impostazioni da GitHub non lette',e);}
+}
+function settingsInit(){setLoadLocal();setApplyAll();}
 </script>
 <script>
 /* Configuratore Yacht — modulo "recall"
@@ -3086,6 +3172,7 @@ function applyXlsxBuffer(buf,fileName){
           out.reps.push({name,email:norm(r.Email||r.email),phone:norm(r.Telefono||r.Phone||r.phone)});});}
       if(!out.machines.length){flash(t('load_err'));return;}
       if(!out.reps.length)out.reps=EMBEDDED.reps;
+      if(typeof mergeRepsFromSettings==='function')out.reps=mergeRepsFromSettings(out.reps);
       if(!out.accessories.length)out.accessories=EMBEDDED.accessories;
       // fusione col catalogo incorporato: il file può contenere solo codice + prezzo (matrice prezzi);
       // i dati tecnici restano quelli del catalogo, il file vince solo dove ha un valore.
@@ -3116,6 +3203,7 @@ setupLoader();
 $('#dashBtn').onclick=()=>toggleDashboard(!DASH);
 $('#offersBtn').onclick=openOfferList;
 loadRegistryLocal();
+settingsInit();
 ghInit();
 if(!S.delivery)S.delivery=t('def_delivery');
 if(!S.packaging)S.packaging=t('def_packaging');

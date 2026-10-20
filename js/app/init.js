@@ -5,6 +5,7 @@ setupLoader();
 $('#dashBtn').onclick=()=>toggleDashboard(!DASH);
 $('#offersBtn').onclick=openOfferList;
 loadRegistryLocal();
+settingsInit();
 ghInit();
 if(!S.delivery)S.delivery=t('def_delivery');
 if(!S.packaging)S.packaging=t('def_packaging');

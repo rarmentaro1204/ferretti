@@ -54,6 +54,7 @@ function stepCustomer(){
   $('#i_rep').oninput=e=>{S.rep.name=e.target.value;const r=DATA.reps.find(x=>x.name===e.target.value);if(r){S.rep.email=r.email||S.rep.email;S.rep.phone=r.phone||S.rep.phone;$('#i_repmail').value=S.rep.email;$('#i_repphone').value=S.rep.phone;}};
   $('#i_repmail').oninput=e=>{S.rep.email=e.target.value;};
   $('#i_repphone').oninput=e=>{S.rep.phone=e.target.value;};
+  ['#i_rep','#i_repmail','#i_repphone'].forEach(id=>$(id).addEventListener('change',()=>{if(typeof repRemember==='function')repRemember();}));
   v.querySelectorAll('[data-issuer]').forEach(inp=>inp.oninput=e=>issuerSet(inp.dataset.issuer,e.target.value));
   if($('#btnOffers'))$('#btnOffers').onclick=openOfferList;
   if($('#btnRecall'))$('#btnRecall').onclick=recallOffer;

@@ -24,3 +24,9 @@ Prezzi: caricare un Excel con colonne `Codice` + `Prezzo` ("Carica listino"): i 
 - `tools/build_excel_templates.py`, `build_price_matrix.py`, `report_categorie.py` e `scraper/categorie.py` sono ancora quelli Depureco.
 - `dist/index.html` contiene le immagini del sito Ferretti incorporate: verificare i diritti d'uso prima di pubblicare.
 - Sicurezza: token GitHub solo nel browser, repo dati sempre privata, nessun prezzo nel file pubblicato.
+
+## Salvataggio su GitHub (offerte e impostazioni)
+Il configuratore salva ogni offerta (JSON + PDF) e le impostazioni in una **repo privata separata** (es. `ferretti-offerte`), mai nella repo del codice:
+- `offerte/<anno>/<NUMERO>.json` e `.pdf` — offerte richiamabili e dashboard;
+- `config/impostazioni.json` — dati emittente, commerciali, ultime condizioni usate, clienti inseriti.
+Collegamento (una volta per computer): pulsante **GitHub** in alto → proprietario, repo, token fine-grained con solo *Contents: Read and write* su quella repo. Il token resta nel browser. L'app rifiuta repo pubbliche.

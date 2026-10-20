@@ -408,7 +408,7 @@ async function saveOfferComplete(){
     const {saved:regOk,num,row:regRow,ghSaved}=await writeRegistryEntry();
     if(ghSaved&&pdfBlob){ try{pdfOk=(await ghUploadPdf(regRow,pdfBlob))||pdfOk;}catch(e){console.error(e);} }
     let clientRes={target:'none'};
-    if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} }
+    if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
       const parts=[t('offer_saved_file').replace('%n',num)];
       parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));

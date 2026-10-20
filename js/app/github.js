@@ -7,7 +7,7 @@
 const GH_LS='yacht_github_v1', GH_CACHE='yacht_github_cache_v1';
 const GH={cfg:{owner:'',repo:'',branch:'main',dir:'offerte',token:''},ok:false,msg:'',busy:false};
 // valori predefiniti (modificabili): proprietario e repo privata delle offerte
-const GH_DEFAULT={owner:'rarmentaro1204',repo:'dprc-offerte',branch:'main',dir:'offerte'};
+const GH_DEFAULT={owner:'rarmentaro1204',repo:'ferretti-offerte',branch:'main',dir:'offerte'};
 function ghLoadCfg(){
   Object.assign(GH.cfg,GH_DEFAULT);
   try{const c=JSON.parse(localStorage.getItem(GH_LS)||'null');if(c)Object.keys(c).forEach(k=>{if(c[k])GH.cfg[k]=c[k];});}catch(_){}
@@ -147,9 +147,9 @@ function ghOpenDialog(){
   const c=GH.cfg;
   o.innerHTML=`<div class="load-card" style="width:min(560px,94vw);max-height:88vh;overflow:auto;text-align:left">
     <div class="load-title">Collega GitHub</div>
-    <div class="load-status" style="min-height:0">Le offerte (dati + PDF) vengono salvate in una repo <b>privata</b>. Collegamento una sola volta: poi è automatico.</div>
+    <div class="load-status" style="min-height:0">Le offerte (dati + PDF) e le impostazioni (dati emittente, commerciali, ultime condizioni, clienti) vengono salvate in una repo <b>privata</b>. Collegamento una sola volta per computer: poi è automatico.</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0 12px">
-      1. Crea una repo <b>privata</b> (es. <code>dprc-offerte</code>).<br>
+      1. Crea una repo <b>privata</b> (es. <code>ferretti-offerte</code>).<br>
       2. GitHub → Settings → Developer settings → <i>Fine-grained tokens</i> → solo quella repo, permesso <b>Contents: Read and write</b>.<br>
       3. Incolla qui sotto proprietario, repo e token.</div>
     <div class="grid g2">
@@ -175,12 +175,12 @@ function ghOpenDialog(){
     st.style.color='#555';st.textContent='Verifica in corso…';
     const ok=await ghConnect();
     st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Collegato: '+GH.msg:GH.msg;
-    if(ok){ghSaveCfg();await ghRefresh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
+    if(ok){ghSaveCfg();await ghRefresh();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
   };
 }
 function ghInit(){
   ghLoadCfg();
   const b=$('#ghBtn');if(b)b.onclick=ghOpenDialog;
   ghRenderBtn();
-  if(ghHasCfg())ghConnect(true).then(ok=>{if(ok)ghRefresh();});     // collegamento automatico all'apertura
+  if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});     // collegamento automatico all'apertura
 }

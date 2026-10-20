@@ -64,6 +64,7 @@ function applyXlsxBuffer(buf,fileName){
           out.reps.push({name,email:norm(r.Email||r.email),phone:norm(r.Telefono||r.Phone||r.phone)});});}
       if(!out.machines.length){flash(t('load_err'));return;}
       if(!out.reps.length)out.reps=EMBEDDED.reps;
+      if(typeof mergeRepsFromSettings==='function')out.reps=mergeRepsFromSettings(out.reps);
       if(!out.accessories.length)out.accessories=EMBEDDED.accessories;
       // fusione col catalogo incorporato: il file può contenere solo codice + prezzo (matrice prezzi);
       // i dati tecnici restano quelli del catalogo, il file vince solo dove ha un valore.

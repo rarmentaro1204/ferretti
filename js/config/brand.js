@@ -33,8 +33,9 @@ function footer(){return `<div class="foot">
 const ISSUER_FIELDS=[['legalName','f_i_legal'],['address0','f_i_addr1'],['address1','f_i_addr2'],['tel','f_i_tel'],['email','f_i_mail'],['vat','f_i_vat'],['web','f_i_web']];
 const ISSUER_LS='yacht_issuer_v1';
 function issuerGet(k){return k==='address0'?BRAND.address[0]:k==='address1'?BRAND.address[1]:BRAND[k]||'';}
-function issuerSet(k,v){
+function issuerSet(k,v,silent){
   if(k==='address0')BRAND.address[0]=v;else if(k==='address1')BRAND.address[1]=v;else BRAND[k]=v;
   try{localStorage.setItem(ISSUER_LS,JSON.stringify(Object.fromEntries(ISSUER_FIELDS.map(([f])=>[f,issuerGet(f)]))));}catch(_){}
+  if(!silent&&typeof setQueue==='function')setQueue();   // copia anche su GitHub
 }
 (function(){try{const o=JSON.parse(localStorage.getItem(ISSUER_LS)||'null');if(o)Object.keys(o).forEach(k=>{if(o[k]!=null)issuerSet(k,o[k]);});}catch(_){}})();
