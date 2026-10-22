@@ -123,6 +123,6 @@ function addSolution(code){
   stepProduct();
 }
 let _flashT;
-function flash(msg){let f=$('#flash');if(!f){f=ce('div');f.id='flash';f.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;z-index:99;font-size:13px;font-weight:600';document.body.appendChild(f);}f.textContent=msg;f.style.opacity='1';clearTimeout(_flashT);_flashT=setTimeout(()=>f.style.opacity='0',1600);}
+function flash(msg,ms){let f=$('#flash');if(!f){f=ce('div');f.id='flash';f.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;z-index:99;font-size:13px;font-weight:600';document.body.appendChild(f);}f.textContent=msg;f.style.opacity='1';clearTimeout(_flashT);_flashT=setTimeout(()=>f.style.opacity='0',ms||1600);}
 
 /* ============== OPTIONAL MATRIX (backend Excel: Matrice_Optional_*.xlsx) ============== */

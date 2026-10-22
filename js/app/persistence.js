@@ -391,8 +391,9 @@ async function saveOfferComplete(){
   if(btn){btn.disabled=true;btn.textContent='⏳ '+t('saving_all');}
   try{
     let pdfOk=false, pdfBlob=null;
-    if(GH.ok&&!window.showDirectoryPicker){ try{pdfBlob=await buildPdfBlob();}catch(e){console.error(e);} }
-    if(window.showDirectoryPicker){
+    // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
+    if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
+    else if(window.showDirectoryPicker){
       try{ const blob=await buildPdfBlob(); pdfBlob=blob; const dir=await getSaveDir();
         const fh=await dir.getFileHandle(suggestedFilename()+'.pdf',{create:true});
         const w=await fh.createWritable(); await w.write(blob); await w.close();
@@ -410,12 +411,18 @@ async function saveOfferComplete(){
     let clientRes={target:'none'};
     if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
-      const parts=[t('offer_saved_file').replace('%n',num)];
-      parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));
-      flash(parts.join(' · '));
+      const parts=[];
+      if(GH.ok){
+        parts.push(ghSaved?t('saved_gh').replace('%n',num):t('gh_fail').replace('%n',num));
+        parts.push(pdfOk?t('pdf_gh_ok'):t('pdf_gh_err'));
+      }else{
+        parts.push(t('offer_saved_file').replace('%n',num));
+        parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));
+      }
+      flash(parts.join(' · '),GH.ok?5200:undefined);
       resetOffer();
     } else {
-      flash(t('offer_not_saved'));
+      flash(GH.ok?t('gh_fail').replace('%n',S.offerNum):t('gh_not_linked'),5200);
       applyNextOfferNumber();
       render();
     }

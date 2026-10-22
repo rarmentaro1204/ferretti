@@ -569,6 +569,7 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
+  saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
   f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
@@ -602,6 +603,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
   f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
@@ -1012,7 +1014,7 @@ function addSolution(code){
   stepProduct();
 }
 let _flashT;
-function flash(msg){let f=$('#flash');if(!f){f=ce('div');f.id='flash';f.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;z-index:99;font-size:13px;font-weight:600';document.body.appendChild(f);}f.textContent=msg;f.style.opacity='1';clearTimeout(_flashT);_flashT=setTimeout(()=>f.style.opacity='0',1600);}
+function flash(msg,ms){let f=$('#flash');if(!f){f=ce('div');f.id='flash';f.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;z-index:99;font-size:13px;font-weight:600';document.body.appendChild(f);}f.textContent=msg;f.style.opacity='1';clearTimeout(_flashT);_flashT=setTimeout(()=>f.style.opacity='0',ms||1600);}
 
 /* ============== OPTIONAL MATRIX (backend Excel: Matrice_Optional_*.xlsx) ============== */
 </script>
@@ -2001,8 +2003,9 @@ async function saveOfferComplete(){
   if(btn){btn.disabled=true;btn.textContent='⏳ '+t('saving_all');}
   try{
     let pdfOk=false, pdfBlob=null;
-    if(GH.ok&&!window.showDirectoryPicker){ try{pdfBlob=await buildPdfBlob();}catch(e){console.error(e);} }
-    if(window.showDirectoryPicker){
+    // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
+    if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
+    else if(window.showDirectoryPicker){
       try{ const blob=await buildPdfBlob(); pdfBlob=blob; const dir=await getSaveDir();
         const fh=await dir.getFileHandle(suggestedFilename()+'.pdf',{create:true});
         const w=await fh.createWritable(); await w.write(blob); await w.close();
@@ -2020,12 +2023,18 @@ async function saveOfferComplete(){
     let clientRes={target:'none'};
     if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
-      const parts=[t('offer_saved_file').replace('%n',num)];
-      parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));
-      flash(parts.join(' · '));
+      const parts=[];
+      if(GH.ok){
+        parts.push(ghSaved?t('saved_gh').replace('%n',num):t('gh_fail').replace('%n',num));
+        parts.push(pdfOk?t('pdf_gh_ok'):t('pdf_gh_err'));
+      }else{
+        parts.push(t('offer_saved_file').replace('%n',num));
+        parts.push(pdfOk?t('pdf_saved'):t('pdf_save_err'));
+      }
+      flash(parts.join(' · '),GH.ok?5200:undefined);
       resetOffer();
     } else {
-      flash(t('offer_not_saved'));
+      flash(GH.ok?t('gh_fail').replace('%n',S.offerNum):t('gh_not_linked'),5200);
       applyNextOfferNumber();
       render();
     }
@@ -2263,17 +2272,18 @@ async function getSaveDir(){
   return h;
 }
 function loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src))return res();const el=document.createElement('script');el.src=src;el.onload=()=>res();el.onerror=()=>rej(new Error('script '+src));document.head.appendChild(el);});}
-function addCanvasPaged(pdf,canvas,first){
+function addCanvasPaged(pdf,canvas,first,q){
+  q=q||0.92;
   const pw=210, ph=297;
   const imgH=canvas.width? canvas.height*pw/canvas.width : ph;
-  if(imgH<=ph+0.6){ if(!first)pdf.addPage(); pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,imgH); return; }
+  if(imgH<=ph+0.6){ if(!first)pdf.addPage(); pdf.addImage(canvas.toDataURL('image/jpeg',q),'JPEG',0,0,pw,imgH); return; }
   const pageHpx=Math.floor(canvas.width*ph/pw); let y=0, pnum=0;
   while(y<canvas.height){
     const sliceH=Math.min(pageHpx,canvas.height-y);
     const c=document.createElement('canvas');c.width=canvas.width;c.height=sliceH;
     c.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceH,0,0,canvas.width,sliceH);
     if(!(first&&pnum===0))pdf.addPage();
-    pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,sliceH*pw/canvas.width);
+    pdf.addImage(c.toDataURL('image/jpeg',q),'JPEG',0,0,pw,sliceH*pw/canvas.width);
     y+=sliceH; pnum++;
   }
 }
@@ -2302,7 +2312,9 @@ async function svgToImg(svg,scale){
   if(cs.display==='block' && (cs.marginLeft==='auto'||cs.marginRight==='auto')){img.style.display='block';img.style.marginLeft='auto';img.style.marginRight='auto';}
   return img;
 }
-async function buildPdfBlob(){
+// opts: {scale,q} — per GitHub si usa un profilo compatto (file più leggero: la funzione Netlify accetta richieste fino a ~6 MB)
+async function buildPdfBlob(opts){
+  opts=opts||{};
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   const {jsPDF}=window.jspdf;
@@ -2319,8 +2331,8 @@ async function buildPdfBlob(){
   await new Promise(r=>setTimeout(r,120));
   try{
     for(let i=0;i<pages.length;i++){
-      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,imageTimeout:0,windowWidth:pages[i].scrollWidth,windowHeight:pages[i].scrollHeight});
-      addCanvasPaged(pdf,canvas,i===0);
+      const canvas=await html2canvas(pages[i],{scale:opts.scale||2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,imageTimeout:0,windowWidth:pages[i].scrollWidth,windowHeight:pages[i].scrollHeight});
+      addCanvasPaged(pdf,canvas,i===0,opts.q);
     }
     return pdf.output('blob');
   } finally { document.body.classList.remove('exporting'); stepQuote(); }

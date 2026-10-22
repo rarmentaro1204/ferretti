@@ -141,17 +141,18 @@ async function getSaveDir(){
   return h;
 }
 function loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src))return res();const el=document.createElement('script');el.src=src;el.onload=()=>res();el.onerror=()=>rej(new Error('script '+src));document.head.appendChild(el);});}
-function addCanvasPaged(pdf,canvas,first){
+function addCanvasPaged(pdf,canvas,first,q){
+  q=q||0.92;
   const pw=210, ph=297;
   const imgH=canvas.width? canvas.height*pw/canvas.width : ph;
-  if(imgH<=ph+0.6){ if(!first)pdf.addPage(); pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,imgH); return; }
+  if(imgH<=ph+0.6){ if(!first)pdf.addPage(); pdf.addImage(canvas.toDataURL('image/jpeg',q),'JPEG',0,0,pw,imgH); return; }
   const pageHpx=Math.floor(canvas.width*ph/pw); let y=0, pnum=0;
   while(y<canvas.height){
     const sliceH=Math.min(pageHpx,canvas.height-y);
     const c=document.createElement('canvas');c.width=canvas.width;c.height=sliceH;
     c.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceH,0,0,canvas.width,sliceH);
     if(!(first&&pnum===0))pdf.addPage();
-    pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,sliceH*pw/canvas.width);
+    pdf.addImage(c.toDataURL('image/jpeg',q),'JPEG',0,0,pw,sliceH*pw/canvas.width);
     y+=sliceH; pnum++;
   }
 }
@@ -180,7 +181,9 @@ async function svgToImg(svg,scale){
   if(cs.display==='block' && (cs.marginLeft==='auto'||cs.marginRight==='auto')){img.style.display='block';img.style.marginLeft='auto';img.style.marginRight='auto';}
   return img;
 }
-async function buildPdfBlob(){
+// opts: {scale,q} — per GitHub si usa un profilo compatto (file più leggero: la funzione Netlify accetta richieste fino a ~6 MB)
+async function buildPdfBlob(opts){
+  opts=opts||{};
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   const {jsPDF}=window.jspdf;
@@ -197,8 +200,8 @@ async function buildPdfBlob(){
   await new Promise(r=>setTimeout(r,120));
   try{
     for(let i=0;i<pages.length;i++){
-      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,imageTimeout:0,windowWidth:pages[i].scrollWidth,windowHeight:pages[i].scrollHeight});
-      addCanvasPaged(pdf,canvas,i===0);
+      const canvas=await html2canvas(pages[i],{scale:opts.scale||2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,imageTimeout:0,windowWidth:pages[i].scrollWidth,windowHeight:pages[i].scrollHeight});
+      addCanvasPaged(pdf,canvas,i===0,opts.q);
     }
     return pdf.output('blob');
   } finally { document.body.classList.remove('exporting'); stepQuote(); }

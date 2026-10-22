@@ -2,6 +2,7 @@
 (function(){
 const Y={
  it:{
+  saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
   f_issuer:"Dati dell'emittente (intestazione e piè di pagina del documento)", f_i_legal:"Ragione sociale", f_i_addr1:"Indirizzo", f_i_addr2:"CAP, città, paese", f_i_tel:"Telefono", f_i_mail:"E-mail", f_i_vat:"P.IVA / C.F.", f_i_web:"Sito web",
@@ -35,6 +36,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
   f_issuer:"Issuer details (document header and footer)", f_i_legal:"Company name", f_i_addr1:"Address", f_i_addr2:"ZIP, city, country", f_i_tel:"Phone", f_i_mail:"E-mail", f_i_vat:"VAT / Tax ID", f_i_web:"Website",
