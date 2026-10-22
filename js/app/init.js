@@ -33,3 +33,6 @@ async function autoLoadPrivate(){
   }catch(e){console.warn('listini non caricati',e);}
 }
 autoLoadPrivate();
+
+// cambio: si verifica alla prima apertura di ogni giorno
+fxRefresh().then(ok=>{if(ok&&S.cur&&S.cur!=='EUR'&&!S.fxRate){fxSelect(S.cur);} if(typeof step!=='undefined'&&step===3)render();});

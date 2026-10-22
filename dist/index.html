@@ -495,7 +495,7 @@ body.show-tools .data-tool{display:inline-flex!important}
 input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 /* pannello prezzo netto */
 .netpanel h2{margin-bottom:2px}
-.netrow{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr 1.1fr;gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
+.netrow{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.5fr;gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
 .netname{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0}
 .netname span{font-size:11.5px;color:var(--muted)}
 .netres{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
@@ -503,6 +503,12 @@ input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 .netres b{font-family:var(--font-title);font-size:20px;font-weight:400;color:var(--red);white-space:nowrap}
 .netres em{font-style:normal;font-size:11.5px;color:#1f7a4d}
 @media(max-width:720px){.netrow{grid-template-columns:1fr 1fr}.netname,.netres{grid-column:1/-1}.netres{align-items:flex-start}}
+
+.netfinal{display:flex;align-items:center;gap:8px}
+.netfinal select.curSel{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--ink)}
+.fxbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;color:#4a4a4a}
+.fxflag{display:inline-flex;align-items:center;gap:6px;font-weight:600;cursor:pointer;margin-left:auto}
+@media(max-width:720px){.fxflag{margin-left:0}}
 </style>
 </head>
 <body>
@@ -582,7 +588,8 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
-  price_locked:"Prezzo da listino: non modificabile", net_title:"Prezzo netto", net_hint:"Imposta il prezzo finale: sconto addizionale e arrotondamento oppure un importo manuale. Serve solo a te: nel PDF compaiono solo le cifre finali, senza traccia di questa trattativa.", net_base:"Totale dopo gli sconti", net_pct:"Sconto addizionale", net_round:"Arrotonda per difetto", net_manual:"Oppure prezzo netto manuale", net_manual_ph:"es. 3.700.000", net_final:"Prezzo netto finale", net_r_none:"Nessun arrotondamento", net_r_cents:"Togli i centesimi", net_r_tens:"Alle 10 €", net_r_hundreds:"Alle 100 €", net_r_thousands:"Alle 1.000 €",
+  net_cur:"Valuta", net_fx:"Cambio", net_fx_update:"Aggiorna cambio", net_fx_fail:"aggiornamento non riuscito: ultimo cambio noto", net_show_doc:"Mostra il documento in %c",
+  price_locked:"Prezzo da listino: non modificabile", net_title:"Prezzo netto", net_hint:"Imposta il prezzo finale: arrotondamento oppure importo manuale, nella valuta scelta. Serve solo a te: nel PDF compaiono solo le cifre finali, senza traccia di questa trattativa.", net_base:"Totale dopo gli sconti", net_pct:"Sconto addizionale", net_round:"Arrotonda per difetto", net_manual:"Oppure prezzo netto manuale", net_manual_ph:"es. 3.700.000", net_final:"Prezzo netto finale", net_r_none:"Nessun arrotondamento", net_r_cents:"Togli i centesimi", net_r_tens:"Alle decine", net_r_hundreds:"Alle centinaia", net_r_thousands:"Alle migliaia",
   saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
@@ -617,7 +624,8 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
-  price_locked:"List price: cannot be edited", net_title:"Net price", net_hint:"Set the final price: additional discount and rounding, or a manual amount. It is for you only: the PDF shows the final figures only, with no trace of this negotiation.", net_base:"Total after discounts", net_pct:"Additional discount", net_round:"Round down", net_manual:"Or manual net price", net_manual_ph:"e.g. 3,700,000", net_final:"Final net price", net_r_none:"No rounding", net_r_cents:"Drop the cents", net_r_tens:"To 10 €", net_r_hundreds:"To 100 €", net_r_thousands:"To 1,000 €",
+  net_cur:"Currency", net_fx:"Exchange rate", net_fx_update:"Update rate", net_fx_fail:"update failed: last known rate", net_show_doc:"Show the document in %c",
+  price_locked:"List price: cannot be edited", net_title:"Net price", net_hint:"Set the final price: rounding or a manual amount, in the chosen currency. It is for you only: the PDF shows the final figures only, with no trace of this negotiation.", net_base:"Total after discounts", net_pct:"Additional discount", net_round:"Round down", net_manual:"Or manual net price", net_manual_ph:"e.g. 3,700,000", net_final:"Final net price", net_r_none:"No rounding", net_r_cents:"Drop the cents", net_r_tens:"To tens", net_r_hundreds:"To hundreds", net_r_thousands:"To thousands",
   saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
@@ -711,7 +719,7 @@ const S={
   app:{use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''},
   solutions:[], // {code,name,desc,atex,unit,qty,img,specs:{}, accessories:[{code,desc,qty,price}]}
   discount:0, discount2:0, discount3:0,
-  validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'',
+  validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'', cur:'EUR', fxRate:1, fxDate:'', curShow:false,
   exclusions:'', notes:''
 };
 const STEPS=['customer','product','options','quote'];   // 1 Cliente · 2 Prodotto · 3 Opzioni · 4 Offerta
@@ -791,6 +799,48 @@ function locSpec(v){
   v=String(v==null?'':v);if(LANG!=='en')return v;
   return v.replace(/\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+,\d+/g,m=>m.replace(/[.,]/g,c=>c==='.'?',':'.'));
 }
+</script>
+<script>
+/* Configuratore Yacht — modulo "fx": valute e cambio.
+   I prezzi (listino, registro, dashboard) sono SEMPRE in euro. La valuta scelta nel pannello «Prezzo netto» serve a lavorare
+   l'importo finale (arrotondamento / prezzo manuale) e, se il flag è attivo, a mostrare il documento in quella valuta.
+   Il cambio si controlla alla prima apertura di ogni giorno (open.er-api.com) e si ricorda; ogni offerta conserva il cambio usato. */
+const CURRENCIES=[['EUR','€','🇪🇺'],['USD','$','🇺🇸'],['GBP','£','🇬🇧'],['CHF','CHF','🇨🇭'],['AED','AED','🇦🇪'],['CAD','C$','🇨🇦'],['AUD','A$','🇦🇺'],
+  ['SGD','S$','🇸🇬'],['HKD','HK$','🇭🇰'],['JPY','¥','🇯🇵'],['CNY','CN¥','🇨🇳'],['NOK','kr','🇳🇴'],['SEK','kr','🇸🇪']];
+const FX_LS='yacht_fx_v1';
+const FX={date:'',rates:{EUR:1},src:'',failed:false};
+function fxLoad(){try{const o=JSON.parse(localStorage.getItem(FX_LS)||'null');if(o&&o.rates)Object.assign(FX,o);}catch(_){}}
+function fxSave(){try{localStorage.setItem(FX_LS,JSON.stringify({date:FX.date,rates:FX.rates,src:FX.src}));}catch(_){}}
+function fxToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// aggiorna il cambio se non è già di oggi (o se force). Ritorna true se i tassi sono di oggi.
+async function fxRefresh(force){
+  if(!force&&FX.date===fxToday()&&FX.rates.USD)return true;
+  const srcs=[['https://open.er-api.com/v6/latest/EUR',j=>j&&j.result==='success'?j.rates:null],
+              ['https://api.frankfurter.dev/v1/latest?base=EUR',j=>j&&j.rates?Object.assign({EUR:1},j.rates):null]];
+  for(const [u,pick] of srcs){
+    try{
+      const r=await fetch(u,{cache:'no-store'});if(!r.ok)continue;
+      const rates=pick(await r.json());
+      if(rates&&rates.USD){FX.rates=Object.assign({EUR:1},rates);FX.date=fxToday();FX.src=new URL(u).host;FX.failed=false;fxSave();return true;}
+    }catch(_){}
+  }
+  FX.failed=true;return false;
+}
+function curInfo(c){return CURRENCIES.find(x=>x[0]===c)||CURRENCIES[0];}
+// cambio dell'offerta: quello salvato con l'offerta, altrimenti l'ultimo noto
+function curRate(){const c=S.cur||'EUR';if(c==='EUR')return 1;return Number(S.fxRate)||Number(FX.rates[c])||0;}
+function fxSelect(c){S.cur=c;if(c==='EUR'){S.fxRate=1;S.fxDate=FX.date;}else{S.fxRate=Number(FX.rates[c])||0;S.fxDate=FX.date;}}
+// il documento usa la valuta scelta solo con il flag attivo (e se il cambio è noto)
+function docCur(){return (S.curShow&&S.cur&&S.cur!=='EUR'&&curRate())?S.cur:'EUR';}
+function fmtCur(n,c){
+  try{return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{style:'currency',currency:c,currencyDisplay:'narrowSymbol'}).format(n);}
+  catch(e){return Number(n).toFixed(2)+' '+c;}
+}
+// importo in euro -> testo nella valuta del documento
+function moneyD(eur){const c=docCur();return c==='EUR'?money(eur):fmtCur((Number(eur)||0)*curRate(),c);}
+// importo in euro -> testo in una valuta qualsiasi (anteprima nel pannello)
+function moneyIn(eur,c){return c==='EUR'?money(eur):fmtCur((Number(eur)||0)*(c===S.cur?curRate():(Number(FX.rates[c])||0)),c);}
+fxLoad();
 </script>
 <script>
 /* Configuratore Yacht — modulo "steps-customer-application" */
@@ -1310,11 +1360,10 @@ function itemDiscLabel(d){const e=parseSteps(d);return e.length?discLabel()+'+'+
 const NET_ROUND={none:0,cents:1,tens:10,hundreds:100,thousands:1000};
 function netTarget(s,base){
   const n=s.net;if(!n)return base;
-  if(Number(n.manual)>0)return Number(n.manual);
-  let T=base*(1-(Number(n.pct)||0)/100);
-  const step=NET_ROUND[n.round||'none']||0;
-  if(step)T=Math.floor(T/step)*step;
-  return T;
+  if(Number(n.manual)>0)return Number(n.manual);          // prezzo manuale: salvato in euro
+  const r=curRate()||1,step=NET_ROUND[n.round||'none']||0;   // arrotondamento: nella valuta scelta
+  if(!step)return base;
+  return Math.floor(base*r/step)*step/r;
 }
 function lineTotals(opts){
   opts=opts||{};
@@ -1357,10 +1406,10 @@ function totalsHtml(sd,pk,showPkg){
   const rows=[];
   const hasDisc=sd.listTot-sd.solTot>0.005;
   const mk=(lbl,val,cls)=>`<div class="totline${cls?' '+cls:''}"><span>${lbl}</span><span>${val}</span></div>`;
-  if(hasDisc){rows.push(mk(t('list_total'),money(sd.listTot)));rows.push(mk(t('discount'),'−'+money(sd.listTot-sd.solTot)));}
-  rows.push(`<div class="totbar"><span>${t('total_general')}</span><span>${money(sd.solTot)}</span></div>`);
+  if(hasDisc){rows.push(mk(t('list_total'),moneyD(sd.listTot)));rows.push(mk(t('discount'),'−'+moneyD(sd.listTot-sd.solTot)));}
+  rows.push(`<div class="totbar"><span>${t('total_general')}</span><span>${moneyD(sd.solTot)}</span></div>`);
   let h=`<div class="totblock">${rows.join('')}</div>`;
-  if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${money(pk.net)}</span></div>`;
+  if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${moneyD(pk.net)}</span></div>`;
   return h;
 }
 
@@ -1433,36 +1482,50 @@ function fitPreview(){
 window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
 
 // ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
+function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
+function curSelectHtml(){return `<select class="curSel" data-fx="cur" title="${esc(t('net_cur'))}">${CURRENCIES.map(([c,sym,fl])=>`<option value="${c}"${(S.cur||'EUR')===c?' selected':''}>${fl} ${sym} · ${c}</option>`).join('')}</select>`;}
 function netPanelHtml(){
   const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
   if(!sols.length)return '';
-  const pcts=[0,1,2,3,4,5,6,8,10];
+  const c=S.cur||'EUR',r=curRate()||1;
   const rnds=[['none','net_r_none'],['cents','net_r_cents'],['tens','net_r_tens'],['hundreds','net_r_hundreds'],['thousands','net_r_thousands']];
   const rows=sols.map(sd=>{
-    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{pct:0,round:'none',manual:''};
-    const fin=netTarget(sd.s,sd.baseTot);
-    const diff=fin-sd.baseTot;
+    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{round:'none',manual:''};
+    const fin=netTarget(sd.s,sd.baseTot),diff=fin-sd.baseTot,man=Number(n.manual)>0;
     return `<div class="netrow" data-netsol="${si}">
-      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${money(sd.baseTot)}</b></span></div>
-      <label class="fld">${t('net_pct')}<select data-net="pct" ${Number(n.manual)>0?'disabled':''}>${pcts.map(p=>`<option value="${p}"${(+n.pct||0)===p?' selected':''}>${p?'−'+p+' %':'—'}</option>`).join('')}</select></label>
-      <label class="fld">${t('net_round')}<select data-net="round" ${Number(n.manual)>0?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
-      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${Number(n.manual)>0?esc(String(n.manual).replace('.',',')):''}"></label>
-      <div class="netres"><span>${t('net_final')}</span><b>${money(fin)}</b>${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${money(Math.abs(diff))}</em>`:''}</div>
+      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${moneyIn(sd.baseTot,c)}</b></span></div>
+      <label class="fld">${t('net_round')}<select data-net="round" ${man?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${man?esc(numFmt(Number(n.manual)*r,c)):''}"></label>
+      <div class="netres"><span>${t('net_final')}</span>
+        <div class="netfinal"><b>${numFmt(fin*r,c)}</b>${curSelectHtml()}</div>
+        ${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${moneyIn(Math.abs(diff),c)}</em>`:''}</div>
     </div>`;}).join('');
-  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}</div>`;
+  const rate=curRate();
+  const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
+  const flag=c==='EUR'?'':`<label class="fxflag"><input type="checkbox" data-fx="show" ${S.curShow?'checked':''} ${rate?'':'disabled'}> ${t('net_show_doc').replace('%c',c)}</label>`;
+  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
   v.querySelectorAll('.netrow').forEach(row=>{
     const s=S.solutions[+row.dataset.netsol];
     row.querySelectorAll('[data-net]').forEach(el=>el.onchange=()=>{
-      s.net=s.net||{pct:0,round:'none',manual:''};
-      const k=el.dataset.net;
-      if(k==='manual'){const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;s.net.manual=n>0?n:'';}
-      else s.net[k]=k==='pct'?(+el.value||0):el.value;
-      if(!(+s.net.pct)&&(s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
+      s.net=s.net||{round:'none',manual:''};
+      if(el.dataset.net==='manual'){
+        const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;
+        s.net.manual=n>0?n/(curRate()||1):'';                 // si scrive nella valuta scelta, si salva in euro
+      }else s.net[el.dataset.net]=el.value;
+      if((s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
       stepQuote();
     });
   });
+  v.querySelectorAll('[data-fx="cur"]').forEach(el=>el.onchange=async()=>{
+    if(el.value!=='EUR'&&!FX.rates[el.value]){await fxRefresh(true);}
+    fxSelect(el.value);
+    if(el.value==='EUR')S.curShow=false;
+    stepQuote();
+  });
+  const sh=v.querySelector('[data-fx="show"]');if(sh)sh.onchange=()=>{S.curShow=sh.checked;stepQuote();};
+  const rf=v.querySelector('[data-fx="refresh"]');if(rf)rf.onclick=async()=>{rf.disabled=true;await fxRefresh(true);fxSelect(S.cur);stepQuote();};
 }
 function stepQuote(){
   const v=$('#view');
@@ -1541,8 +1604,8 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${money(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${moneyD(r.unit)}</td>
+      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
     // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
     const rowChunks=[priceRowsArr];
     const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
@@ -3383,6 +3446,9 @@ async function autoLoadPrivate(){
   }catch(e){console.warn('listini non caricati',e);}
 }
 autoLoadPrivate();
+
+// cambio: si verifica alla prima apertura di ogni giorno
+fxRefresh().then(ok=>{if(ok&&S.cur&&S.cur!=='EUR'&&!S.fxRate){fxSelect(S.cur);} if(typeof step!=='undefined'&&step===3)render();});
 </script>
 </body>
 </html>

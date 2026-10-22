@@ -17,7 +17,7 @@ const S={
   app:{use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''},
   solutions:[], // {code,name,desc,atex,unit,qty,img,specs:{}, accessories:[{code,desc,qty,price}]}
   discount:0, discount2:0, discount3:0,
-  validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'',
+  validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'', cur:'EUR', fxRate:1, fxDate:'', curShow:false,
   exclusions:'', notes:''
 };
 const STEPS=['customer','product','options','quote'];   // 1 Cliente · 2 Prodotto · 3 Opzioni · 4 Offerta

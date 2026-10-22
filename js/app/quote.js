@@ -18,11 +18,10 @@ function itemDiscLabel(d){const e=parseSteps(d);return e.length?discLabel()+'+'+
 const NET_ROUND={none:0,cents:1,tens:10,hundreds:100,thousands:1000};
 function netTarget(s,base){
   const n=s.net;if(!n)return base;
-  if(Number(n.manual)>0)return Number(n.manual);
-  let T=base*(1-(Number(n.pct)||0)/100);
-  const step=NET_ROUND[n.round||'none']||0;
-  if(step)T=Math.floor(T/step)*step;
-  return T;
+  if(Number(n.manual)>0)return Number(n.manual);          // prezzo manuale: salvato in euro
+  const r=curRate()||1,step=NET_ROUND[n.round||'none']||0;   // arrotondamento: nella valuta scelta
+  if(!step)return base;
+  return Math.floor(base*r/step)*step/r;
 }
 function lineTotals(opts){
   opts=opts||{};
@@ -65,10 +64,10 @@ function totalsHtml(sd,pk,showPkg){
   const rows=[];
   const hasDisc=sd.listTot-sd.solTot>0.005;
   const mk=(lbl,val,cls)=>`<div class="totline${cls?' '+cls:''}"><span>${lbl}</span><span>${val}</span></div>`;
-  if(hasDisc){rows.push(mk(t('list_total'),money(sd.listTot)));rows.push(mk(t('discount'),'−'+money(sd.listTot-sd.solTot)));}
-  rows.push(`<div class="totbar"><span>${t('total_general')}</span><span>${money(sd.solTot)}</span></div>`);
+  if(hasDisc){rows.push(mk(t('list_total'),moneyD(sd.listTot)));rows.push(mk(t('discount'),'−'+moneyD(sd.listTot-sd.solTot)));}
+  rows.push(`<div class="totbar"><span>${t('total_general')}</span><span>${moneyD(sd.solTot)}</span></div>`);
   let h=`<div class="totblock">${rows.join('')}</div>`;
-  if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${money(pk.net)}</span></div>`;
+  if(showPkg&&pk.members.length>1)h+=`<div class="totbar pkg"><span>${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})</span><span>${moneyD(pk.net)}</span></div>`;
   return h;
 }
 
@@ -141,36 +140,50 @@ function fitPreview(){
 window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
 
 // ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
+function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
+function curSelectHtml(){return `<select class="curSel" data-fx="cur" title="${esc(t('net_cur'))}">${CURRENCIES.map(([c,sym,fl])=>`<option value="${c}"${(S.cur||'EUR')===c?' selected':''}>${fl} ${sym} · ${c}</option>`).join('')}</select>`;}
 function netPanelHtml(){
   const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
   if(!sols.length)return '';
-  const pcts=[0,1,2,3,4,5,6,8,10];
+  const c=S.cur||'EUR',r=curRate()||1;
   const rnds=[['none','net_r_none'],['cents','net_r_cents'],['tens','net_r_tens'],['hundreds','net_r_hundreds'],['thousands','net_r_thousands']];
   const rows=sols.map(sd=>{
-    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{pct:0,round:'none',manual:''};
-    const fin=netTarget(sd.s,sd.baseTot);
-    const diff=fin-sd.baseTot;
+    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{round:'none',manual:''};
+    const fin=netTarget(sd.s,sd.baseTot),diff=fin-sd.baseTot,man=Number(n.manual)>0;
     return `<div class="netrow" data-netsol="${si}">
-      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${money(sd.baseTot)}</b></span></div>
-      <label class="fld">${t('net_pct')}<select data-net="pct" ${Number(n.manual)>0?'disabled':''}>${pcts.map(p=>`<option value="${p}"${(+n.pct||0)===p?' selected':''}>${p?'−'+p+' %':'—'}</option>`).join('')}</select></label>
-      <label class="fld">${t('net_round')}<select data-net="round" ${Number(n.manual)>0?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
-      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${Number(n.manual)>0?esc(String(n.manual).replace('.',',')):''}"></label>
-      <div class="netres"><span>${t('net_final')}</span><b>${money(fin)}</b>${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${money(Math.abs(diff))}</em>`:''}</div>
+      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${moneyIn(sd.baseTot,c)}</b></span></div>
+      <label class="fld">${t('net_round')}<select data-net="round" ${man?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${man?esc(numFmt(Number(n.manual)*r,c)):''}"></label>
+      <div class="netres"><span>${t('net_final')}</span>
+        <div class="netfinal"><b>${numFmt(fin*r,c)}</b>${curSelectHtml()}</div>
+        ${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${moneyIn(Math.abs(diff),c)}</em>`:''}</div>
     </div>`;}).join('');
-  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}</div>`;
+  const rate=curRate();
+  const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
+  const flag=c==='EUR'?'':`<label class="fxflag"><input type="checkbox" data-fx="show" ${S.curShow?'checked':''} ${rate?'':'disabled'}> ${t('net_show_doc').replace('%c',c)}</label>`;
+  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
   v.querySelectorAll('.netrow').forEach(row=>{
     const s=S.solutions[+row.dataset.netsol];
     row.querySelectorAll('[data-net]').forEach(el=>el.onchange=()=>{
-      s.net=s.net||{pct:0,round:'none',manual:''};
-      const k=el.dataset.net;
-      if(k==='manual'){const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;s.net.manual=n>0?n:'';}
-      else s.net[k]=k==='pct'?(+el.value||0):el.value;
-      if(!(+s.net.pct)&&(s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
+      s.net=s.net||{round:'none',manual:''};
+      if(el.dataset.net==='manual'){
+        const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;
+        s.net.manual=n>0?n/(curRate()||1):'';                 // si scrive nella valuta scelta, si salva in euro
+      }else s.net[el.dataset.net]=el.value;
+      if((s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
       stepQuote();
     });
   });
+  v.querySelectorAll('[data-fx="cur"]').forEach(el=>el.onchange=async()=>{
+    if(el.value!=='EUR'&&!FX.rates[el.value]){await fxRefresh(true);}
+    fxSelect(el.value);
+    if(el.value==='EUR')S.curShow=false;
+    stepQuote();
+  });
+  const sh=v.querySelector('[data-fx="show"]');if(sh)sh.onchange=()=>{S.curShow=sh.checked;stepQuote();};
+  const rf=v.querySelector('[data-fx="refresh"]');if(rf)rf.onclick=async()=>{rf.disabled=true;await fxRefresh(true);fxSelect(S.cur);stepQuote();};
 }
 function stepQuote(){
   const v=$('#view');
@@ -249,8 +262,8 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${money(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${moneyD(r.unit)}</td>
+      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
     // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
     const rowChunks=[priceRowsArr];
     const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>

@@ -446,7 +446,7 @@ body.show-tools .data-tool{display:inline-flex!important}
 input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 /* pannello prezzo netto */
 .netpanel h2{margin-bottom:2px}
-.netrow{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr 1.1fr;gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
+.netrow{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.5fr;gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
 .netname{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0}
 .netname span{font-size:11.5px;color:var(--muted)}
 .netres{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
@@ -454,3 +454,9 @@ input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 .netres b{font-family:var(--font-title);font-size:20px;font-weight:400;color:var(--red);white-space:nowrap}
 .netres em{font-style:normal;font-size:11.5px;color:#1f7a4d}
 @media(max-width:720px){.netrow{grid-template-columns:1fr 1fr}.netname,.netres{grid-column:1/-1}.netres{align-items:flex-start}}
+
+.netfinal{display:flex;align-items:center;gap:8px}
+.netfinal select.curSel{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--ink)}
+.fxbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;color:#4a4a4a}
+.fxflag{display:inline-flex;align-items:center;gap:6px;font-weight:600;cursor:pointer;margin-left:auto}
+@media(max-width:720px){.fxflag{margin-left:0}}
