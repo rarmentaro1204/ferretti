@@ -203,7 +203,7 @@ function renderDashboard(){
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
-  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 32 offerte fittizie (22 in italiano e 10 in inglese) con prezzi inventati (numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
+  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova (prezzi inventati) e 10 complete, ognuna con una barca e 15-22 optional (prezzi del listino caricato), numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
   if(!rows.length){
     v.innerHTML=demoBanner+head+`<div class="card"><p class="hint" style="margin:0">${dt('nodata')}</p></div>`;wireDash();return;
   }
@@ -348,7 +348,7 @@ function ensureDemoSeed(){
   let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
   if(!deleted&&!hasDemoRows()&&!hasRealRows()&&DATA.machines&&DATA.machines.length)installDemo();
   // demo creata con una versione precedente (senza validità): rigenerala
-  else if(!deleted&&hasDemoRows()&&REGISTRY.rows.filter(r=>r.demo).length!==32&&DATA.machines&&DATA.machines.length)installDemo();
+  else if(!deleted&&hasDemoRows()&&REGISTRY.rows.filter(r=>r.demo).length!==42&&DATA.machines&&DATA.machines.length)installDemo();
 }
 function removeDemo(){
   REGISTRY.rows.filter(r=>r.demo).forEach(r=>{try{localStorage.removeItem(SNAP_LS+r.num);}catch(_){}});
@@ -404,5 +404,48 @@ function installDemo(){
     REGISTRY.rows.push(row);
     rememberSnapshotLocal(num,{__yachtOffer:true,baseOfferNum:num,savedAt:new Date(2026,month,1).toISOString(),lang,state});
   }
+  installShowcaseDemo(rnd,pick,reps,tpl);
   persistRegistryLocal();
+}
+// 10 offerte demo "complete" per le presentazioni: UNA barca ciascuna, con 15-22 optional del listino (prezzi reali del listino caricato)
+const SHOWCASE_N=10;
+function installShowcaseDemo(rnd,pick,reps,tpl){
+  const boats=DATA.machines.filter(m=>m.price>0);
+  if(!boats.length)return;
+  const clients=['Marina Azzurra Charter Srl','Famiglia Rinaldi','Tirreno Yachting SpA','Adriatica Holding Srl','Gruppo Bellavista','Lago & Mare Srl','Capo Verde Family Office','Riviera Luxury Boats Srl','Studio Legale Montanari','Porto Rotondo Marine Srl'];
+  const contacts=['Alessandro Rinaldi','Giulia Montanari','Federico Bellavista','Sara Conti','Matteo Ferraro','Elena Gallo','Luca Ricci','Chiara Moretti','Davide Marini','Paola Serra'];
+  const months=[0,1,2,3,4,5,6,7,8,9];
+  for(let i=0;i<SHOWCASE_N;i++){
+    const lang=i<7?'it':'en';
+    const m=boats[(i*3+1)%boats.length];            // modelli diversi a rotazione
+    const pool=(machineOptionals(m.code)||[]).filter(o=>(o.price??o.l0??o.le)>0&&!/\bMAN\b.*\bhp\b/i.test(o.desc||''));   // niente kit ricambi di motori diversi dalla barca
+    const eng=pool.find(o=>/^ENG-/i.test(o.code));
+    const others=pool.filter(o=>o!==eng).map(o=>[rnd(),o]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+    const n=15+Math.floor(rnd()*8);
+    const chosen=[...(eng&&i%2===0?[eng]:[]),...others].slice(0,n);
+    const acc=chosen.map(o=>({code:o.code,desc:(lang==='it'&&o.desc_it)?o.desc_it:(o.desc||''),group:o.group||'Altro',qty:1,price:Number(o.price??o.l0??o.le)||0,img:''}));
+    const specs={};SPEC_FIELDS.forEach(([f])=>{if(m[f])specs[f]=m[f];});
+    const sol={code:m.code,name:m.name,desc:m.desc||'',atex:false,unit:Number(m.price)||0,qty:1,img:'',imgs:[],specs,accessories:acc,disc:null,tableDesc:undefined};
+    const disc2=pick([0,0,3,5]);
+    const mult=1-disc2/100;
+    const total=Math.round((sol.unit+acc.reduce((x,a)=>x+a.price*a.qty,0))*mult*100)/100;
+    const month=months[i];
+    const maxDay=month===new Date().getMonth()&&new Date().getFullYear()===2026?Math.max(1,new Date().getDate()-1):27;
+    const dateStr=new Date(2026,month,1+Math.floor(rnd()*maxDay)).toLocaleDateString('it-IT');
+    const rep=pick(reps);
+    const num='DEMO-26-'+String(33+i).padStart(3,'0');
+    const validity=pick([30,45,60]);
+    const x=rnd();const status=month<=6?(x<0.4?'won':x<0.7?'lost':'open'):(x<0.2?'won':x<0.3?'lost':'open');
+    const L={code:m.code,name:m.name,category:m.category,qty:1,value:total,pkg:1,won:status==='won'};
+    const client=clients[i],contact=contacts[i];
+    const state=Object.assign({},tpl,{rep:{name:rep.name,email:rep.email||'',phone:rep.phone||''},offerNum:num,date:dateStr,client,contact,role:lang==='it'?'Rappresentante armatore':'Owner representative',
+      phone:'',email:'demo@esempio.invalid',subject:(I18N[lang]&&I18N[lang].def_subject)||'Offerta imbarcazione',intro:'',
+      isRevisionOffer:false,solutions:[sol],discount:0,discount2:disc2,discount3:0,notes:'',validity:String(validity),incoterm:pick(['Ex Works','FAS','CIF','DAP','DDP']),
+      payment:(I18N[lang]&&I18N[lang].def_payment)||tpl.payment});
+    const row={prog:33+i,num,date:dateStr,client,rep:rep.name,lang,total,
+      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),
+      status,outcomeDate:status==='open'?'':dateStr,wonValue:'',lines:[L],demo:true};
+    REGISTRY.rows.push(row);
+    rememberSnapshotLocal(num,{__yachtOffer:true,baseOfferNum:num,savedAt:new Date(2026,month,1).toISOString(),lang,state});
+  }
 }
