@@ -509,6 +509,20 @@ input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 .fxbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;color:#4a4a4a}
 .fxflag{display:inline-flex;align-items:center;gap:6px;font-weight:600;cursor:pointer;margin-left:auto}
 @media(max-width:720px){.fxflag{margin-left:0}}
+
+/* menù valuta con bandiere */
+.curdd{position:relative}
+.curbtn{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;cursor:pointer;color:var(--ink)}
+.curbtn i{font-style:normal;font-size:10px;color:var(--muted)}
+.curbtn span{color:var(--muted);font-size:12px}
+.flag{border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.12);display:inline-block;vertical-align:middle;object-fit:cover}
+.curlist{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:270px;max-height:300px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.18);padding:4px}
+.curlist[hidden]{display:none}
+.curopt{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-size:13px;text-align:left;color:var(--ink)}
+.curopt:hover,.curopt.on{background:var(--soft)}
+.curopt b{min-width:34px}
+.curopt span{color:var(--muted);font-size:12px;white-space:nowrap}
+.fxflag{display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-left:auto}
 </style>
 </head>
 <body>
@@ -588,7 +602,7 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
-  net_cur:"Valuta", net_fx:"Cambio", net_fx_update:"Aggiorna cambio", net_fx_fail:"aggiornamento non riuscito: ultimo cambio noto", net_show_doc:"Mostra il documento in %c",
+  net_cur:"Valuta", net_fx:"Cambio", net_fx_update:"Aggiorna cambio", net_fx_fail:"aggiornamento non riuscito: ultimo cambio noto", net_show_doc:"Il documento è nella valuta scelta: %c",
   price_locked:"Prezzo da listino: non modificabile", net_title:"Prezzo netto", net_hint:"Imposta il prezzo finale: arrotondamento oppure importo manuale, nella valuta scelta. Serve solo a te: nel PDF compaiono solo le cifre finali, senza traccia di questa trattativa.", net_base:"Totale dopo gli sconti", net_pct:"Sconto addizionale", net_round:"Arrotonda per difetto", net_manual:"Oppure prezzo netto manuale", net_manual_ph:"es. 3.700.000", net_final:"Prezzo netto finale", net_r_none:"Nessun arrotondamento", net_r_cents:"Togli i centesimi", net_r_tens:"Alle decine", net_r_hundreds:"Alle centinaia", net_r_thousands:"Alle migliaia",
   saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
@@ -624,7 +638,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
-  net_cur:"Currency", net_fx:"Exchange rate", net_fx_update:"Update rate", net_fx_fail:"update failed: last known rate", net_show_doc:"Show the document in %c",
+  net_cur:"Currency", net_fx:"Exchange rate", net_fx_update:"Update rate", net_fx_fail:"update failed: last known rate", net_show_doc:"The document is in the chosen currency: %c",
   price_locked:"List price: cannot be edited", net_title:"Net price", net_hint:"Set the final price: rounding or a manual amount, in the chosen currency. It is for you only: the PDF shows the final figures only, with no trace of this negotiation.", net_base:"Total after discounts", net_pct:"Additional discount", net_round:"Round down", net_manual:"Or manual net price", net_manual_ph:"e.g. 3,700,000", net_final:"Final net price", net_r_none:"No rounding", net_r_cents:"Drop the cents", net_r_tens:"To tens", net_r_hundreds:"To hundreds", net_r_thousands:"To thousands",
   saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
@@ -770,6 +784,14 @@ function nextProgressivo(){
   let max=0;REGISTRY.rows.filter(r=>!r.demo).forEach(r=>{const p=parseInt(r.prog||r.Progressivo||0,10);if(p>max)max=p;});   // le offerte demo non contano
   return max+1;
 }
+// numero offerta mostrato subito aggiornato (dopo la lettura del registro/GitHub)
+function refreshOfferNumber(){
+  const b=S.offerNum;applyNextOfferNumber();
+  if(S.offerNum!==b){
+    const i=document.querySelector('#i_offernum');if(i)i.value=S.offerNum;
+    if(typeof step!=='undefined'&&step===3&&typeof stepQuote==='function')stepQuote();
+  }
+}
 function applyNextOfferNumber(){
   // never clobber a recalled offer's "<original>_REVn" number with a fresh progressive one —
   // this refresh runs automatically (e.g. every time the Offer step renders) so without this
@@ -805,8 +827,11 @@ function locSpec(v){
    I prezzi (listino, registro, dashboard) sono SEMPRE in euro. La valuta scelta nel pannello «Prezzo netto» serve a lavorare
    l'importo finale (arrotondamento / prezzo manuale) e, se il flag è attivo, a mostrare il documento in quella valuta.
    Il cambio si controlla alla prima apertura di ogni giorno (open.er-api.com) e si ricorda; ogni offerta conserva il cambio usato. */
-const CURRENCIES=[['EUR','€','🇪🇺'],['USD','$','🇺🇸'],['GBP','£','🇬🇧'],['CHF','CHF','🇨🇭'],['AED','AED','🇦🇪'],['CAD','C$','🇨🇦'],['AUD','A$','🇦🇺'],
-  ['SGD','S$','🇸🇬'],['HKD','HK$','🇭🇰'],['JPY','¥','🇯🇵'],['CNY','CN¥','🇨🇳'],['NOK','kr','🇳🇴'],['SEK','kr','🇸🇪']];
+// [sigla, simbolo, codice paese della bandiera, nome]
+const CURRENCIES=[['EUR','€','eu','Euro'],['USD','$','us','Dollaro USA'],['GBP','£','gb','Sterlina'],['CHF','CHF','ch','Franco svizzero'],['AED','AED','ae','Dirham EAU'],['CAD','C$','ca','Dollaro canadese'],['AUD','A$','au','Dollaro australiano'],
+  ['SGD','S$','sg','Dollaro di Singapore'],['HKD','HK$','hk','Dollaro di Hong Kong'],['JPY','¥','jp','Yen'],['CNY','CN¥','cn','Yuan'],['NOK','kr','no','Corona norvegese'],['SEK','kr','se','Corona svedese']];
+// bandiera come immagine (funziona su qualsiasi computer, a differenza delle emoji)
+function flagImg(cc,w){return `<img class="flag" src="https://flagcdn.com/w40/${cc}.png" width="${w||22}" height="${Math.round((w||22)*0.75)}" alt="${cc.toUpperCase()}" loading="lazy">`;}
 const FX_LS='yacht_fx_v1';
 const FX={date:'',rates:{EUR:1},src:'',failed:false};
 function fxLoad(){try{const o=JSON.parse(localStorage.getItem(FX_LS)||'null');if(o&&o.rates)Object.assign(FX,o);}catch(_){}}
@@ -830,8 +855,8 @@ function curInfo(c){return CURRENCIES.find(x=>x[0]===c)||CURRENCIES[0];}
 // cambio dell'offerta: quello salvato con l'offerta, altrimenti l'ultimo noto
 function curRate(){const c=S.cur||'EUR';if(c==='EUR')return 1;return Number(S.fxRate)||Number(FX.rates[c])||0;}
 function fxSelect(c){S.cur=c;if(c==='EUR'){S.fxRate=1;S.fxDate=FX.date;}else{S.fxRate=Number(FX.rates[c])||0;S.fxDate=FX.date;}}
-// il documento usa la valuta scelta solo con il flag attivo (e se il cambio è noto)
-function docCur(){return (S.curShow&&S.cur&&S.cur!=='EUR'&&curRate())?S.cur:'EUR';}
+// il documento è nella valuta scelta (se il cambio è noto)
+function docCur(){return (S.cur&&S.cur!=='EUR'&&curRate())?S.cur:'EUR';}
 function fmtCur(n,c){
   try{return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{style:'currency',currency:c,currencyDisplay:'narrowSymbol'}).format(n);}
   catch(e){return Number(n).toFixed(2)+' '+c;}
@@ -859,6 +884,7 @@ let maxReached=0;
 /* ============== STEP 1: CUSTOMER ============== */
 function stepCustomer(){
   const v=$('#view');
+  ghRefreshSoon();
   const repOpts=DATA.reps.map(r=>`<option value="${esc(r.name)}">`).join('');
   v.innerHTML=`
   <div class="card">
@@ -1483,7 +1509,11 @@ window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fit
 
 // ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
 function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
-function curSelectHtml(){return `<select class="curSel" data-fx="cur" title="${esc(t('net_cur'))}">${CURRENCIES.map(([c,sym,fl])=>`<option value="${c}"${(S.cur||'EUR')===c?' selected':''}>${fl} ${sym} · ${c}</option>`).join('')}</select>`;}
+function curSelectHtml(){
+  const [c,sym,cc]=curInfo(S.cur||'EUR');
+  return `<div class="curdd"><button type="button" class="curbtn" data-fx="ddbtn" title="${esc(t('net_cur'))}">${flagImg(cc)}<b>${sym}</b><span>${c}</span><i>▾</i></button>
+    <div class="curlist" hidden>${CURRENCIES.map(([k,sy,fc,nm])=>`<button type="button" class="curopt${k===c?' on':''}" data-fx-cur="${k}">${flagImg(fc)}<b>${sy}</b><span>${k} · ${nm}</span></button>`).join('')}</div></div>`;
+}
 function netPanelHtml(){
   const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
   if(!sols.length)return '';
@@ -1502,7 +1532,7 @@ function netPanelHtml(){
     </div>`;}).join('');
   const rate=curRate();
   const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
-  const flag=c==='EUR'?'':`<label class="fxflag"><input type="checkbox" data-fx="show" ${S.curShow?'checked':''} ${rate?'':'disabled'}> ${t('net_show_doc').replace('%c',c)}</label>`;
+  const flag=c==='EUR'?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
   return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
@@ -1518,17 +1548,18 @@ function wireNetPanel(v){
       stepQuote();
     });
   });
-  v.querySelectorAll('[data-fx="cur"]').forEach(el=>el.onchange=async()=>{
-    if(el.value!=='EUR'&&!FX.rates[el.value]){await fxRefresh(true);}
-    fxSelect(el.value);
-    if(el.value==='EUR')S.curShow=false;
-    stepQuote();
+  v.querySelectorAll('[data-fx="ddbtn"]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const l=btn.nextElementSibling;const open=l.hidden;document.querySelectorAll('.curlist').forEach(x=>x.hidden=true);l.hidden=!open;});
+  document.addEventListener('click',()=>document.querySelectorAll('.curlist').forEach(x=>x.hidden=true),{once:true});
+  v.querySelectorAll('[data-fx-cur]').forEach(btn=>btn.onclick=async()=>{
+    const k=btn.dataset.fxCur;
+    if(k!=='EUR'&&!FX.rates[k]){await fxRefresh(true);}
+    fxSelect(k);stepQuote();
   });
-  const sh=v.querySelector('[data-fx="show"]');if(sh)sh.onchange=()=>{S.curShow=sh.checked;stepQuote();};
   const rf=v.querySelector('[data-fx="refresh"]');if(rf)rf.onclick=async()=>{rf.disabled=true;await fxRefresh(true);fxSelect(S.cur);stepQuote();};
 }
 function stepQuote(){
   const v=$('#view');
+  if(typeof ghRefreshSoon==='function')ghRefreshSoon();
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
   if(REGISTRY.fileHandle&&!stepQuote._refreshing){stepQuote._refreshing=true;
     reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===3)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}
@@ -2189,7 +2220,7 @@ function resetOffer(){
   S.client='';S.contact='';S.role='';S.phone='';S.email='';S.subject=t('def_subject');S.intro='';S.isRevisionOffer=false;
   S.app={use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''};
   S.solutions=[];S.discount=0;S.discount2=0;S.discount3=0;
-  S.validity='30';S.lead='';S.warranty='';
+  S.validity='30';S.lead='';S.warranty='';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
   S.delivery=t('def_delivery');S.packaging=t('def_packaging');S.payment=t('def_payment');
   S.exclusions='';S.notes='';
   applyNextOfferNumber();
@@ -2830,11 +2861,11 @@ async function toggleDashboard(on){
 const DEMO_LS_HIDE='yacht_demo_hidden', DEMO_LS_DELETED='yacht_demo_deleted';
 function hasDemoRows(){return REGISTRY.rows.some(r=>r.demo);}
 function hasRealRows(){return REGISTRY.rows.some(r=>!r.demo);}
-// con offerte vere presenti la demo si nasconde da sola, finché non la si mostra a mano
+// le demo si caricano da sole (a meno che non siano state eliminate o nascoste a mano)
 function demoVisible(){
   let v=null;try{v=localStorage.getItem(DEMO_LS_HIDE);}catch(_){}
   if(v==='0')return true; if(v==='1')return false;
-  return !hasRealRows();
+  return true;   // le offerte demo sono visibili di default (insieme alle vere); «Solo demo» per le presentazioni
 }
 function setDemoVisible(on){try{localStorage.setItem(DEMO_LS_HIDE,on?'0':'1');}catch(_){}}
 // modalità presentazione: mostra SOLO le offerte demo (nasconde quelle vere, con i dati dei clienti)
@@ -2844,7 +2875,11 @@ function setDemoOnly(on){try{localStorage.setItem(DEMO_ONLY_LS,on?'1':'0');}catc
 function offerRows(){return REGISTRY.rows.filter(r=>demoOnly()?!!r.demo:(!r.demo||demoVisible()));}
 function ensureDemoSeed(){
   let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
-  if(!deleted&&!hasDemoRows()&&!hasRealRows()&&DATA.machines&&DATA.machines.length)installDemo();
+  const demo=REGISTRY.rows.filter(r=>r.demo);
+  // le 10 complete devono avere 15+ optional: se erano state create prima del caricamento del listino optional, si rigenerano
+  const poor=MATRIX_INFO.machines&&demo.some(r=>r.accN!=null&&r.accN<15);
+  if(!deleted&&!hasDemoRows()&&DATA.machines&&DATA.machines.length)installDemo();
+  else if(!deleted&&poor)installDemo();
   // demo creata con una versione precedente (senza validità): rigenerala
   else if(!deleted&&hasDemoRows()&&REGISTRY.rows.filter(r=>r.demo).length!==42&&DATA.machines&&DATA.machines.length)installDemo();
 }
@@ -2941,7 +2976,7 @@ function installShowcaseDemo(rnd,pick,reps,tpl){
       isRevisionOffer:false,solutions:[sol],discount:0,discount2:disc2,discount3:0,notes:'',validity:String(validity),incoterm:pick(['Ex Works','FAS','CIF','DAP','DDP']),
       payment:(I18N[lang]&&I18N[lang].def_payment)||tpl.payment});
     const row={prog:33+i,num,date:dateStr,client,rep:rep.name,lang,total,
-      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),
+      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),accN:acc.length,
       status,outcomeDate:status==='open'?'':dateStr,wonValue:'',lines:[L],demo:true};
     REGISTRY.rows.push(row);
     rememberSnapshotLocal(num,{__yachtOffer:true,baseOfferNum:num,savedAt:new Date(2026,month,1).toISOString(),lang,state});
@@ -3025,8 +3060,11 @@ async function ghTree(){
   return (r.body.tree||[]).filter(x=>x.type==='blob'&&x.path.startsWith(dir)&&/\.json$/i.test(x.path));
 }
 // legge tutte le offerte dalla repo e le unisce al registro locale (GitHub vince in caso di stesso numero)
+// aggiorna al massimo una volta ogni 30 s (usata quando si entra nei passi Cliente/Offerta)
+function ghRefreshSoon(){if(GH.ok&&Date.now()-(GH.lastRefresh||0)>30000)ghRefresh().then(refreshOfferNumber);}
 async function ghRefresh(){
   if(!GH.ok||(typeof DEMO!=='undefined'&&DEMO.on))return false;
+  GH.lastRefresh=Date.now();
   try{
     const files=await ghTree();
     let cache={};try{cache=JSON.parse(localStorage.getItem(GH_CACHE)||'{}');}catch(_){}
@@ -3155,14 +3193,14 @@ function ghOpenDialog(){
     st.style.color='#555';st.textContent='Verifica in corso…';
     const ok=await ghConnect();
     st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Collegato: '+GH.msg:GH.msg;
-    if(ok){ghSaveCfg();await ghRefresh();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
+    if(ok){ghSaveCfg();await ghRefresh();refreshOfferNumber();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
   };
 }
 function ghInit(){
   ghLoadCfg();
   const b=$('#ghBtn');if(b)b.onclick=ghOpenDialog;
   ghRenderBtn();
-  ghDetectProxy().then(()=>{if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});});     // collegamento automatico all'apertura (server oppure token locale)
+  ghDetectProxy().then(()=>{if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh().then(refreshOfferNumber);setPullGh();}});});     // collegamento automatico all'apertura (server oppure token locale)
 }
 </script>
 <script>
@@ -3424,6 +3462,7 @@ $('#dashBtn').onclick=()=>toggleDashboard(!DASH);
 $('#offersBtn').onclick=openOfferList;
 loadRegistryLocal();
 settingsInit();
+applyNextOfferNumber();
 ghInit();
 if(!S.delivery)S.delivery=t('def_delivery');
 if(!S.packaging)S.packaging=t('def_packaging');
@@ -3449,6 +3488,7 @@ async function autoLoadPrivate(){
     const b=await fetchFirst('02_Matrice_Optional_Ferretti.xlsx');
     if(b){applyMatrixWorkbook(XLSX.read(b,{type:'array'}),'02_Matrice_Optional_Ferretti.xlsx');if($('#matTxt'))$('#matTxt').textContent='✓ 02_Matrice_Optional_Ferretti.xlsx';render();}
   }catch(e){console.warn('listini non caricati',e);}
+  try{ensureDemoSeed();}catch(e){console.warn('demo',e);}   // offerte demo: caricate da sole, a listino pronto
 }
 autoLoadPrivate();
 

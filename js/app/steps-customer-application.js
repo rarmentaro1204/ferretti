@@ -14,6 +14,7 @@ let maxReached=0;
 /* ============== STEP 1: CUSTOMER ============== */
 function stepCustomer(){
   const v=$('#view');
+  ghRefreshSoon();
   const repOpts=DATA.reps.map(r=>`<option value="${esc(r.name)}">`).join('');
   v.innerHTML=`
   <div class="card">

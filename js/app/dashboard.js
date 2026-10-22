@@ -337,11 +337,11 @@ async function toggleDashboard(on){
 const DEMO_LS_HIDE='yacht_demo_hidden', DEMO_LS_DELETED='yacht_demo_deleted';
 function hasDemoRows(){return REGISTRY.rows.some(r=>r.demo);}
 function hasRealRows(){return REGISTRY.rows.some(r=>!r.demo);}
-// con offerte vere presenti la demo si nasconde da sola, finché non la si mostra a mano
+// le demo si caricano da sole (a meno che non siano state eliminate o nascoste a mano)
 function demoVisible(){
   let v=null;try{v=localStorage.getItem(DEMO_LS_HIDE);}catch(_){}
   if(v==='0')return true; if(v==='1')return false;
-  return !hasRealRows();
+  return true;   // le offerte demo sono visibili di default (insieme alle vere); «Solo demo» per le presentazioni
 }
 function setDemoVisible(on){try{localStorage.setItem(DEMO_LS_HIDE,on?'0':'1');}catch(_){}}
 // modalità presentazione: mostra SOLO le offerte demo (nasconde quelle vere, con i dati dei clienti)
@@ -351,7 +351,11 @@ function setDemoOnly(on){try{localStorage.setItem(DEMO_ONLY_LS,on?'1':'0');}catc
 function offerRows(){return REGISTRY.rows.filter(r=>demoOnly()?!!r.demo:(!r.demo||demoVisible()));}
 function ensureDemoSeed(){
   let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
-  if(!deleted&&!hasDemoRows()&&!hasRealRows()&&DATA.machines&&DATA.machines.length)installDemo();
+  const demo=REGISTRY.rows.filter(r=>r.demo);
+  // le 10 complete devono avere 15+ optional: se erano state create prima del caricamento del listino optional, si rigenerano
+  const poor=MATRIX_INFO.machines&&demo.some(r=>r.accN!=null&&r.accN<15);
+  if(!deleted&&!hasDemoRows()&&DATA.machines&&DATA.machines.length)installDemo();
+  else if(!deleted&&poor)installDemo();
   // demo creata con una versione precedente (senza validità): rigenerala
   else if(!deleted&&hasDemoRows()&&REGISTRY.rows.filter(r=>r.demo).length!==42&&DATA.machines&&DATA.machines.length)installDemo();
 }
@@ -448,7 +452,7 @@ function installShowcaseDemo(rnd,pick,reps,tpl){
       isRevisionOffer:false,solutions:[sol],discount:0,discount2:disc2,discount3:0,notes:'',validity:String(validity),incoterm:pick(['Ex Works','FAS','CIF','DAP','DDP']),
       payment:(I18N[lang]&&I18N[lang].def_payment)||tpl.payment});
     const row={prog:33+i,num,date:dateStr,client,rep:rep.name,lang,total,
-      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),
+      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),accN:acc.length,
       status,outcomeDate:status==='open'?'':dateStr,wonValue:'',lines:[L],demo:true};
     REGISTRY.rows.push(row);
     rememberSnapshotLocal(num,{__yachtOffer:true,baseOfferNum:num,savedAt:new Date(2026,month,1).toISOString(),lang,state});

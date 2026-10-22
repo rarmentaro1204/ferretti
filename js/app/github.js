@@ -74,8 +74,11 @@ async function ghTree(){
   return (r.body.tree||[]).filter(x=>x.type==='blob'&&x.path.startsWith(dir)&&/\.json$/i.test(x.path));
 }
 // legge tutte le offerte dalla repo e le unisce al registro locale (GitHub vince in caso di stesso numero)
+// aggiorna al massimo una volta ogni 30 s (usata quando si entra nei passi Cliente/Offerta)
+function ghRefreshSoon(){if(GH.ok&&Date.now()-(GH.lastRefresh||0)>30000)ghRefresh().then(refreshOfferNumber);}
 async function ghRefresh(){
   if(!GH.ok||(typeof DEMO!=='undefined'&&DEMO.on))return false;
+  GH.lastRefresh=Date.now();
   try{
     const files=await ghTree();
     let cache={};try{cache=JSON.parse(localStorage.getItem(GH_CACHE)||'{}');}catch(_){}
@@ -204,12 +207,12 @@ function ghOpenDialog(){
     st.style.color='#555';st.textContent='Verifica in corso…';
     const ok=await ghConnect();
     st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Collegato: '+GH.msg:GH.msg;
-    if(ok){ghSaveCfg();await ghRefresh();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
+    if(ok){ghSaveCfg();await ghRefresh();refreshOfferNumber();await setPullGh();flash('GitHub collegato');setTimeout(()=>o.remove(),700);if(step===3)render();}
   };
 }
 function ghInit(){
   ghLoadCfg();
   const b=$('#ghBtn');if(b)b.onclick=ghOpenDialog;
   ghRenderBtn();
-  ghDetectProxy().then(()=>{if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});});     // collegamento automatico all'apertura (server oppure token locale)
+  ghDetectProxy().then(()=>{if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh().then(refreshOfferNumber);setPullGh();}});});     // collegamento automatico all'apertura (server oppure token locale)
 }

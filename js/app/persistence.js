@@ -446,7 +446,7 @@ function resetOffer(){
   S.client='';S.contact='';S.role='';S.phone='';S.email='';S.subject=t('def_subject');S.intro='';S.isRevisionOffer=false;
   S.app={use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''};
   S.solutions=[];S.discount=0;S.discount2=0;S.discount3=0;
-  S.validity='30';S.lead='';S.warranty='';
+  S.validity='30';S.lead='';S.warranty='';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
   S.delivery=t('def_delivery');S.packaging=t('def_packaging');S.payment=t('def_payment');
   S.exclusions='';S.notes='';
   applyNextOfferNumber();

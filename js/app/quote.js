@@ -141,7 +141,11 @@ window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fit
 
 // ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
 function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
-function curSelectHtml(){return `<select class="curSel" data-fx="cur" title="${esc(t('net_cur'))}">${CURRENCIES.map(([c,sym,fl])=>`<option value="${c}"${(S.cur||'EUR')===c?' selected':''}>${fl} ${sym} · ${c}</option>`).join('')}</select>`;}
+function curSelectHtml(){
+  const [c,sym,cc]=curInfo(S.cur||'EUR');
+  return `<div class="curdd"><button type="button" class="curbtn" data-fx="ddbtn" title="${esc(t('net_cur'))}">${flagImg(cc)}<b>${sym}</b><span>${c}</span><i>▾</i></button>
+    <div class="curlist" hidden>${CURRENCIES.map(([k,sy,fc,nm])=>`<button type="button" class="curopt${k===c?' on':''}" data-fx-cur="${k}">${flagImg(fc)}<b>${sy}</b><span>${k} · ${nm}</span></button>`).join('')}</div></div>`;
+}
 function netPanelHtml(){
   const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
   if(!sols.length)return '';
@@ -160,7 +164,7 @@ function netPanelHtml(){
     </div>`;}).join('');
   const rate=curRate();
   const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
-  const flag=c==='EUR'?'':`<label class="fxflag"><input type="checkbox" data-fx="show" ${S.curShow?'checked':''} ${rate?'':'disabled'}> ${t('net_show_doc').replace('%c',c)}</label>`;
+  const flag=c==='EUR'?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
   return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
@@ -176,17 +180,18 @@ function wireNetPanel(v){
       stepQuote();
     });
   });
-  v.querySelectorAll('[data-fx="cur"]').forEach(el=>el.onchange=async()=>{
-    if(el.value!=='EUR'&&!FX.rates[el.value]){await fxRefresh(true);}
-    fxSelect(el.value);
-    if(el.value==='EUR')S.curShow=false;
-    stepQuote();
+  v.querySelectorAll('[data-fx="ddbtn"]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const l=btn.nextElementSibling;const open=l.hidden;document.querySelectorAll('.curlist').forEach(x=>x.hidden=true);l.hidden=!open;});
+  document.addEventListener('click',()=>document.querySelectorAll('.curlist').forEach(x=>x.hidden=true),{once:true});
+  v.querySelectorAll('[data-fx-cur]').forEach(btn=>btn.onclick=async()=>{
+    const k=btn.dataset.fxCur;
+    if(k!=='EUR'&&!FX.rates[k]){await fxRefresh(true);}
+    fxSelect(k);stepQuote();
   });
-  const sh=v.querySelector('[data-fx="show"]');if(sh)sh.onchange=()=>{S.curShow=sh.checked;stepQuote();};
   const rf=v.querySelector('[data-fx="refresh"]');if(rf)rf.onclick=async()=>{rf.disabled=true;await fxRefresh(true);fxSelect(S.cur);stepQuote();};
 }
 function stepQuote(){
   const v=$('#view');
+  if(typeof ghRefreshSoon==='function')ghRefreshSoon();
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
   if(REGISTRY.fileHandle&&!stepQuote._refreshing){stepQuote._refreshing=true;
     reloadRegistry().then(ok=>{stepQuote._refreshing=false;if(ok){const b=S.offerNum;applyNextOfferNumber();if(S.offerNum!==b&&step===3)stepQuote();}}).catch(()=>{stepQuote._refreshing=false;});}

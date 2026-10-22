@@ -68,6 +68,14 @@ function nextProgressivo(){
   let max=0;REGISTRY.rows.filter(r=>!r.demo).forEach(r=>{const p=parseInt(r.prog||r.Progressivo||0,10);if(p>max)max=p;});   // le offerte demo non contano
   return max+1;
 }
+// numero offerta mostrato subito aggiornato (dopo la lettura del registro/GitHub)
+function refreshOfferNumber(){
+  const b=S.offerNum;applyNextOfferNumber();
+  if(S.offerNum!==b){
+    const i=document.querySelector('#i_offernum');if(i)i.value=S.offerNum;
+    if(typeof step!=='undefined'&&step===3&&typeof stepQuote==='function')stepQuote();
+  }
+}
 function applyNextOfferNumber(){
   // never clobber a recalled offer's "<original>_REVn" number with a fresh progressive one —
   // this refresh runs automatically (e.g. every time the Offer step renders) so without this

@@ -2,8 +2,11 @@
    I prezzi (listino, registro, dashboard) sono SEMPRE in euro. La valuta scelta nel pannello «Prezzo netto» serve a lavorare
    l'importo finale (arrotondamento / prezzo manuale) e, se il flag è attivo, a mostrare il documento in quella valuta.
    Il cambio si controlla alla prima apertura di ogni giorno (open.er-api.com) e si ricorda; ogni offerta conserva il cambio usato. */
-const CURRENCIES=[['EUR','€','🇪🇺'],['USD','$','🇺🇸'],['GBP','£','🇬🇧'],['CHF','CHF','🇨🇭'],['AED','AED','🇦🇪'],['CAD','C$','🇨🇦'],['AUD','A$','🇦🇺'],
-  ['SGD','S$','🇸🇬'],['HKD','HK$','🇭🇰'],['JPY','¥','🇯🇵'],['CNY','CN¥','🇨🇳'],['NOK','kr','🇳🇴'],['SEK','kr','🇸🇪']];
+// [sigla, simbolo, codice paese della bandiera, nome]
+const CURRENCIES=[['EUR','€','eu','Euro'],['USD','$','us','Dollaro USA'],['GBP','£','gb','Sterlina'],['CHF','CHF','ch','Franco svizzero'],['AED','AED','ae','Dirham EAU'],['CAD','C$','ca','Dollaro canadese'],['AUD','A$','au','Dollaro australiano'],
+  ['SGD','S$','sg','Dollaro di Singapore'],['HKD','HK$','hk','Dollaro di Hong Kong'],['JPY','¥','jp','Yen'],['CNY','CN¥','cn','Yuan'],['NOK','kr','no','Corona norvegese'],['SEK','kr','se','Corona svedese']];
+// bandiera come immagine (funziona su qualsiasi computer, a differenza delle emoji)
+function flagImg(cc,w){return `<img class="flag" src="https://flagcdn.com/w40/${cc}.png" width="${w||22}" height="${Math.round((w||22)*0.75)}" alt="${cc.toUpperCase()}" loading="lazy">`;}
 const FX_LS='yacht_fx_v1';
 const FX={date:'',rates:{EUR:1},src:'',failed:false};
 function fxLoad(){try{const o=JSON.parse(localStorage.getItem(FX_LS)||'null');if(o&&o.rates)Object.assign(FX,o);}catch(_){}}
@@ -27,8 +30,8 @@ function curInfo(c){return CURRENCIES.find(x=>x[0]===c)||CURRENCIES[0];}
 // cambio dell'offerta: quello salvato con l'offerta, altrimenti l'ultimo noto
 function curRate(){const c=S.cur||'EUR';if(c==='EUR')return 1;return Number(S.fxRate)||Number(FX.rates[c])||0;}
 function fxSelect(c){S.cur=c;if(c==='EUR'){S.fxRate=1;S.fxDate=FX.date;}else{S.fxRate=Number(FX.rates[c])||0;S.fxDate=FX.date;}}
-// il documento usa la valuta scelta solo con il flag attivo (e se il cambio è noto)
-function docCur(){return (S.curShow&&S.cur&&S.cur!=='EUR'&&curRate())?S.cur:'EUR';}
+// il documento è nella valuta scelta (se il cambio è noto)
+function docCur(){return (S.cur&&S.cur!=='EUR'&&curRate())?S.cur:'EUR';}
 function fmtCur(n,c){
   try{return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{style:'currency',currency:c,currencyDisplay:'narrowSymbol'}).format(n);}
   catch(e){return Number(n).toFixed(2)+' '+c;}

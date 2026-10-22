@@ -6,6 +6,7 @@ $('#dashBtn').onclick=()=>toggleDashboard(!DASH);
 $('#offersBtn').onclick=openOfferList;
 loadRegistryLocal();
 settingsInit();
+applyNextOfferNumber();
 ghInit();
 if(!S.delivery)S.delivery=t('def_delivery');
 if(!S.packaging)S.packaging=t('def_packaging');
@@ -31,6 +32,7 @@ async function autoLoadPrivate(){
     const b=await fetchFirst('02_Matrice_Optional_Ferretti.xlsx');
     if(b){applyMatrixWorkbook(XLSX.read(b,{type:'array'}),'02_Matrice_Optional_Ferretti.xlsx');if($('#matTxt'))$('#matTxt').textContent='✓ 02_Matrice_Optional_Ferretti.xlsx';render();}
   }catch(e){console.warn('listini non caricati',e);}
+  try{ensureDemoSeed();}catch(e){console.warn('demo',e);}   // offerte demo: caricate da sole, a listino pronto
 }
 autoLoadPrivate();
 
