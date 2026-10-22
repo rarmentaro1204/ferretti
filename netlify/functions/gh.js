@@ -17,7 +17,8 @@ exports.handler = async (event) => {
   const path = String(req.path || '');
   const base = `/repos/${OWNER()}/${REPO()}`;
   const readable = path === base || path.startsWith(base + '/contents/') || path.startsWith(base + '/git/trees/') || path.startsWith(base + '/git/blobs/');
-  const writable = path.startsWith(base + '/contents/');
+  // scrittura solo nelle cartelle dei dati (mai sul codice del sito, anche se la repo fosse la stessa)
+  const writable = path.startsWith(base + '/contents/offerte/') || path.startsWith(base + '/contents/config/');
   if (path.includes('..') || !(method === 'GET' ? readable : method === 'PUT' && writable)) return send(403, { message: 'Percorso non consentito' });
   try {
     const res = await fetch('https://api.github.com' + path, {
