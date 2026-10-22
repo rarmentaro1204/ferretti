@@ -86,7 +86,7 @@ function stepOptions(){
       <select class="pe" data-acc="${si}-${ai}-group" title="${esc(t('opt_group'))}" style="width:118px;flex:0 0 auto;font-size:12px">${OPT_GROUP_ORDER.map(g=>`<option value="${esc(g)}"${(a.group||'Altro')===g?' selected':''}>${esc(optGroupLabel(g))}</option>`).join('')}</select>
       <div class="acc-row" style="flex:1;margin-top:0">
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
-        <input placeholder="${t('description')}" value="${esc(a.desc)}" data-acc="${si}-${ai}-desc">
+        <input placeholder="${t('description')}" value="${esc(accItDesc(s,a))}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
         ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(money(a.price))}">`}
         <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">

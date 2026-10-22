@@ -1,6 +1,15 @@
 /* Configuratore Yacht — modulo "quote" */
 function discMultiplier(){return (1-(S.discount||0)/100)*(1-(S.discount2||0)/100)*(1-(S.discount3||0)/100);}
-function discLabel(){const parts=[S.discount||0];if(S.discount2)parts.push(S.discount2);if(S.discount3)parts.push(S.discount3);return parts.join('+');}
+// solo gli sconti realmente applicati (es. «10» e non «0+10»); «0» se non ce ne sono
+// descrizione in italiano di un optional del listino (anche per offerte salvate con testi in inglese)
+function accItDesc(s,a){
+  if(a.free||!a.code)return a.desc||'';
+  const lists=[typeof machineOptionals==='function'?machineOptionals(s.code):[],...Object.values(MACHINE_OPTIONALS||{})];
+  for(const l of lists){const o=(l||[]).find(x=>x.code===a.code);if(o&&(o.desc_it||o.desc))return optDesc(o);}
+  return a.desc||'';
+}
+function genDiscParts(){return [S.discount,S.discount2,S.discount3].filter(x=>+x>0);}
+function discLabel(){const p=genDiscParts();return p.length?p.join('+'):'0';}
 // Sconto per riga: la macchina e ogni accessorio possono avere uno sconto EXTRA (item.disc, anche a più step "5+3")
 // che si applica in cascata sopra lo sconto generale (passo Opzioni, condizioni commerciali).
 // Lo sconto di riga è EXTRA: si somma (in cascata) allo sconto generale. Accetta uno o più step: "5" oppure "5+3".
@@ -9,7 +18,7 @@ function parseSteps(d){
   return String(d).split(/[+;\/\s]+/).map(x=>parseFloat(String(x).replace(',','.'))).filter(x=>isFinite(x)&&x>0).map(x=>Math.min(100,x));
 }
 function itemMult(d){return discMultiplier()*parseSteps(d).reduce((m,x)=>m*(1-x/100),1);}
-function itemDiscLabel(d){const e=parseSteps(d);return e.length?discLabel()+'+'+e.join('+'):discLabel();}
+function itemDiscLabel(d){const all=[...genDiscParts(),...parseSteps(d)];return all.length?all.join('+'):'0';}
 // Machines: by default each one is an ALTERNATIVE solution (customer picks one). A machine flagged
 // sameOrder (S.solutions[i].sameOrder, i>0) belongs to the SAME ORDER as the previous one: they are
 // quoted together and their totals add up. Consecutive machines linked this way form one "package".
@@ -32,6 +41,7 @@ function lineTotals(opts){
     if(!s.sparesOnly)rows.push(mk({code:s.code,desc:s.tableDesc||s.name,unit:s.unit,qty:s.qty,partial:s.unit*s.qty,img:s.img},s.disc));
     const seenAcc=new Set();
     s.accessories.forEach(a=>{
+      a=Object.assign({},a,{desc:accItDesc(s,a)});
       const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
@@ -268,7 +278,7 @@ function stepQuote(){
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
     const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${moneyD(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
+      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc==='0'?'—':r.disc+'%'}</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
     // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
     const rowChunks=[priceRowsArr];
     const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>

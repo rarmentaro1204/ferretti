@@ -353,7 +353,7 @@ function ensureDemoSeed(){
   let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
   const demo=REGISTRY.rows.filter(r=>r.demo);
   // le 10 complete devono avere 15+ optional: se erano state create prima del caricamento del listino optional, si rigenerano
-  const poor=MATRIX_INFO.machines&&demo.some(r=>r.accN!=null&&r.accN<15);
+  const poor=MATRIX_INFO.machines&&demo.some(r=>r.accN!=null&&(r.accN<15||r.dv!==2));
   if(!deleted&&!hasDemoRows()&&DATA.machines&&DATA.machines.length)installDemo();
   else if(!deleted&&poor)installDemo();
   // demo creata con una versione precedente (senza validità): rigenerala
@@ -432,7 +432,7 @@ function installShowcaseDemo(rnd,pick,reps,tpl){
     const others=pool.filter(o=>o!==eng).map(o=>[rnd(),o]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
     const n=15+Math.floor(rnd()*8);
     const chosen=[...(eng&&i%2===0?[eng]:[]),...others].slice(0,n);
-    const acc=chosen.map(o=>({code:o.code,desc:(lang==='it'&&o.desc_it)?o.desc_it:(o.desc||''),group:o.group||'Altro',qty:1,price:Number(o.price??o.l0??o.le)||0,img:''}));
+    const acc=chosen.map(o=>({code:o.code,desc:o.desc_it||o.desc||'',group:o.group||'Altro',qty:1,price:Number(o.price??o.l0??o.le)||0,img:''}));
     const specs={};SPEC_FIELDS.forEach(([f])=>{if(m[f])specs[f]=m[f];});
     const sol={code:m.code,name:m.name,desc:m.desc||'',atex:false,unit:Number(m.price)||0,qty:1,img:'',imgs:[],specs,accessories:acc,disc:null,tableDesc:undefined};
     const disc2=pick([0,0,3,5]);
@@ -452,7 +452,7 @@ function installShowcaseDemo(rnd,pick,reps,tpl){
       isRevisionOffer:false,solutions:[sol],discount:0,discount2:disc2,discount3:0,notes:'',validity:String(validity),incoterm:pick(['Ex Works','FAS','CIF','DAP','DDP']),
       payment:(I18N[lang]&&I18N[lang].def_payment)||tpl.payment});
     const row={prog:33+i,num,date:dateStr,client,rep:rep.name,lang,total,
-      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),accN:acc.length,
+      machine:`${m.code} (${m.name})`,addedOptionals:`[${m.code}] `+acc.map(a=>a.code+' - '+a.desc).join('; '),note:'DEMO',validity:String(validity),accN:acc.length,dv:2,
       status,outcomeDate:status==='open'?'':dateStr,wonValue:'',lines:[L],demo:true};
     REGISTRY.rows.push(row);
     rememberSnapshotLocal(num,{__yachtOffer:true,baseOfferNum:num,savedAt:new Date(2026,month,1).toISOString(),lang,state});
