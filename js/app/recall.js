@@ -54,7 +54,7 @@ async function openOfferList(){
   const st=o.querySelector('#ol_status');
   const draw=()=>{
     const q=o.querySelector('#ol_q').value.trim().toLowerCase(),rep=o.querySelector('#ol_rep').value,sf=o.querySelector('#ol_st').value;
-    const rows=REGISTRY.rows.filter(r=>(!r.demo||demoVisible())&&(!rep||String(r.rep).trim()===rep)&&(!sf||rowStatus(r)===sf)&&
+    const rows=offerRows().filter(r=>(!rep||String(r.rep).trim()===rep)&&(!sf||rowStatus(r)===sf)&&
       (!q||(String(r.num)+' '+r.client+' '+r.machine+' '+r.rep).toLowerCase().includes(q)))
       .sort((a,b)=>(parseOfferDate(b.date)||0)-(parseOfferDate(a.date)||0)||(+b.prog||0)-(+a.prog||0));
     const lab={won:'Vinta',lost:'Persa',open:'Aperta'};
@@ -65,7 +65,7 @@ async function openOfferList(){
     o.querySelectorAll('[data-row]').forEach(tr=>tr.onclick=()=>recallFromList(REGISTRY.rows[+tr.dataset.row]));
   };
   const fillReps=()=>{const sel=o.querySelector('#ol_rep'),cur=sel.value;
-    const reps=[...new Set(REGISTRY.rows.filter(r=>!r.demo||demoVisible()).map(r=>String(r.rep||'').trim()).filter(Boolean))].sort();
+    const reps=[...new Set(offerRows().map(r=>String(r.rep||'').trim()).filter(Boolean))].sort();
     sel.innerHTML='<option value="">Tutti i commerciali</option>'+reps.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');};
   ['#ol_q','#ol_rep','#ol_st'].forEach(s=>o.querySelector(s).addEventListener('input',draw));
   loadRegistryLocal();ensureDemoSeed();fillReps();draw();

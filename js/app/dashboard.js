@@ -199,7 +199,7 @@ function renderDashboard(){
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
         <label class="fld" style="min-width:110px">${dt('year')}<select id="d_year">${years.map(y=>`<option${y===dashYear?' selected':''}>${y}</option>`).join('')}</select></label>
         <label class="fld" style="min-width:220px">${dt('rep')}<select id="d_rep"><option value="">${dt('all')}</option>${reps.map(r=>`<option${r===dashRep?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
-        ${hasDemoRows()?`<button class="btn sm" id="d_demoToggle" style="background:#FFD017;color:#171717">${demoVisible()?'Nascondi demo':'Mostra demo'}</button><button class="btn ghost sm" id="d_demoDel">Elimina offerte demo</button>`:`<button class="btn ghost sm" id="d_demo">Carica offerte demo</button>`}
+        ${hasDemoRows()?`<button class="btn sm" id="d_demoToggle" style="background:#FFD017;color:#171717">${demoVisible()?'Nascondi demo':'Mostra demo'}</button>${hasRealRows()&&demoVisible()?`<button class="btn sm" id="d_demoOnly" style="background:${demoOnly()?'#1f7a4d':'#4a4a4a'};color:#fff">${demoOnly()?'✓ Solo demo (presentazione)':'Solo demo (presentazione)'}</button>`:''}<button class="btn ghost sm" id="d_demoDel">Elimina offerte demo</button>`:`<button class="btn ghost sm" id="d_demo">Carica offerte demo</button>`}
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
@@ -285,9 +285,10 @@ function wireDash(){
   $('#d_year').onchange=e=>{dashYear=+e.target.value;renderDashboard();};
   $('#d_rep').onchange=e=>{dashRep=e.target.value;renderDashboard();};
   $('#d_back').onclick=()=>toggleDashboard(false);
-  if($('#d_demo'))$('#d_demo').onclick=()=>{installDemo();renderDashboard();};
+  if($('#d_demo'))$('#d_demo').onclick=()=>{installDemo();setDemoVisible(true);renderDashboard();};
+  if($('#d_demoOnly'))$('#d_demoOnly').onclick=()=>{setDemoOnly(!demoOnly());renderDashboard();};
   if($('#d_demoToggle'))$('#d_demoToggle').onclick=()=>{setDemoVisible(!demoVisible());renderDashboard();};
-  if($('#d_demoDel'))$('#d_demoDel').onclick=()=>{if(confirm('Eliminare le 20 offerte demo?')){removeDemo();renderDashboard();}};
+  if($('#d_demoDel'))$('#d_demoDel').onclick=()=>{if(confirm('Eliminare le offerte demo?')){removeDemo();renderDashboard();}};
   $('#d_export').onclick=()=>{try{downloadRegistry();}catch(e){flash(t('load_err'));}};
   v.querySelectorAll('[data-expidx]').forEach(tr=>tr.onclick=()=>recallFromList(REGISTRY.rows[+tr.dataset.expidx]));
   startCountdown();
@@ -343,7 +344,11 @@ function demoVisible(){
   return !hasRealRows();
 }
 function setDemoVisible(on){try{localStorage.setItem(DEMO_LS_HIDE,on?'0':'1');}catch(_){}}
-function offerRows(){return REGISTRY.rows.filter(r=>!r.demo||demoVisible());}
+// modalità presentazione: mostra SOLO le offerte demo (nasconde quelle vere, con i dati dei clienti)
+const DEMO_ONLY_LS='yacht_demo_only';
+function demoOnly(){try{return localStorage.getItem(DEMO_ONLY_LS)==='1'&&hasDemoRows()&&demoVisible();}catch(_){return false;}}
+function setDemoOnly(on){try{localStorage.setItem(DEMO_ONLY_LS,on?'1':'0');}catch(_){}}
+function offerRows(){return REGISTRY.rows.filter(r=>demoOnly()?!!r.demo:(!r.demo||demoVisible()));}
 function ensureDemoSeed(){
   let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
   if(!deleted&&!hasDemoRows()&&!hasRealRows()&&DATA.machines&&DATA.machines.length)installDemo();
