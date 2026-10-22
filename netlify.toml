@@ -9,3 +9,7 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"   # strumento interno: non indicizzare
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# funzione ponte verso la repo GitHub privata (variabile GITHUB_TOKEN impostata su Netlify)
+[functions]
+  directory = "netlify/functions"

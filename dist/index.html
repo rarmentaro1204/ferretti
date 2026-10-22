@@ -2765,17 +2765,35 @@ function installDemo(){
    - Il numero progressivo è riservato creando il file: se esiste già (422) si passa al successivo.
    - Rifiuta di scrivere se la repo è PUBBLICA: i dati dei clienti non devono finire in una repo aperta. */
 const GH_LS='yacht_github_v1', GH_CACHE='yacht_github_cache_v1';
-const GH={cfg:{owner:'',repo:'',branch:'main',dir:'offerte',token:''},ok:false,msg:'',busy:false};
+const GH={cfg:{owner:'',repo:'',branch:'main',dir:'offerte',token:''},ok:false,msg:'',busy:false,proxy:false};   // proxy: collegamento tramite funzione Netlify (token sul server)
 // valori predefiniti (modificabili): proprietario e repo privata delle offerte
 const GH_DEFAULT={owner:'rarmentaro1204',repo:'ferretti-offerte',branch:'main',dir:'offerte'};
 function ghLoadCfg(){
   Object.assign(GH.cfg,GH_DEFAULT);
   try{const c=JSON.parse(localStorage.getItem(GH_LS)||'null');if(c)Object.keys(c).forEach(k=>{if(c[k])GH.cfg[k]=c[k];});}catch(_){}
 }
-function ghSaveCfg(){try{localStorage.setItem(GH_LS,JSON.stringify(GH.cfg));}catch(_){}}
+function ghSaveCfg(){if(GH.proxy)return;try{localStorage.setItem(GH_LS,JSON.stringify(GH.cfg));}catch(_){}}
 function ghHasCfg(){return !!(GH.cfg.token&&GH.cfg.owner&&GH.cfg.repo);}
 function ghRepoPath(){return `/repos/${encodeURIComponent(GH.cfg.owner)}/${encodeURIComponent(GH.cfg.repo)}`;}
+// Sul sito pubblicato il token sta sul server (funzione Netlify /.netlify/functions/gh): ogni PC/browser è collegato da solo.
+async function ghDetectProxy(){
+  if(!/^https?:/.test(location.protocol))return false;
+  try{
+    const r=await fetch('/.netlify/functions/gh',{cache:'no-store'});
+    if(!r.ok||!/json/.test(r.headers.get('content-type')||''))return false;
+    const j=await r.json();
+    if(j&&j.configured){GH.proxy=true;Object.assign(GH.cfg,{owner:j.owner,repo:j.repo,branch:GH_DEFAULT.branch,dir:GH_DEFAULT.dir,token:'(server)'});return true;}
+  }catch(_){}
+  return false;
+}
 async function ghApi(path,opt={}){
+  if(GH.proxy){
+    const res=await fetch('/.netlify/functions/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:opt.method||'GET',path,body:opt.body||null})});
+    let j=null;try{j=await res.json();}catch(_){}
+    if(!j)return {status:res.status,ok:false,body:null};
+    const st=j.status!=null?j.status:res.status;
+    return {status:st,ok:st>=200&&st<300,body:j.body};
+  }
   const res=await fetch('https://api.github.com'+path,Object.assign({},opt,{headers:Object.assign({
     Authorization:'Bearer '+GH.cfg.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},opt.headers||{})}));
   let body=null;try{body=await res.json();}catch(_){}
@@ -2905,6 +2923,17 @@ function ghOpenDialog(){
   const old=document.getElementById('ghOverlay');if(old)old.remove();
   const o=document.createElement('div');o.id='ghOverlay';o.className='load-overlay';o.style.display='flex';
   const c=GH.cfg;
+  if(GH.proxy){   // collegamento automatico dal server: niente da inserire
+    o.innerHTML=`<div class="load-card" style="width:min(520px,94vw);text-align:left">
+      <div class="load-title">GitHub</div>
+      <div class="load-status" style="min-height:0">Collegato automaticamente dal server: offerte e impostazioni si salvano nella repo privata <b>${esc(c.owner)}/${esc(c.repo)}</b> su questo e su qualunque altro computer o browser. Non serve inserire nessun token.</div>
+      <div id="gh_status" style="margin-top:10px;font-size:12.5px;color:${GH.ok?'#1f7a4d':'#8c1412'}">${esc(GH.ok?'Stato: '+GH.msg:(GH.msg||'Verifica in corso…'))}</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" id="gh_retry">Riprova</button><button class="btn ghost" id="gh_close" style="margin-left:auto">Chiudi</button></div></div>`;
+    document.body.appendChild(o);
+    o.querySelector('#gh_close').onclick=()=>o.remove();
+    o.querySelector('#gh_retry').onclick=async()=>{const st=o.querySelector('#gh_status');st.textContent='Verifica in corso…';const ok=await ghConnect();st.style.color=ok?'#1f7a4d':'#8c1412';st.textContent=ok?'Stato: '+GH.msg:GH.msg;if(ok){await ghRefresh();await setPullGh();}};
+    return;
+  }
   o.innerHTML=`<div class="load-card" style="width:min(560px,94vw);max-height:88vh;overflow:auto;text-align:left">
     <div class="load-title">Collega GitHub</div>
     <div class="load-status" style="min-height:0">Le offerte (dati + PDF) e le impostazioni (dati emittente, commerciali, ultime condizioni, clienti) vengono salvate in una repo <b>privata</b>. Collegamento una sola volta per computer: poi è automatico.</div>
@@ -2942,7 +2971,7 @@ function ghInit(){
   ghLoadCfg();
   const b=$('#ghBtn');if(b)b.onclick=ghOpenDialog;
   ghRenderBtn();
-  if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});     // collegamento automatico all'apertura
+  ghDetectProxy().then(()=>{if(ghHasCfg())ghConnect(true).then(ok=>{if(ok){ghRefresh();setPullGh();}});});     // collegamento automatico all'apertura (server oppure token locale)
 }
 </script>
 <script>
