@@ -6,7 +6,7 @@ const INCOTERMS=['Ex Works','FAS','CIF','DAP','DDP'];   // delivery condition
 let OPT_CATALOG={};      // optional code -> {group,order,desc}
 let MATRIX_INFO={file:'',machines:0};
 function optGroupSlug(g){return String(g||'Altro').toLowerCase().replace(/[^a-z]+/g,'_').replace(/^_|_$/g,'');}
-function optGroupLabel(g){const k='og_'+optGroupSlug(g);const v=t(k);return v===k?g:v;}
+function optGroupLabel(g){return String(g||'Altro');}   // nomi dei gruppi sempre in italiano
 // one price sheet: row "Codice Macchina" = optional codes, next row "Descrizione", then one row per machine (blank cell = not available)
 function parseMatrixSheet(sheet){
   const aoa=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
@@ -33,7 +33,7 @@ function applyMatrixWorkbook(wb,fileName){
   // catalogue (group / order / description per optional) + prices still to verify
   OPT_CATALOG={};
   const sC=find('catalogo');
-  if(sC)sheetRows(wb.Sheets[sC],['codice']).forEach(r=>{const c=norm(r.Codice);if(c)OPT_CATALOG[c]={group:norm(r.Gruppo),order:num(r.Ordine),desc:norm(r.Descrizione),descIt:norm(r.Descrizione_IT),note:norm(r.Nota)};});
+  if(sC)sheetRows(wb.Sheets[sC],['codice']).forEach(r=>{const c=norm(r.Codice);if(c)OPT_CATALOG[c]={group:norm(r.Gruppo),order:num(r.Ordine),desc:norm(r.Descrizione),descIt:norm(r.Descrizione_IT),note:norm(r.Nota),noteIt:norm(r.Nota_IT)};});
   const CHECK=new Set();
   const sV=find('verific');
   if(sV)sheetRows(wb.Sheets[sV],['macchina']).forEach(r=>{const m=norm(r.Macchina),o=norm(r.Optional);if(m&&o)CHECK.add(m+'|'+o);});
@@ -46,7 +46,7 @@ function applyMatrixWorkbook(wb,fileName){
   machines.forEach(m=>{
     const a0=(p0&&p0.rows[m])||{},aE=(pE&&pE.rows[m])||{};
     const list=[...new Set([...Object.keys(a0),...Object.keys(aE)])].map(c=>({
-      code:c,desc:(OPT_CATALOG[c]&&OPT_CATALOG[c].desc)||(hdrInfo[c]&&hdrInfo[c].desc)||'',desc_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].descIt)||'',note:(OPT_CATALOG[c]&&OPT_CATALOG[c].note)||'',
+      code:c,desc:(OPT_CATALOG[c]&&OPT_CATALOG[c].desc)||(hdrInfo[c]&&hdrInfo[c].desc)||'',desc_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].descIt)||'',note:(OPT_CATALOG[c]&&OPT_CATALOG[c].note)||'',note_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].noteIt)||'',
       l0:a0[c],le:aE[c],group:gOf(c),order:(OPT_CATALOG[c]&&OPT_CATALOG[c].order)||9999,check:CHECK.has(m+'|'+c)}));
     list.sort((x,y)=>OPT_GROUP_ORDER.indexOf(x.group)-OPT_GROUP_ORDER.indexOf(y.group)||x.order-y.order||x.code.localeCompare(y.code));
     MACHINE_OPTIONALS[m]=list;
@@ -55,7 +55,8 @@ function applyMatrixWorkbook(wb,fileName){
   return true;
 }
 // descrizione dell'optional nella lingua dell'offerta (il listino ufficiale è in inglese; l'italiano è la traduzione)
-function optDesc(o){return (LANG==='it'&&o.desc_it)?o.desc_it:(o.desc||'');}
+// gli optional restano SEMPRE in italiano (anche con l'offerta in inglese)
+function optDesc(o){return o.desc_it||o.desc||'';}
 function handleMatrix(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -87,7 +88,7 @@ function stepOptions(){
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
         <input placeholder="${t('description')}" value="${esc(a.desc)}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
-        <input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">
+        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(money(a.price))}">`}
         <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">
         <button class="xbtn" data-accdel="${si}-${ai}">✕</button>
       </div></div>`).join('');
@@ -97,7 +98,7 @@ function stepOptions(){
     const chipsOf=(arr,kind)=>arr.map(o=>`<button class="chip" style="cursor:pointer" data-add${kind}="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('');
     // optionals of THIS machine (from the backend matrix), grouped Filtrazione / Struttura / Costruzione / ...
     const isSel=o=>s.accessories.some(a=>a.code===o.code);
-    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${o.note?' — '+esc(o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
+    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${(o.note_it||o.note)?' — '+esc(o.note_it||o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
         <span class="oc">${isSel(o)?'✓':'+'} ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
       return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})${arr.filter(isSel).length?` <span class="optgrp-n">${arr.filter(isSel).length} ✓</span>`:''}</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
@@ -194,7 +195,7 @@ function stepOptions(){
     else if(f==='disc')s.disc=(e.target.value.trim()===''?null:e.target.value.trim());});
   v.querySelectorAll('[data-solspec]').forEach(inp=>inp.oninput=e=>{
     const p=inp.dataset.solspec.split('-');S.solutions[+p[0]].specs[p[1]]=e.target.value;});
-  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',qty:1,price:0,img:''});stepOptions();});
+  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',free:true,qty:1,price:0,img:''});stepOptions();});
   v.querySelectorAll('[data-accdel]').forEach(b=>b.onclick=()=>{const[si,ai]=b.dataset.accdel.split('-');S.solutions[si].accessories.splice(ai,1);stepOptions();});
   function addAcc(si,acc){
     const price=acc.price;

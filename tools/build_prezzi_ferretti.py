@@ -145,6 +145,37 @@ IT = {  # traduzione italiana delle voci del listino optional 720 (chiave = test
     "Tonnage certificate": "Certificato di stazza",
 }
 
+NOTE_IT = {  # note del listino (voci con (*)), tradotte in italiano; chiave = titolo inglese senza "(*)"
+    "Customer’s tender installation": "È necessaria una valutazione preliminare di dimensioni e peso del tender del cliente.",
+    "Seabob F9S Ferretti Yachts Special Edition, including fixing onboard": "Il prezzo si riferisce alla versione Ferretti Yachts Special Edition del Seabob S9. Qualsiasi configurazione alternativa sarà quotata a parte.",
+    "Williams 345 SportJet tender": "Include il fissaggio.",
+    "Williams 395 Sportjet tender": "Fissaggio incluso.",
+    "Courtesy lights for exteriors": "Include le luci della scala per il flybridge e delle scale verso il pozzetto, strisce luminose sui passavanti.",
+    "Handrail for swim-ladder": "Corrimano a basso profilo.",
+    "Painting of navigation equipment": "Colore: bianco.",
+    "Safety equipment upgrade (life raft + jackets)": "Upgrade da 12 a 18 persone.",
+    "EPIRB": "Radioboa di localizzazione d'emergenza (tipo di precisione), con rilascio idrostatico automatico e attivazione, approvata I.M.O. Il cliente deve fornire il codice M.M.S.I. per l'attivazione. Il dispositivo non può funzionare senza collegamento o attivazione. Include sensore GPS a bordo, categoria 1. Dopo la consegna l'attivazione del sistema è responsabilità del cliente.",
+    "Joystick at 2 helm stations": "Include elica di prua con eliche proporzionali.",
+    "Proportional stern thruster": "Selezionabile solo insieme all'upgrade elica di prua proporzionale (OPT15208).",
+    "Simrad display upgrade": "L'upgrade include: 4 monitor evo3 da 16” in plancia e 2 monitor evo3 da 12” sul flybridge.",
+    "Simrad NAIS500 (RX-TX) AIS transponder - Class B": "Il cliente deve fornire il codice M.M.S.I. per l'attivazione. Dopo la consegna l'attivazione del sistema è responsabilità del cliente.",
+    "X-AID integrated adaptive docking system by Xenta": "Richiede il joystick (OPT14747) con eliche di prua e di poppa, eliche proporzionali incluse.",
+    "55'' TV in salon with TV lift upgrade": "Upgrade dal TV fisso standard da 43”.",
+    "65” Mirror TV in master cabin upgrade": "Upgrade dal TV standard da 50”.",
+    "Fusion MS-RA770 hi-fi, additional": "Aggiuntivo nella cabina armatoriale.",
+    "Premium 5G internet package": "Access point wifi aggiuntivo e antenna esterna per la copertura completa dello yacht. Tutti i dispositivi elettronici e le cabine avranno collegamenti cablati (switch hub POE a 24 porte).",
+    "Premium audio for exteriors": "PRUA: 2 altoparlanti JL Audio + FUSION MS400; FLYBRIDGE: 4 altoparlanti JL Audio + 1 amplificatore; POZZETTO: 4 altoparlanti JL Audio + 2 amplificatori.",
+    "Starlink premium internet system": "1 antenna.",
+    "Generators upgrade": "Include filtro Racor, separatore di fumi e 2 generatori da 22 kW, upgrade dallo standard da 11 kW.",
+    "USB sockets throughout yacht": "Dove applicabile, come specificato nel progetto illuminotecnico.",
+    "Courtesy lights for interiors": "Include le luci della scala verso il ponte inferiore e le strisce luminose sotto i letti.",
+    "WC with bidet": "Disponibile solo per il bagno armatoriale.",
+    "Refrigerator on flybridge": "Frigorifero (50 l) sul flybridge.",
+    "Wine cellar": "Cantinetta con capacità di 10 bottiglie.",
+    "Gyro stabilizer": "Include 1 NG 6 e 1 NG 10.",
+    "Spare parts kit for generator": "Include: 2 filtri olio, 2 filtri gasolio, 1 cinghia, 2 rotori, 2 anodi e 1 valigia.",
+}
+
 
 def main(pdf):
     OUT.mkdir(exist_ok=True)
@@ -174,7 +205,12 @@ def main(pdf):
             it = v["en"]
         if v["qr"]:
             it += " — su richiesta"; v["en"] += " — on request"
-        opt.append((f"OPT720-{i:03d}", P.GRUPPO[v["sez"]], i, v["en"], it, v["note"], v["price"], True))
+        import re as _re
+        titolo = _re.sub(r"\s*\(\*\)", "", v["en"].replace(" — on request", "")).strip()
+        nota_it = NOTE_IT.get(titolo, "")
+        if v["note"] and not nota_it:
+            print("NOTA SENZA TRADUZIONE:", titolo)
+        opt.append((f"OPT720-{i:03d}", P.GRUPPO[v["sez"]], i, v["en"], it, v["note"], v["price"], nota_it))
     eng = []   # delta motorizzazione optional per modello
     for m in modelli:
         pr = LISTINO.get(m["Nome"])
@@ -194,9 +230,11 @@ def main(pdf):
                 riga.append(next(o[6] for o in opt if o[0] == c))   # su richiesta: gli optional del listino 720 valgono per tutti i modelli
         ws.append(riga)
     w2 = wb.create_sheet("Catalogo_Optional")
-    w2.append(["Codice", "Gruppo", "Ordine", "Descrizione", "Descrizione_IT", "Nota"])
-    for o in eng + opt:
-        w2.append([o[0], o[1], o[2], o[3], o[4], o[5]])
+    w2.append(["Codice", "Gruppo", "Ordine", "Descrizione", "Descrizione_IT", "Nota", "Nota_IT"])
+    for o in eng:
+        w2.append([o[0], o[1], o[2], o[3], o[4], o[5], ""])          # o[7] = codice modello (serve alla matrice), non una nota
+    for o in opt:
+        w2.append([o[0], o[1], o[2], o[3], o[4], o[5], o[7]])        # o[7] = nota in italiano
     wb.save(OUT / "02_Matrice_Optional_Ferretti.xlsx")
     print(f"listino: {len(modelli)} modelli · optional 720: {len(opt)} · delta motori: {len(eng)} -> {OUT}")
 

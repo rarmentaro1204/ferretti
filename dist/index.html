@@ -490,6 +490,19 @@ body.show-tools .data-tool{display:inline-flex!important}
 .chip.opt.sel .od,.chip.opt.sel .op,.chip.opt.sel .oc{color:#fff}
 .chip.opt.sel .od{opacity:.85}
 .optgrp-n{background:#1f5ea8;color:#fff;border-radius:999px;padding:1px 7px;font-size:9.5px;margin-left:4px}
+
+/* prezzo bloccato */
+input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
+/* pannello prezzo netto */
+.netpanel h2{margin-bottom:2px}
+.netrow{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr 1.1fr;gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
+.netname{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0}
+.netname span{font-size:11.5px;color:var(--muted)}
+.netres{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.netres span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.netres b{font-family:var(--font-title);font-size:20px;font-weight:400;color:var(--red);white-space:nowrap}
+.netres em{font-style:normal;font-size:11.5px;color:#1f7a4d}
+@media(max-width:720px){.netrow{grid-template-columns:1fr 1fr}.netname,.netres{grid-column:1/-1}.netres{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -569,6 +582,7 @@ const I18N = {"en": {"step_customer": "Customer", "step_application": "Applicati
 (function(){
 const Y={
  it:{
+  price_locked:"Prezzo da listino: non modificabile", net_title:"Prezzo netto", net_hint:"Imposta il prezzo finale: sconto addizionale e arrotondamento oppure un importo manuale. Serve solo a te: nel PDF compaiono solo le cifre finali, senza traccia di questa trattativa.", net_base:"Totale dopo gli sconti", net_pct:"Sconto addizionale", net_round:"Arrotonda per difetto", net_manual:"Oppure prezzo netto manuale", net_manual_ph:"es. 3.700.000", net_final:"Prezzo netto finale", net_r_none:"Nessun arrotondamento", net_r_cents:"Togli i centesimi", net_r_tens:"Alle 10 €", net_r_hundreds:"Alle 100 €", net_r_thousands:"Alle 1.000 €",
   saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
@@ -603,6 +617,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  price_locked:"List price: cannot be edited", net_title:"Net price", net_hint:"Set the final price: additional discount and rounding, or a manual amount. It is for you only: the PDF shows the final figures only, with no trace of this negotiation.", net_base:"Total after discounts", net_pct:"Additional discount", net_round:"Round down", net_manual:"Or manual net price", net_manual_ph:"e.g. 3,700,000", net_final:"Final net price", net_r_none:"No rounding", net_r_cents:"Drop the cents", net_r_tens:"To 10 €", net_r_hundreds:"To 100 €", net_r_thousands:"To 1,000 €",
   saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
@@ -1027,7 +1042,7 @@ const INCOTERMS=['Ex Works','FAS','CIF','DAP','DDP'];   // delivery condition
 let OPT_CATALOG={};      // optional code -> {group,order,desc}
 let MATRIX_INFO={file:'',machines:0};
 function optGroupSlug(g){return String(g||'Altro').toLowerCase().replace(/[^a-z]+/g,'_').replace(/^_|_$/g,'');}
-function optGroupLabel(g){const k='og_'+optGroupSlug(g);const v=t(k);return v===k?g:v;}
+function optGroupLabel(g){return String(g||'Altro');}   // nomi dei gruppi sempre in italiano
 // one price sheet: row "Codice Macchina" = optional codes, next row "Descrizione", then one row per machine (blank cell = not available)
 function parseMatrixSheet(sheet){
   const aoa=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
@@ -1054,7 +1069,7 @@ function applyMatrixWorkbook(wb,fileName){
   // catalogue (group / order / description per optional) + prices still to verify
   OPT_CATALOG={};
   const sC=find('catalogo');
-  if(sC)sheetRows(wb.Sheets[sC],['codice']).forEach(r=>{const c=norm(r.Codice);if(c)OPT_CATALOG[c]={group:norm(r.Gruppo),order:num(r.Ordine),desc:norm(r.Descrizione),descIt:norm(r.Descrizione_IT),note:norm(r.Nota)};});
+  if(sC)sheetRows(wb.Sheets[sC],['codice']).forEach(r=>{const c=norm(r.Codice);if(c)OPT_CATALOG[c]={group:norm(r.Gruppo),order:num(r.Ordine),desc:norm(r.Descrizione),descIt:norm(r.Descrizione_IT),note:norm(r.Nota),noteIt:norm(r.Nota_IT)};});
   const CHECK=new Set();
   const sV=find('verific');
   if(sV)sheetRows(wb.Sheets[sV],['macchina']).forEach(r=>{const m=norm(r.Macchina),o=norm(r.Optional);if(m&&o)CHECK.add(m+'|'+o);});
@@ -1067,7 +1082,7 @@ function applyMatrixWorkbook(wb,fileName){
   machines.forEach(m=>{
     const a0=(p0&&p0.rows[m])||{},aE=(pE&&pE.rows[m])||{};
     const list=[...new Set([...Object.keys(a0),...Object.keys(aE)])].map(c=>({
-      code:c,desc:(OPT_CATALOG[c]&&OPT_CATALOG[c].desc)||(hdrInfo[c]&&hdrInfo[c].desc)||'',desc_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].descIt)||'',note:(OPT_CATALOG[c]&&OPT_CATALOG[c].note)||'',
+      code:c,desc:(OPT_CATALOG[c]&&OPT_CATALOG[c].desc)||(hdrInfo[c]&&hdrInfo[c].desc)||'',desc_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].descIt)||'',note:(OPT_CATALOG[c]&&OPT_CATALOG[c].note)||'',note_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].noteIt)||'',
       l0:a0[c],le:aE[c],group:gOf(c),order:(OPT_CATALOG[c]&&OPT_CATALOG[c].order)||9999,check:CHECK.has(m+'|'+c)}));
     list.sort((x,y)=>OPT_GROUP_ORDER.indexOf(x.group)-OPT_GROUP_ORDER.indexOf(y.group)||x.order-y.order||x.code.localeCompare(y.code));
     MACHINE_OPTIONALS[m]=list;
@@ -1076,7 +1091,8 @@ function applyMatrixWorkbook(wb,fileName){
   return true;
 }
 // descrizione dell'optional nella lingua dell'offerta (il listino ufficiale è in inglese; l'italiano è la traduzione)
-function optDesc(o){return (LANG==='it'&&o.desc_it)?o.desc_it:(o.desc||'');}
+// gli optional restano SEMPRE in italiano (anche con l'offerta in inglese)
+function optDesc(o){return o.desc_it||o.desc||'';}
 function handleMatrix(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -1108,7 +1124,7 @@ function stepOptions(){
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
         <input placeholder="${t('description')}" value="${esc(a.desc)}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
-        <input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">
+        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(money(a.price))}">`}
         <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">
         <button class="xbtn" data-accdel="${si}-${ai}">✕</button>
       </div></div>`).join('');
@@ -1118,7 +1134,7 @@ function stepOptions(){
     const chipsOf=(arr,kind)=>arr.map(o=>`<button class="chip" style="cursor:pointer" data-add${kind}="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('');
     // optionals of THIS machine (from the backend matrix), grouped Filtrazione / Struttura / Costruzione / ...
     const isSel=o=>s.accessories.some(a=>a.code===o.code);
-    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${o.note?' — '+esc(o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
+    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${(o.note_it||o.note)?' — '+esc(o.note_it||o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
         <span class="oc">${isSel(o)?'✓':'+'} ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
     const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
       return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})${arr.filter(isSel).length?` <span class="optgrp-n">${arr.filter(isSel).length} ✓</span>`:''}</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
@@ -1215,7 +1231,7 @@ function stepOptions(){
     else if(f==='disc')s.disc=(e.target.value.trim()===''?null:e.target.value.trim());});
   v.querySelectorAll('[data-solspec]').forEach(inp=>inp.oninput=e=>{
     const p=inp.dataset.solspec.split('-');S.solutions[+p[0]].specs[p[1]]=e.target.value;});
-  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',qty:1,price:0,img:''});stepOptions();});
+  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',free:true,qty:1,price:0,img:''});stepOptions();});
   v.querySelectorAll('[data-accdel]').forEach(b=>b.onclick=()=>{const[si,ai]=b.dataset.accdel.split('-');S.solutions[si].accessories.splice(ai,1);stepOptions();});
   function addAcc(si,acc){
     const price=acc.price;
@@ -1289,7 +1305,19 @@ function itemDiscLabel(d){const e=parseSteps(d);return e.length?discLabel()+'+'+
 // Machines: by default each one is an ALTERNATIVE solution (customer picks one). A machine flagged
 // sameOrder (S.solutions[i].sameOrder, i>0) belongs to the SAME ORDER as the previous one: they are
 // quoted together and their totals add up. Consecutive machines linked this way form one "package".
-function lineTotals(){
+// Prezzo netto (passo Offerta): % addizionale + arrotondamento oppure importo manuale. Si assorbe nel prezzo della barca,
+// così il documento mostra solo cifre finali coerenti: nessuna traccia della trattativa nel PDF.
+const NET_ROUND={none:0,cents:1,tens:10,hundreds:100,thousands:1000};
+function netTarget(s,base){
+  const n=s.net;if(!n)return base;
+  if(Number(n.manual)>0)return Number(n.manual);
+  let T=base*(1-(Number(n.pct)||0)/100);
+  const step=NET_ROUND[n.round||'none']||0;
+  if(step)T=Math.floor(T/step)*step;
+  return T;
+}
+function lineTotals(opts){
+  opts=opts||{};
   const mult=discMultiplier();
   const sols=S.solutions.map(s=>{
     const rows=[];
@@ -1301,8 +1329,13 @@ function lineTotals(){
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
       rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
+    const baseTot=rows.reduce((x,r)=>x+r.total,0);
+    if(!opts.noNet&&s.net&&!s.sparesOnly&&rows.length){
+      const T=netTarget(s,baseTot),boat=rows[0],bm=itemMult(s.disc),nt=boat.total+(T-baseTot);
+      if(nt>0&&bm>0&&(s.qty||1)>0){boat.total=nt;boat.unit=nt/((s.qty||1)*bm);boat.partial=boat.unit*(s.qty||1);}
+    }
     const listTot=rows.reduce((x,r)=>x+r.partial,0);
-    return {s,rows,listTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
+    return {s,rows,listTot,baseTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
   });
   const packages=[];
   sols.forEach((sd,i)=>{
@@ -1398,6 +1431,39 @@ function fitPreview(){
   if(avail<860){p.style.padding='6px 0';p.style.zoom=Math.max(.3,(avail-8)/794).toFixed(3);}
 }
 window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
+
+// ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
+function netPanelHtml(){
+  const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
+  if(!sols.length)return '';
+  const pcts=[0,1,2,3,4,5,6,8,10];
+  const rnds=[['none','net_r_none'],['cents','net_r_cents'],['tens','net_r_tens'],['hundreds','net_r_hundreds'],['thousands','net_r_thousands']];
+  const rows=sols.map(sd=>{
+    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{pct:0,round:'none',manual:''};
+    const fin=netTarget(sd.s,sd.baseTot);
+    const diff=fin-sd.baseTot;
+    return `<div class="netrow" data-netsol="${si}">
+      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${money(sd.baseTot)}</b></span></div>
+      <label class="fld">${t('net_pct')}<select data-net="pct" ${Number(n.manual)>0?'disabled':''}>${pcts.map(p=>`<option value="${p}"${(+n.pct||0)===p?' selected':''}>${p?'−'+p+' %':'—'}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_round')}<select data-net="round" ${Number(n.manual)>0?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${Number(n.manual)>0?esc(String(n.manual).replace('.',',')):''}"></label>
+      <div class="netres"><span>${t('net_final')}</span><b>${money(fin)}</b>${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${money(Math.abs(diff))}</em>`:''}</div>
+    </div>`;}).join('');
+  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}</div>`;
+}
+function wireNetPanel(v){
+  v.querySelectorAll('.netrow').forEach(row=>{
+    const s=S.solutions[+row.dataset.netsol];
+    row.querySelectorAll('[data-net]').forEach(el=>el.onchange=()=>{
+      s.net=s.net||{pct:0,round:'none',manual:''};
+      const k=el.dataset.net;
+      if(k==='manual'){const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;s.net.manual=n>0?n:'';}
+      else s.net[k]=k==='pct'?(+el.value||0):el.value;
+      if(!(+s.net.pct)&&(s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
+      stepQuote();
+    });
+  });
+}
 function stepQuote(){
   const v=$('#view');
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
@@ -1475,7 +1541,7 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r nw ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${money(r.unit)}</td>
       <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
     // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
     const rowChunks=[priceRowsArr];
@@ -1545,9 +1611,11 @@ function stepQuote(){
         ${t('save_note')}
       </div>
     </div>
+    ${netPanelHtml()}
     <div class="pages">${html}</div>`;
   repaginateQuote();
   fitPreview();
+  wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
   // inline editing directly in the document preview

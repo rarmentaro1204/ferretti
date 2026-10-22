@@ -13,7 +13,19 @@ function itemDiscLabel(d){const e=parseSteps(d);return e.length?discLabel()+'+'+
 // Machines: by default each one is an ALTERNATIVE solution (customer picks one). A machine flagged
 // sameOrder (S.solutions[i].sameOrder, i>0) belongs to the SAME ORDER as the previous one: they are
 // quoted together and their totals add up. Consecutive machines linked this way form one "package".
-function lineTotals(){
+// Prezzo netto (passo Offerta): % addizionale + arrotondamento oppure importo manuale. Si assorbe nel prezzo della barca,
+// così il documento mostra solo cifre finali coerenti: nessuna traccia della trattativa nel PDF.
+const NET_ROUND={none:0,cents:1,tens:10,hundreds:100,thousands:1000};
+function netTarget(s,base){
+  const n=s.net;if(!n)return base;
+  if(Number(n.manual)>0)return Number(n.manual);
+  let T=base*(1-(Number(n.pct)||0)/100);
+  const step=NET_ROUND[n.round||'none']||0;
+  if(step)T=Math.floor(T/step)*step;
+  return T;
+}
+function lineTotals(opts){
+  opts=opts||{};
   const mult=discMultiplier();
   const sols=S.solutions.map(s=>{
     const rows=[];
@@ -25,8 +37,13 @@ function lineTotals(){
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
       rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
+    const baseTot=rows.reduce((x,r)=>x+r.total,0);
+    if(!opts.noNet&&s.net&&!s.sparesOnly&&rows.length){
+      const T=netTarget(s,baseTot),boat=rows[0],bm=itemMult(s.disc),nt=boat.total+(T-baseTot);
+      if(nt>0&&bm>0&&(s.qty||1)>0){boat.total=nt;boat.unit=nt/((s.qty||1)*bm);boat.partial=boat.unit*(s.qty||1);}
+    }
     const listTot=rows.reduce((x,r)=>x+r.partial,0);
-    return {s,rows,listTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
+    return {s,rows,listTot,baseTot,solTot:rows.reduce((x,r)=>x+r.total,0)};
   });
   const packages=[];
   sols.forEach((sd,i)=>{
@@ -122,6 +139,39 @@ function fitPreview(){
   if(avail<860){p.style.padding='6px 0';p.style.zoom=Math.max(.3,(avail-8)/794).toFixed(3);}
 }
 window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fitPreview();});
+
+// ---- Prezzo netto: pannello di lavoro (fuori dal documento, non si stampa) ----
+function netPanelHtml(){
+  const sols=lineTotals({noNet:true}).sols.filter(sd=>!sd.s.sparesOnly);
+  if(!sols.length)return '';
+  const pcts=[0,1,2,3,4,5,6,8,10];
+  const rnds=[['none','net_r_none'],['cents','net_r_cents'],['tens','net_r_tens'],['hundreds','net_r_hundreds'],['thousands','net_r_thousands']];
+  const rows=sols.map(sd=>{
+    const si=S.solutions.indexOf(sd.s),n=sd.s.net||{pct:0,round:'none',manual:''};
+    const fin=netTarget(sd.s,sd.baseTot);
+    const diff=fin-sd.baseTot;
+    return `<div class="netrow" data-netsol="${si}">
+      <div class="netname"><b>${esc(String(sd.s.name))}</b><span>${t('net_base')}: <b>${money(sd.baseTot)}</b></span></div>
+      <label class="fld">${t('net_pct')}<select data-net="pct" ${Number(n.manual)>0?'disabled':''}>${pcts.map(p=>`<option value="${p}"${(+n.pct||0)===p?' selected':''}>${p?'−'+p+' %':'—'}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_round')}<select data-net="round" ${Number(n.manual)>0?'disabled':''}>${rnds.map(([k,l])=>`<option value="${k}"${(n.round||'none')===k?' selected':''}>${t(l)}</option>`).join('')}</select></label>
+      <label class="fld">${t('net_manual')}<input data-net="manual" type="text" inputmode="decimal" placeholder="${esc(t('net_manual_ph'))}" value="${Number(n.manual)>0?esc(String(n.manual).replace('.',',')):''}"></label>
+      <div class="netres"><span>${t('net_final')}</span><b>${money(fin)}</b>${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${money(Math.abs(diff))}</em>`:''}</div>
+    </div>`;}).join('');
+  return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}</div>`;
+}
+function wireNetPanel(v){
+  v.querySelectorAll('.netrow').forEach(row=>{
+    const s=S.solutions[+row.dataset.netsol];
+    row.querySelectorAll('[data-net]').forEach(el=>el.onchange=()=>{
+      s.net=s.net||{pct:0,round:'none',manual:''};
+      const k=el.dataset.net;
+      if(k==='manual'){const n=parseFloat(String(el.value).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;s.net.manual=n>0?n:'';}
+      else s.net[k]=k==='pct'?(+el.value||0):el.value;
+      if(!(+s.net.pct)&&(s.net.round||'none')==='none'&&!(Number(s.net.manual)>0))delete s.net;
+      stepQuote();
+    });
+  });
+}
 function stepQuote(){
   const v=$('#view');
   // if the registry file is shared, refresh the preview number to the latest free one (avoids showing a number a colleague just used)
@@ -199,7 +249,7 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc ce" contenteditable="true" data-editdesc="${i}|${ri}">${esc(r.desc||'')}</td><td class="r nw ce" contenteditable="true" data-editprice="${i}|${ri}">${money(r.unit)}</td>
+    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${money(r.unit)}</td>
       <td class="c">${r.qty}</td><td class="r nw">${money(r.partial)}</td><td class="c nw">${r.disc}%</td><td class="r nw tt">${money(r.total)}</td></tr>`);
     // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
     const rowChunks=[priceRowsArr];
@@ -269,9 +319,11 @@ function stepQuote(){
         ${t('save_note')}
       </div>
     </div>
+    ${netPanelHtml()}
     <div class="pages">${html}</div>`;
   repaginateQuote();
   fitPreview();
+  wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
   // inline editing directly in the document preview

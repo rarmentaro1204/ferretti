@@ -2,6 +2,7 @@
 (function(){
 const Y={
  it:{
+  price_locked:"Prezzo da listino: non modificabile", net_title:"Prezzo netto", net_hint:"Imposta il prezzo finale: sconto addizionale e arrotondamento oppure un importo manuale. Serve solo a te: nel PDF compaiono solo le cifre finali, senza traccia di questa trattativa.", net_base:"Totale dopo gli sconti", net_pct:"Sconto addizionale", net_round:"Arrotonda per difetto", net_manual:"Oppure prezzo netto manuale", net_manual_ph:"es. 3.700.000", net_final:"Prezzo netto finale", net_r_none:"Nessun arrotondamento", net_r_cents:"Togli i centesimi", net_r_tens:"Alle 10 €", net_r_hundreds:"Alle 100 €", net_r_thousands:"Alle 1.000 €",
   saved_gh:"Offerta %n salvata su GitHub", gh_fail:"Offerta %n NON salvata su GitHub (resta solo in questo browser): controlla il pulsante GitHub in alto", pdf_gh_ok:"PDF salvato su GitHub", pdf_gh_err:"PDF non salvato su GitHub: usa «Stampa / Salva come PDF»", gh_not_linked:"GitHub non è collegato: l'offerta NON è stata salvata online. Clicca GitHub in alto per collegarlo.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabine",
@@ -36,6 +37,7 @@ const Y={
   no_image:"Nessuna immagine — aggiungila nello step Opzioni"
  },
  en:{
+  price_locked:"List price: cannot be edited", net_title:"Net price", net_hint:"Set the final price: additional discount and rounding, or a manual amount. It is for you only: the PDF shows the final figures only, with no trace of this negotiation.", net_base:"Total after discounts", net_pct:"Additional discount", net_round:"Round down", net_manual:"Or manual net price", net_manual_ph:"e.g. 3,700,000", net_final:"Final net price", net_r_none:"No rounding", net_r_cents:"Drop the cents", net_r_tens:"To 10 €", net_r_hundreds:"To 100 €", net_r_thousands:"To 1,000 €",
   saved_gh:"Offer %n saved to GitHub", gh_fail:"Offer %n NOT saved to GitHub (kept in this browser only): check the GitHub button at the top", pdf_gh_ok:"PDF saved to GitHub", pdf_gh_err:"PDF not saved to GitHub: use \"Print / Save as PDF\"", gh_not_linked:"GitHub is not linked: the offer was NOT saved online. Click GitHub at the top to link it.",
   sc_incoterm:"Delivery condition",
   cabins_short:"cabins",
