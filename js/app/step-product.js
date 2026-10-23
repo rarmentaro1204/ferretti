@@ -15,7 +15,7 @@ const USD_MARKUP=1.10;
 function usdOf(e){return Math.round((Number(e)||0)*USD_MARKUP);}
 // passo Prodotto a tre schermate: 0 listino · 1 gamma · 2 modello
 let PSTEP=0, PANIM=false, PCHOSEN=false;
-function machineImg(m){return heroOf(m,imgUrlForCode(m.code));}
+function machineImg(m){const f=(m.photos||[])[0]||m.imageFile;return f?thumbUrl(f):imgUrlForCode(m.code);}
 function buildMachineListHtml(){
   let list=DATA.machines;
   if(curCat)list=list.filter(m=>m.category===curCat);

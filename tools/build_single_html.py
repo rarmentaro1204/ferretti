@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Impacchetta index.html + css/ + js/ in UN SOLO file HTML autonomo.
-Uso: python3 tools/build_single_html.py  ->  dist/index.html (file unico CON immagini incorporate, pubblicato da Netlify)
+Uso: python3 tools/build_single_html.py  ->  dist/index.html (HTML unico leggero + immagini ottimizzate in dist/images, pubblicato da Netlify)
      python3 tools/build_single_html.py --no-images  ->  dist-lean/index.html (leggero, solo uso locale)
 Restano esterni (CDN, serve internet): font Google (Jost, Inter, Cormorant) e libreria SheetJS per leggere gli Excel."""
 import argparse, base64, hashlib, json, re
@@ -27,19 +27,9 @@ import urllib.parse
 html = html.replace('<link rel="icon" href="assets/ferretti-favicon.svg" type="image/svg+xml">',
                     '<link rel="icon" href="data:image/svg+xml,%s" type="image/svg+xml">' % urllib.parse.quote(logo))
 if not args.no_images:
-    embed, alias = {}, {}
-    for f in sorted([*(radice / "images").glob("*"), *(radice / "images" / "brochure").glob("*")]):
-        if f.is_dir():
-            continue
-        dati = f.read_bytes()
-        h = hashlib.sha1(dati).hexdigest()[:12]
-        mime = {"png": "image/png", "jpg": "image/jpeg", "webp": "image/webp", "gif": "image/gif"}.get(f.suffix[1:].lower(), "image/png")
-        embed.setdefault(h, f"data:{mime};base64," + base64.b64encode(dati).decode())
-        alias[("brochure/" if f.parent.name == "brochure" else "") + f.name] = h
-    blocco = "<script>\nObject.assign(IMAGES_EMBED, %s);\nObject.assign(IMAGES_ALIAS, %s);\n</script>\n" % (json.dumps(embed), json.dumps(alias))
-    marker = "<script>\n/* Configuratore Yacht — modulo \"core\" */"
-    assert marker in html
-    html = html.replace(marker, blocco + marker, 1)
+    # le immagini NON si incorporano più nell'HTML (pesava 21 MB): file separati in dist/images, caricati solo quando servono
+    import subprocess, sys
+    subprocess.run([sys.executable, str(radice / "tools" / "optimize_images.py")], check=True)
 assert 'src="js/' not in html and 'href="css/' not in html and 'assets/' not in html
 out = radice / ("dist-lean" if args.no_images else "dist") / "index.html"   # dist/ = cartella pubblicata da Netlify
 out.parent.mkdir(exist_ok=True)

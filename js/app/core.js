@@ -42,6 +42,8 @@ function photoUrl(f){
   if(typeof IMAGES_EMBED!=='undefined'&&IMAGES_ALIAS[f]&&IMAGES_EMBED[IMAGES_ALIAS[f]])return IMAGES_EMBED[IMAGES_ALIAS[f]];
   return IMAGES_BASE+f.split('/').map(encodeURIComponent).join('/');
 }
+// miniatura (600 px) di una foto: per gamme e schede modello, così la pagina si apre subito
+function thumbUrl(f){return IMAGES_BASE+'thumb/'+String(f).split('/').pop();}
 function imgKey(code){return String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
 function imgUrlForCode(code){
   const k=imgKey(code);

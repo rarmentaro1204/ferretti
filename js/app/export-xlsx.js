@@ -71,8 +71,14 @@ function xlAddSheet(wb,sd,lang,name){
   ws.getCell(grand+2,1).value=L(`Prezzi IVA esclusa. Validità offerta: ${S.validity||'30'} giorni. ${S.incoterm||'Ex Works'}.`,`Prices exclusive of VAT. Offer validity: ${S.validity||'30'} days. ${S.incoterm||'Ex Works'}.`);
   return {tot,grand};
 }
+// ExcelJS (≈1 MB) si scarica solo quando serve davvero: al primo salvataggio o «Scarica Excel»
+let _exceljsP=null;
+function loadExcelJS(){
+  if(typeof ExcelJS!=='undefined')return Promise.resolve();
+  return _exceljsP||(_exceljsP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=res;s.onerror=()=>{_exceljsP=null;rej(new Error('ExcelJS non scaricato'));};document.head.appendChild(s);}));
+}
 async function buildOfferXlsx(){
-  if(typeof ExcelJS==='undefined')throw new Error('ExcelJS non caricato');
+  await loadExcelJS();
   const wb=new ExcelJS.Workbook();wb.creator=(S.rep&&S.rep.name)||BRAND.legalName;wb.created=new Date();
   const {sols}=lineTotals(),used=new Set(),svc=[];
   sols.filter(sd=>!sd.s.sparesOnly).forEach(sd=>{

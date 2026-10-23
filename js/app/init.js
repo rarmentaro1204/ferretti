@@ -24,9 +24,12 @@ async function fetchFirst(name){
   }
   return null;
 }
+// la libreria Excel si carica in parallelo alla pagina (async): prima di leggere i listini si aspetta che sia pronta
+function xlsxReady(){return window.XLSX?Promise.resolve():new Promise(r=>{const t=setInterval(()=>{if(window.XLSX){clearInterval(t);r();}},25);});}
 async function autoLoadPrivate(){
   if(!/^https?:/.test(location.protocol))return;
   try{
+    await xlsxReady();
     const a=await fetchFirst('01_Listino_Prezzi_Ferretti.xlsx');
     if(a)applyXlsxBuffer(a,'01_Listino_Prezzi_Ferretti.xlsx');
     const b=await fetchFirst('02_Matrice_Optional_Ferretti.xlsx');
