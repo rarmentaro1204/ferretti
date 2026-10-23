@@ -5,15 +5,15 @@
   command = ""
 
 [[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
   for = "/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"   # strumento interno: non indicizzare
     Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=604800"
 
 # funzione ponte verso la repo GitHub privata (variabile GITHUB_TOKEN impostata su Netlify)
 [functions]
