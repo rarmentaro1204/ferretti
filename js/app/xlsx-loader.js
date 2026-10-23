@@ -45,7 +45,7 @@ function applyXlsxBuffer(buf,fileName){
             name:norm(get('Nome','Name','name')),
             desc:norm(get('Descrizione_EN','Descrizione','Description','desc')),
             atex:/^(si|sì|yes|x|true|1)$/i.test(norm(get('ATEX','Atex','atex'))),
-            price:num(get('Prezzo','Prezzo_EUR','Price')),
+            price:num(get('Prezzo','Prezzo_EUR','Price')),priceUsd:num(get('Prezzo_USD','Price_USD','USD')),
             loa:norm(get('LOA','LOA_m')),beam:norm(get('Larghezza','Larghezza_m')),draft:norm(get('Pescaggio','Pescaggio_m')),
             hull:norm(get('Lunghezza_scafo','Lunghezza_scafo_m')),cabins:norm(get('Cabine')),
             engine:norm(get('Motore_Standard')),speed:norm(get('Velocita','Velocità')),engine_opt:norm(get('Motore_Optional')),speed_opt:norm(get('Velocita_Optional')),
@@ -73,6 +73,7 @@ function applyXlsxBuffer(buf,fileName){
       out.machines.forEach(m=>{const b=base.get(m.code)||{};const r={...b};
         Object.keys(m).forEach(k=>{if(m[k]!==''&&m[k]!=null&&!(k==='atex'&&!m[k]&&b.atex))r[k]=m[k];});
         if(!m.price&&b.price)r.price=b.price;
+        if(!m.priceUsd&&b.priceUsd)r.priceUsd=b.priceUsd;
         merged.set(m.code,r);});
       base.forEach((b,c)=>{if(!merged.has(c))merged.set(c,b);});   // modelli non presenti nel file: restano (senza prezzo)
       out.machines=[...merged.values()].map(m=>({...m,category:m.category||'OTHER',name:m.name||m.code}));

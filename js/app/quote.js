@@ -45,7 +45,7 @@ function lineTotals(opts){
       const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
-      rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
+      rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',descEn:accEnDesc(s,a),group:a.group||'Altro',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
     const baseTot=rows.reduce((x,r)=>x+r.total,0);
     if(!opts.noNet&&s.net&&!s.sparesOnly&&rows.length){
       const T=netTarget(s,baseTot),boat=rows[0],bm=itemMult(s.disc),nt=boat.total+(T-baseTot);
@@ -153,6 +153,7 @@ window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fit
 function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
 function curSelectHtml(){
   const [c,sym,cc]=curInfo(S.cur||'EUR');
+  if(S.listino==='USD')return `<div class="curdd"><span class="curbtn" style="cursor:default">${flagImg(cc)}<b>${sym}</b><span>${c}</span></span></div>`;   // listino in dollari: valuta fissa
   return `<div class="curdd"><button type="button" class="curbtn" data-fx="ddbtn" title="${esc(t('net_cur'))}">${flagImg(cc)}<b>${sym}</b><span>${c}</span><i>▾</i></button>
     <div class="curlist" hidden>${CURRENCIES.map(([k,sy,fc,nm])=>`<button type="button" class="curopt${k===c?' on':''}" data-fx-cur="${k}">${flagImg(fc)}<b>${sy}</b><span>${k} · ${nm}</span></button>`).join('')}</div></div>`;
 }
@@ -173,8 +174,8 @@ function netPanelHtml(){
         ${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${moneyIn(Math.abs(diff),c)}</em>`:''}</div>
     </div>`;}).join('');
   const rate=curRate();
-  const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
-  const flag=c==='EUR'?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
+  const info=(c==='EUR'||S.listino==='USD')?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
+  const flag=(c==='EUR'||S.listino==='USD')?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
   return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
@@ -287,6 +288,7 @@ function stepQuote(){
     const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
     const hero=(m&&heroOf(m,s.img))||s.img||'';
     const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
+    if(!s.sparesOnly){html+=solutionPagesHtml(sd,pk,isPkgLast,label);return;}   // pagine barca + optional impaginate come il listino Azimut
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
       <div class="sl-eyebrow">${label}</div>`;
@@ -340,6 +342,7 @@ function stepQuote(){
       <h2>${t('step_quote')}</h2><p class="hint">${t('hint_quote')}</p>
       <div class="doc-tools">
         <button class="btn prim" id="btnPrint">🖨 ${t('print_pdf')}</button>
+        <button class="btn prim" id="btnXlsx" style="background:#2e6b3a">📊 ${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:#1f7a4d">✅ ${t('save_all')}</button>
         <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
@@ -354,6 +357,7 @@ function stepQuote(){
   wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
+  $('#btnXlsx').onclick=downloadOfferXlsx;
   // inline editing directly in the document preview
   v.querySelectorAll('[data-editname]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editname].name=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editspec]').forEach(el=>el.addEventListener('blur',()=>{const[si,k]=el.dataset.editspec.split('|');S.solutions[+si].specs[k]=el.textContent.trim();stepQuote();}));

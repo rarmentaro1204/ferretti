@@ -133,17 +133,18 @@ async function ghSaveOffer(row,snapshot){
   }
   throw new Error('numero offerta non riservabile');
 }
-async function ghUploadPdf(row,blob){
+async function ghUploadFile(row,blob,ext,label){
   if(!GH.ok||!blob)return false;
-  const path=ghOfferPath(row.num,row.date)+'.pdf';
+  const path=ghOfferPath(row.num,row.date)+ext;
   const b64=await ghBlobB64(blob);
-  let r=await ghPut(path,b64,`PDF offerta ${row.num}`);
+  let r=await ghPut(path,b64,`${label} offerta ${row.num}`);
   if(r.status===422||r.status===409){      // già presente (revisione): aggiorna con lo sha attuale
     const cur=await ghApi(`${ghRepoPath()}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(GH.cfg.branch)}`);
-    if(cur.ok)r=await ghPut(path,b64,`PDF offerta ${row.num} (aggiornato)`,cur.body.sha);
+    if(cur.ok)r=await ghPut(path,b64,`${label} offerta ${row.num} (aggiornato)`,cur.body.sha);
   }
   return r.ok;
 }
+function ghUploadPdf(row,blob){return ghUploadFile(row,blob,'.pdf','PDF');}
 // aggiorna esito/valore di un'offerta già salvata (dashboard), conservando lo snapshot
 async function ghUpdateOffer(row){
   if(!GH.ok||!row.ghPath)return false;

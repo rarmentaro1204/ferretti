@@ -15,6 +15,7 @@ const S={
   isRevisionOffer:false,
   intro:'',
   app:{use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''},
+  listino:'EUR',   // listino prezzi: EUR (L€) oppure USD (L$)
   solutions:[], // {code,name,desc,atex,unit,qty,img,specs:{}, accessories:[{code,desc,qty,price}]}
   discount:0, discount2:0, discount3:0,
   validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'', cur:'EUR', fxRate:1, fxDate:'', curShow:false,
@@ -56,7 +57,7 @@ function addSolImages(si, urls){ const s=S.solutions[si]; ensureImgs(s); urls.fo
 // optionals & spare parts read from the price lists, specific to each model
 function machineOptionals(code){return MACHINE_OPTIONALS[code]||[];}
 function machineSpares(code){return MACHINE_SPARES[code]||[];}
-function liteP(o){return o.price??o.l0??o.le;}
+function liteP(o){return S.listino==='USD'?o.usd:(o.price??o.l0??o.le);}   // listino scelto al passo Prodotto: € oppure $
 function addItem(si,o){
   if(S.solutions[si].accessories.find(x=>x.code===o.code))return;
   const item={code:o.code,desc:(typeof optDesc==='function'?optDesc(o):o.desc)||'',group:o.group||'Altro',qty:1,price:liteP(o)||0,img:''};
@@ -89,7 +90,8 @@ function applyNextOfferNumber(){
 const $=s=>document.querySelector(s);
 const ce=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
 function money(n){n=Number(n)||0;const neg=n<0;n=Math.abs(n);const p=n.toFixed(2).split('.');const int=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (neg?'-':'')+int+','+p[1]+' €';}
-function priceOf(m){return Number(m.price)||0;}
+function priceOf(m){return S.listino==='USD'?(Number(m.priceUsd)||0):(Number(m.price)||0);}
+function L2(it,en){return LANG==='en'?en:it;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 const SPEC_FIELDS=[['loa','loa'],['beam','beam'],['draft','draft'],['hull','hull'],['cabins','cabins'],

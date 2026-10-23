@@ -19,6 +19,7 @@ function stepCustomer(){
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_customer')}</h2><p class="hint">${t('hint_customer')}</p>
+    ${typeof hsBannerHtml==='function'?hsBannerHtml():''}
     <button class="btn prim" id="btnOffers" style="margin-bottom:12px;margin-right:8px">📚 ${LANG==='it'?'Richiama un\'offerta':'Recall an offer'}</button>
     ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">🔄 ${t('recall_offer')}</button>`:''}
     <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">📤 ${t('recall_upload')}</button>
@@ -66,11 +67,19 @@ function stepCustomer(){
   bind('i_phone','phone');bind('i_email','email');bind('i_intro','intro');
   // client field with autocomplete from loaded clients file
   const ci=$('#i_client'), sg=$('#cliSugg');
+  let hsT;
   function showSugg(){
-    if(!CLIENTS.length){sg.style.display='none';return;}
+    if(typeof HS!=='undefined'&&HS.active&&HS.apiBase){   // dati dal CRM HubSpot
+      clearTimeout(hsT);hsT=setTimeout(async()=>{
+        const res=await hsSearchClients(ci.value.trim());if(!res)return;
+        CLIENTS=res;sg.innerHTML='';fillSugg(res);},200);return;}
+    fillSugg(CLIENTS);
+  }
+  function fillSugg(all){
+    if(!all.length){sg.style.display='none';return;}
     const q=ci.value.trim().toLowerCase();
-    let list=CLIENTS;
-    if(q)list=CLIENTS.filter(c=>(c.company+' '+c.contact+' '+c.email).toLowerCase().includes(q));
+    let list=all;
+    if(q&&!(typeof HS!=='undefined'&&HS.active&&HS.apiBase))list=all.filter(c=>(c.company+' '+c.contact+' '+c.email).toLowerCase().includes(q));
     list=list.slice(0,40);
     if(!list.length){sg.style.display='none';return;}
     sg.innerHTML=list.map((c,i)=>`<div data-ci="${CLIENTS.indexOf(c)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:13px">

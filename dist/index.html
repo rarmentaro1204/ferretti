@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 /* ==========================================================================
    FERRETTI YACHTS — design tokens (identità RICOSTRUITA dal sito ufficiale, vedi brand/BRAND_GUIDELINES.md)
@@ -523,6 +524,104 @@ input.ro{background:#f1f1ef;color:#555;border-color:#e2e0dc;cursor:not-allowed}
 .curopt b{min-width:34px}
 .curopt span{color:var(--muted);font-size:12px;white-space:nowrap}
 .fxflag{display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-left:auto}
+
+/* ============ PASSO OPTIONAL — vista laterale (categorie in alto, elenco a destra) ============ */
+.optview{margin-top:10px}
+.obar{display:flex;align-items:stretch;justify-content:space-between;gap:12px;background:#ececec;border-radius:8px 8px 0 0;overflow:hidden}
+.otabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px 6px 0}
+.otab{border:none;background:transparent;padding:11px 14px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#333;border-radius:6px 6px 0 0;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.otab:hover{background:#f6f6f6}
+.otab.on{background:#fff;font-weight:700;color:var(--navy)}
+.otab i{font-style:normal;font-size:10px;font-weight:700;background:var(--red);color:#fff;border-radius:999px;padding:1px 6px;min-width:17px;text-align:center}
+.otab i:empty{display:none}
+.ocart{display:flex;align-items:center;gap:8px;padding:0 16px;font-size:14px;white-space:nowrap}
+.ocart b{font-weight:700;color:var(--navy)}
+.ogrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;background:#f2f2f2;padding:14px;border-radius:0 0 8px 8px;align-items:start}
+.ogrid.wide{grid-template-columns:minmax(0,1fr)}
+.ogrid.wide .oleft{display:none}
+.oleft{position:sticky;top:12px}
+.ohero{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#dcdcdc;border-radius:2px}
+.ohero.ph{display:flex;align-items:center;justify-content:center;color:#888;font-size:13px}
+.oname{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;font-size:13px;color:var(--navy)}
+.oname span{color:var(--muted);font-size:11.5px}
+.oright{min-width:0}
+.osearch{display:flex;gap:8px;align-items:center;border-bottom:1px solid #9a9a9a;margin-bottom:12px;background:#fff;padding:2px 10px}
+.osearch input{flex:1;min-width:0;border:none;padding:11px 0;font-size:14px;letter-spacing:.08em;background:transparent;outline:none}
+.opane{max-height:620px;overflow:auto;padding-right:2px;display:flex;flex-direction:column;gap:12px}
+.ogrid.wide .opane{max-height:none;display:block}
+.ocard{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;background:#fff;padding:10px;border:2px solid transparent;border-radius:3px;align-items:stretch}
+.ocard.sel{border-color:#6fbf8e;background:#f7fcf9}
+.ocard.na{opacity:.6}
+.oimg{width:96px;height:80px;background:#e4e4e4;overflow:hidden}
+.oimg img,.oimg svg{width:100%;height:100%;object-fit:cover;display:block}
+.otxt{min-width:0;display:flex;flex-direction:column;gap:3px}
+.oti{font-size:13.5px;line-height:1.3;color:#1f1f1f}
+.oen{font-size:12px;line-height:1.3;color:#8a8a8a}
+.ocode{font-size:10.5px;color:#9a9a9a;margin-top:auto;letter-spacing:.04em}
+.oside{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px;min-width:118px}
+.opr{font-size:14px;color:#222;white-space:nowrap}
+.oqty{display:flex;flex-direction:column;font-size:10.5px;color:#8a8a8a;letter-spacing:.08em}
+.oqty input{width:92px;border:none;border-bottom:1px solid #9a9a9a;padding:3px 0;font-size:14px;background:transparent;text-align:left;outline:none}
+.tgl{position:relative;display:inline-block;width:38px;height:16px;flex:0 0 auto}
+.tgl input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;z-index:2}
+.tgl span{position:absolute;inset:0;background:#8a8a8a;border-radius:10px;transition:background .15s}
+.tgl span::after{content:'';position:absolute;top:-3px;left:-2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .15s,background .15s}
+.tgl input:checked+span{background:#7fcf9c}
+.tgl input:checked+span::after{transform:translateX(20px);background:#31b36a}
+.tgl input:disabled{cursor:not-allowed}
+@media(max-width:860px){
+  .ogrid{grid-template-columns:minmax(0,1fr)}
+  .oleft{position:static}
+  .opane{max-height:none}
+  .obar{flex-direction:column;gap:0}
+  .otabs{overflow-x:auto;flex-wrap:nowrap}
+  .ocart{padding:8px 14px;justify-content:flex-end}
+  .ocard{grid-template-columns:72px minmax(0,1fr);}
+  .oimg{width:72px;height:64px}
+  .oside{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;min-width:0}
+}
+/* listino / classe al passo Prodotto */
+.lsel{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.lsel button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;color:var(--navy);display:inline-flex;align-items:center;gap:8px}
+.lsel button.sel{border-color:var(--red);background:var(--red);color:#fff}
+.lsel button:hover:not(.sel){border-color:var(--navy)}
+.stp-t{margin:18px 0 8px;font-family:var(--font-title);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.stp-t b{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;letter-spacing:0;margin-right:8px}
+
+/* ============ DOCUMENTO — pagine barca e optional (impaginazione listino Azimut) ============ */
+.ov-hero{display:block;width:100%;height:74mm;object-fit:cover;margin:0 0 8mm}
+.ov-h{font-size:19px!important;height:auto!important;padding:0 0 4px!important;color:var(--navy)!important}
+.ov-h .it{color:#9a9a9a}
+.ov-h .en{color:var(--navy)}
+.ov-tbl{margin-bottom:6mm}
+.ov-row{display:flex;gap:6mm;padding:3.6mm 3mm;border-bottom:1px solid var(--navy);align-items:center}
+.ov-row:last-child{border-bottom-width:1.6px}
+.ov-l{flex:0 0 46%}
+.ov-l b{display:block;font-weight:400;font-size:12.5px;color:var(--navy)}
+.ov-l i{display:block;font-style:normal;font-weight:300;font-size:12px;color:#9a9a9a;margin-top:1px}
+.ov-v{font-size:12.5px;color:var(--navy);letter-spacing:.01em}
+.op-h{font-family:var(--font-title);font-size:15px;font-weight:300;letter-spacing:.01em;color:#9a9a9a;padding:3mm 0 3mm;border-bottom:1.6px solid var(--navy);height:17mm;display:flex;align-items:flex-end;margin-bottom:0}
+.op-h .en{color:var(--navy)}
+.op-row{display:grid;grid-template-columns:minmax(0,1fr) 34mm 29mm;gap:4mm;height:27mm;align-items:center;border-bottom:1px solid var(--navy);overflow:hidden}
+.op-t{display:flex;flex-direction:column;gap:1.2mm;padding-left:3mm;min-width:0}
+.op-code{font-size:9px;font-weight:700;color:#111;letter-spacing:.02em}
+.op-d1{font-size:9.3px;color:#2b2b2b;line-height:1.35;font-weight:300;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.op-d2{font-size:8.6px;color:#a0a0a0;line-height:1.35;font-weight:300;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.op-pr{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.8mm;font-size:9.6px}
+.op-pr b{font-weight:700;color:#111}
+.op-pr s{color:#9a9a9a;font-size:8.3px}
+.op-pr em{font-style:normal;color:#777;font-size:8.3px}
+.op-img{height:22mm;width:29mm;background:#e4e4e4;overflow:hidden}
+.op-img img,.op-img svg{width:100%;height:100%;object-fit:cover;display:block}
+.tt-box{margin-top:9mm;border-top:1.6px solid var(--navy)}
+.tt-box.pkg{margin-top:6mm}
+.tt-row{display:flex;justify-content:space-between;align-items:center;padding:4.2mm 2mm;border-bottom:1px solid var(--navy);font-size:12px;font-weight:300;color:#222;letter-spacing:.01em}
+.tt-row:nth-child(even){border-bottom-width:1.6px}
+.tt-row.strong{font-weight:600}
+@media print{.op-row,.ov-row{break-inside:avoid}}
+
+.hsbar{margin:0 0 14px;padding:9px 12px;border:1px solid #f3b79a;background:#fff4ee;border-radius:8px;font-size:12.5px;color:#7a2e0e}
+.hsbar span{color:#a5603f;margin-left:6px}
 </style>
 </head>
 <body>
@@ -731,6 +830,7 @@ const S={
   isRevisionOffer:false,
   intro:'',
   app:{use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''},
+  listino:'EUR',   // listino prezzi: EUR (L€) oppure USD (L$)
   solutions:[], // {code,name,desc,atex,unit,qty,img,specs:{}, accessories:[{code,desc,qty,price}]}
   discount:0, discount2:0, discount3:0,
   validity:'30', lead:'', delivery:'', packaging:'', warranty:'', incoterm:'Ex Works', payment:'', cur:'EUR', fxRate:1, fxDate:'', curShow:false,
@@ -772,7 +872,7 @@ function addSolImages(si, urls){ const s=S.solutions[si]; ensureImgs(s); urls.fo
 // optionals & spare parts read from the price lists, specific to each model
 function machineOptionals(code){return MACHINE_OPTIONALS[code]||[];}
 function machineSpares(code){return MACHINE_SPARES[code]||[];}
-function liteP(o){return o.price??o.l0??o.le;}
+function liteP(o){return S.listino==='USD'?o.usd:(o.price??o.l0??o.le);}   // listino scelto al passo Prodotto: € oppure $
 function addItem(si,o){
   if(S.solutions[si].accessories.find(x=>x.code===o.code))return;
   const item={code:o.code,desc:(typeof optDesc==='function'?optDesc(o):o.desc)||'',group:o.group||'Altro',qty:1,price:liteP(o)||0,img:''};
@@ -805,7 +905,8 @@ function applyNextOfferNumber(){
 const $=s=>document.querySelector(s);
 const ce=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
 function money(n){n=Number(n)||0;const neg=n<0;n=Math.abs(n);const p=n.toFixed(2).split('.');const int=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (neg?'-':'')+int+','+p[1]+' €';}
-function priceOf(m){return Number(m.price)||0;}
+function priceOf(m){return S.listino==='USD'?(Number(m.priceUsd)||0):(Number(m.price)||0);}
+function L2(it,en){return LANG==='en'?en:it;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 const SPEC_FIELDS=[['loa','loa'],['beam','beam'],['draft','draft'],['hull','hull'],['cabins','cabins'],
@@ -889,6 +990,7 @@ function stepCustomer(){
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_customer')}</h2><p class="hint">${t('hint_customer')}</p>
+    ${typeof hsBannerHtml==='function'?hsBannerHtml():''}
     <button class="btn prim" id="btnOffers" style="margin-bottom:12px;margin-right:8px">📚 ${LANG==='it'?'Richiama un\'offerta':'Recall an offer'}</button>
     ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">🔄 ${t('recall_offer')}</button>`:''}
     <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">📤 ${t('recall_upload')}</button>
@@ -936,11 +1038,19 @@ function stepCustomer(){
   bind('i_phone','phone');bind('i_email','email');bind('i_intro','intro');
   // client field with autocomplete from loaded clients file
   const ci=$('#i_client'), sg=$('#cliSugg');
+  let hsT;
   function showSugg(){
-    if(!CLIENTS.length){sg.style.display='none';return;}
+    if(typeof HS!=='undefined'&&HS.active&&HS.apiBase){   // dati dal CRM HubSpot
+      clearTimeout(hsT);hsT=setTimeout(async()=>{
+        const res=await hsSearchClients(ci.value.trim());if(!res)return;
+        CLIENTS=res;sg.innerHTML='';fillSugg(res);},200);return;}
+    fillSugg(CLIENTS);
+  }
+  function fillSugg(all){
+    if(!all.length){sg.style.display='none';return;}
     const q=ci.value.trim().toLowerCase();
-    let list=CLIENTS;
-    if(q)list=CLIENTS.filter(c=>(c.company+' '+c.contact+' '+c.email).toLowerCase().includes(q));
+    let list=all;
+    if(q&&!(typeof HS!=='undefined'&&HS.active&&HS.apiBase))list=all.filter(c=>(c.company+' '+c.contact+' '+c.email).toLowerCase().includes(q));
     list=list.slice(0,40);
     if(!list.length){sg.style.display='none';return;}
     sg.innerHTML=list.map((c,i)=>`<div data-ci="${CLIENTS.indexOf(c)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:13px">
@@ -1005,7 +1115,7 @@ function buildMachineListHtml(){
       <div class="info"><div class="nm">${esc(m.name)} ${protBadge(m)}</div>
       <div class="meta">${esc(m.code)} · ${esc([m.subcategory&&m.subcategory!==m.name?m.subcategory:'',meta].filter(Boolean).join(' · ')||m.category)}</div></div>
       <div class="pr">${priceOf(m)?money(priceOf(m)):'<span style="color:var(--muted);font-size:12px;font-weight:600">'+t('price_tbd')+'</span>'}</div>
-      <button class="btn prim sm" data-add="${esc(m.code)}">+ ${t('add')}</button></div>`;
+      <button class="btn prim sm" data-add="${esc(m.code)}"${(S.listino==='USD'&&!priceOf(m))?' disabled title="'+esc(L2('Prezzo non disponibile nel listino $','Price not available in the $ price list'))+'"':''}>+ ${t('add')}</button></div>`;
   }).join('');
   return html||'<p class="hint">'+t('no_results')+'</p>';
 }
@@ -1028,8 +1138,14 @@ function stepProduct(){
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_product')}</h2><p class="hint">${t('hint_product')}</p>
+    <div class="stp-t"><b>1</b>${L2('Listino','Price list')}</div>
+    <div class="lsel"><button data-listino="EUR" class="${S.listino!=='USD'?'sel':''}">${flagImg('eu',20)} L € · Euro</button>
+      <button data-listino="USD" class="${S.listino==='USD'?'sel':''}">${flagImg('us',20)} L $ · ${L2('Dollaro USA','US Dollar')}</button></div>
+    ${S.listino==='USD'&&!DATA.machines.some(m=>Number(m.priceUsd)>0)?`<p class="hint" style="margin:8px 0 0;color:var(--red-700)">${L2('Listino in dollari non ancora caricato: manca la colonna «Prezzo_USD» nel listino barche. I modelli restano non selezionabili finché non arriva.','Dollar price list not loaded yet: the «Prezzo_USD» column is missing from the boat price list. Models cannot be selected until it is loaded.')}</p>`:''}
+    <div class="stp-t"><b>2</b>${L2('Classe della barca','Yacht class')}</div>
     <div class="cat-grid">${catHtml}</div>
-    <div style="margin-top:12px"><span class="hint" style="margin-right:6px">${t('protection_f')}:</span>${protHtml}</div>
+    <div class="stp-t"><b>3</b>${L2('Modello','Model')}</div>
+    <div style="margin-bottom:4px"><span class="hint" style="margin-right:6px">${t('protection_f')}:</span>${protHtml}</div>
     ${subHtml}
     <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
     <div class="mlist">${listHtml}</div>
@@ -1040,6 +1156,7 @@ function stepProduct(){
     ${S.solutions.length?renderSolList():'<p class="hint">'+t('none_selected')+'</p>'}
   </div>
   ${selectedDrawer()}`;
+  v.querySelectorAll('[data-listino]').forEach(b=>b.onclick=()=>setListino(b.dataset.listino));
   v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=(curCat===b.dataset.c?null:b.dataset.c);curSub=null;stepProduct();});
   v.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{curProt=b.dataset.prot;curSub=null;stepProduct();});
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{curSub=b.dataset.sub||null;stepProduct();});
@@ -1051,6 +1168,14 @@ function stepProduct(){
   wireMove(v);
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
+}
+// listino prezzi: € oppure $ (due listini distinti, non una conversione); cambiarlo azzera i prodotti scelti
+function setListino(l){
+  if((S.listino||'EUR')===l)return;
+  if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
+  S.solutions=[];S.listino=l;delete S.net;
+  if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
+  stepProduct();
 }
 let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
@@ -1139,8 +1264,9 @@ function parseMatrixSheet(sheet){
 function applyMatrixWorkbook(wb,fileName){
   const find=k=>wb.SheetNames.find(n=>n.toLowerCase().includes(k));
   // listino unico: foglio "Optional_Prezzi" (compatibile con i vecchi fogli optional_l0 / optional_le)
-  const s0=find('optional_prezzi')||find('optional_l0')||find('l0'),sE=find('optional_le')||find('_le');
-  const p0=s0?parseMatrixSheet(wb.Sheets[s0]):null,pE=sE?parseMatrixSheet(wb.Sheets[sE]):null;
+  const sU=wb.SheetNames.find(n=>/usd/i.test(n)&&/optional/i.test(n));   // listino in dollari (foglio opzionale «Optional_Prezzi_USD»)
+  const s0=wb.SheetNames.find(n=>/optional_prezzi$/i.test(n))||find('optional_l0')||find('l0'),sE=find('optional_le')||find('_le');
+  const p0=s0?parseMatrixSheet(wb.Sheets[s0]):null,pE=sE?parseMatrixSheet(wb.Sheets[sE]):null,pU=sU?parseMatrixSheet(wb.Sheets[sU]):null;
   if(!p0&&!pE)return false;
   // catalogue (group / order / description per optional) + prices still to verify
   OPT_CATALOG={};
@@ -1150,16 +1276,16 @@ function applyMatrixWorkbook(wb,fileName){
   const sV=find('verific');
   if(sV)sheetRows(wb.Sheets[sV],['macchina']).forEach(r=>{const m=norm(r.Macchina),o=norm(r.Optional);if(m&&o)CHECK.add(m+'|'+o);});
   const hdrInfo={};
-  [p0,pE].forEach(p=>{if(!p)return;p.codes.forEach((c,j)=>{if(!c||j===0)return;hdrInfo[c]=hdrInfo[c]||{};if(p.descs[j]&&!hdrInfo[c].desc)hdrInfo[c].desc=p.descs[j];if(p.grpRow[j]&&!hdrInfo[c].group)hdrInfo[c].group=p.grpRow[j];});});
+  [p0,pE,pU].forEach(p=>{if(!p)return;p.codes.forEach((c,j)=>{if(!c||j===0)return;hdrInfo[c]=hdrInfo[c]||{};if(p.descs[j]&&!hdrInfo[c].desc)hdrInfo[c].desc=p.descs[j];if(p.grpRow[j]&&!hdrInfo[c].group)hdrInfo[c].group=p.grpRow[j];});});
   const gOf=c=>{const g=(OPT_CATALOG[c]&&OPT_CATALOG[c].group)||(hdrInfo[c]&&hdrInfo[c].group)||'Altro';
     const hit=OPT_GROUP_ORDER.find(x=>x.toLowerCase()===g.toLowerCase());return hit||'Altro';};
   Object.keys(MACHINE_OPTIONALS).forEach(k=>delete MACHINE_OPTIONALS[k]);
-  const machines=new Set([...Object.keys(p0?p0.rows:{}),...Object.keys(pE?pE.rows:{})]);
+  const machines=new Set([...Object.keys(p0?p0.rows:{}),...Object.keys(pE?pE.rows:{}),...Object.keys(pU?pU.rows:{})]);
   machines.forEach(m=>{
-    const a0=(p0&&p0.rows[m])||{},aE=(pE&&pE.rows[m])||{};
-    const list=[...new Set([...Object.keys(a0),...Object.keys(aE)])].map(c=>({
+    const a0=(p0&&p0.rows[m])||{},aE=(pE&&pE.rows[m])||{},aU=(pU&&pU.rows[m])||{};
+    const list=[...new Set([...Object.keys(a0),...Object.keys(aE),...Object.keys(aU)])].map(c=>({
       code:c,desc:(OPT_CATALOG[c]&&OPT_CATALOG[c].desc)||(hdrInfo[c]&&hdrInfo[c].desc)||'',desc_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].descIt)||'',note:(OPT_CATALOG[c]&&OPT_CATALOG[c].note)||'',note_it:(OPT_CATALOG[c]&&OPT_CATALOG[c].noteIt)||'',
-      l0:a0[c],le:aE[c],group:gOf(c),order:(OPT_CATALOG[c]&&OPT_CATALOG[c].order)||9999,check:CHECK.has(m+'|'+c)}));
+      l0:a0[c],le:aE[c],usd:aU[c],group:gOf(c),order:(OPT_CATALOG[c]&&OPT_CATALOG[c].order)||9999,check:CHECK.has(m+'|'+c)}));
     list.sort((x,y)=>OPT_GROUP_ORDER.indexOf(x.group)-OPT_GROUP_ORDER.indexOf(y.group)||x.order-y.order||x.code.localeCompare(y.code));
     MACHINE_OPTIONALS[m]=list;
   });
@@ -1183,13 +1309,36 @@ function handleMatrix(e){
   };
   reader.readAsArrayBuffer(file);
 }
-/* ============== STEP 4: OPTIONS ============== */
-function stepOptions(){
-  const v=$('#view');
-  if(!S.solutions.length){v.innerHTML=`<div class="card"><h2>${t('step_options')}</h2><p class="hint">${t('add_product_first')}</p></div>`;return;}
-  const LT=lineTotals();
-  const solHtml=S.solutions.map((s,si)=>{
-    const accRows=s.accessories.map((a,ai)=>`<div class="accline" style="display:flex;gap:8px;align-items:center;margin-top:8px">
+/* ============== STEP 3: OPTIONS — vista laterale ============== */
+// Barra delle categorie in alto, foto della barca a sinistra, elenco optional a destra (una scheda per optional con interruttore).
+const OPT_GROUP_EN={Motorizzazione:'Propulsion',Coperta:'Deck',Interni:'Interior',Elettronica:'Electronics',Comfort:'Comfort',Servizi:'Services',Altro:'Other'};
+const OPT_TAB={}, OPT_SEARCH={}, OPT_QTY={};   // per soluzione: categoria aperta, testo cercato, quantità scelte prima della selezione
+const IMG_PH='<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="90" fill="#e4e4e4"/><rect x="27" y="20" width="66" height="50" rx="5" fill="none" stroke="#c9c9c9" stroke-width="5"/><circle cx="44" cy="37" r="6" fill="#c9c9c9"/><path d="M31 66l20-20 12 12 9-9 17 17z" fill="#c9c9c9"/></svg>';
+function listMoney(p){return (S.listino==='USD')?fmtCur(p,'USD'):money(p);}
+function optSel(s,o){return s.accessories.find(a=>a.code===o.code);}
+function optPriceOk(o){const p=liteP(o);return p!=null&&p!==''&&(S.listino!=='USD'||Number(p)>0);}
+function optGroupsOf(s){const opts=machineOptionals(s.code);return OPT_GROUP_ORDER.filter(g=>opts.some(o=>(o.group||'Altro')===g));}
+function optTabOf(si){const gs=optGroupsOf(S.solutions[si]);let c=OPT_TAB[si];if(c!=='SUMMARY'&&!gs.includes(c))c=gs[0]||'SUMMARY';OPT_TAB[si]=c;return c;}
+function optSolRoot(si){return document.querySelector(`[data-optsol="${si}"]`);}
+
+function optCardHtml(si,o){
+  const s=S.solutions[si],sel=optSel(s,o),ok=optPriceOk(o);
+  const it=optDesc(o),en=(o.desc&&o.desc!==it)?o.desc:'';
+  const img=imgUrlForCode(o.code);
+  const qty=sel?sel.qty:(OPT_QTY[si+'|'+o.code]||1);
+  return `<div class="ocard${sel?' sel':''}${ok?'':' na'}" data-ocard="${si}|${esc(o.code)}">
+    <div class="oimg">${img?`<img src="${img}" alt="">`:IMG_PH}</div>
+    <div class="otxt"><div class="oti">${esc(it||o.code)}</div>${en?`<div class="oen">${esc(en)}</div>`:''}
+      <div class="ocode">${esc(o.code)}${o.check?` <span style="color:#d97706" title="${esc(t('verify_price'))}">⚠</span>`:''}${(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
+    <div class="oside">
+      <div class="opr">${ok?listMoney(liteP(o)):'<span title="'+esc(L2('Prezzo non disponibile in questo listino','Price not available in this price list'))+'">—</span>'}</div>
+      <label class="oqty">${L2('Quantità','Quantity')}<input type="number" min="1" value="${qty}" data-oqty="${si}|${esc(o.code)}"></label>
+      <label class="tgl"><input type="checkbox" data-otgl="${si}|${esc(o.code)}" ${sel?'checked':''} ${ok?'':'disabled'}><span></span></label>
+    </div></div>`;
+}
+function accRowsHtml(si){
+  const s=S.solutions[si];
+  return s.accessories.map((a,ai)=>`<div class="accline" style="display:flex;gap:8px;align-items:center;margin-top:8px">
       <span style="position:relative;display:inline-block;width:40px;height:40px;flex:0 0 auto">
         ${a.img?`<img class="imgthumb" style="width:40px;height:40px" src="${a.img}">`:'<span class="imgthumb" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#c7ccd6">+</span>'}
         <input type="file" accept="image/*" title="${esc(t('change_image'))}" data-accimgadd="${si}-${ai}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:40px;height:40px">
@@ -1200,30 +1349,143 @@ function stepOptions(){
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
         <input placeholder="${t('description')}" value="${esc(accItDesc(s,a))}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
-        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(money(a.price))}">`}
+        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(listMoney(a.price))}">`}
         <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">
         <button class="xbtn" data-accdel="${si}-${ai}">✕</button>
       </div></div>`).join('');
-    const opts=machineOptionals(s.code), spares=machineSpares(s.code);
+}
+function optSummaryHtml(si){
+  const s=S.solutions[si],spares=machineSpares(s.code);
+  const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${spares.map(o=>`<button class="chip" style="cursor:pointer" data-addspare="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('')}</div>`:'';
+  return `${sprBlock}<div style="font-size:12.5px;font-weight:700;color:#4a4a4a">${t('accessories')}</div>
+      <div style="position:relative;margin-top:4px">
+        <input class="search" style="margin:0" id="accpick-${si}" autocomplete="off" placeholder="🔎 ${esc(t('ph_acc_search'))}">
+        <div id="accsugg-${si}" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:20;max-height:240px;overflow:auto;display:none"></div>
+      </div>
+      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span>${t('unit_price')}</span><span>${t('discount')} %</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
+      ${accRowsHtml(si)}
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="hint" style="margin:0">${t('add_free_accessory')}:</span>
+        ${OPT_GROUP_ORDER.filter(g=>g!=='Altro').map(g=>`<button class="btn ghost sm" data-accadd="${si}" data-grp="${esc(g)}">+ ${esc(optGroupLabel(g))}</button>`).join('')}
+        <button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${esc(optGroupLabel('Altro'))}</button></div>`;
+}
+function optPaneHtml(si){
+  const s=S.solutions[si],cur=optTabOf(si);
+  if(cur==='SUMMARY')return optSummaryHtml(si);
+  const opts=machineOptionals(s.code),q=String(OPT_SEARCH[si]||'').trim().toLowerCase();
+  let list=q?opts.filter(o=>(o.code+' '+optDesc(o)+' '+(o.desc||'')).toLowerCase().includes(q)):opts.filter(o=>(o.group||'Altro')===cur);
+  if(!list.length)return `<p class="hint" style="margin:14px 4px">${esc(t('no_results'))}</p>`;
+  return list.map(o=>optCardHtml(si,o)).join('');
+}
+function optViewHtml(si){
+  const s=S.solutions[si],cur=optTabOf(si),opts=machineOptionals(s.code),gs=optGroupsOf(s);
+  const sd=lineTotals().sols[si];
+  const tabs=gs.map(g=>{const n=opts.filter(o=>(o.group||'Altro')===g&&optSel(s,o)).length;
+    return `<button class="otab${g===cur?' on':''}" data-otab="${si}|${esc(g)}">${esc(optGroupLabel(g))}<i data-ocnt="${esc(g)}">${n||''}</i></button>`;}).join('')
+    +`<button class="otab${cur==='SUMMARY'?' on':''}" data-otab="${si}|SUMMARY">${L2('Riepilogo','Summary')}<i data-ocnt="SUMMARY">${s.accessories.length||''}</i></button>`;
+  const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
+  const hero=(m&&heroOf(m,s.img))||ensureImgs(s)[0]||imgUrlForCode(s.code)||'';
+  const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
+  const none=!opts.length&&!s.custom?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${t('no_options_machine')}</div>`:'';
+  const wide=cur==='SUMMARY';
+  return `<div class="optview">${loadHint}${none}
+    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}"><span>🛒</span><b>${sd?moneyD(sd.solTot):''}</b></div></div>
+    <div class="ogrid${wide?' wide':''}">
+      <div class="oleft">${hero?`<img class="ohero" src="${hero}" alt="">`:`<div class="ohero ph">${esc(s.name)}</div>`}
+        <div class="oname"><b>${esc(s.name)}</b><span>${esc(s.code)}</span></div></div>
+      <div class="oright">${wide?'':`<div class="osearch"><input data-osearch="${si}" placeholder="${esc(L2('Cerca optional','Search items'))}" value="${esc(OPT_SEARCH[si]||'')}" autocomplete="off"><button class="btn ghost sm" data-oall="${si}" title="${esc(t('add_all_options'))}">+ ${esc(L2('tutti','all'))}</button></div>`}
+        <div class="opane">${optPaneHtml(si)}</div></div>
+    </div></div>`;
+}
+// aggiorna totale, contatori delle schede e stato delle schede senza ridisegnare la pagina
+function optRefresh(si){
+  const root=optSolRoot(si);if(!root)return;
+  const s=S.solutions[si],opts=machineOptionals(s.code),sd=lineTotals().sols[si];
+  const cb=root.querySelector('.ocart b');if(cb&&sd)cb.textContent=moneyD(sd.solTot);
+  OPT_GROUP_ORDER.forEach(g=>{const i=root.querySelector(`[data-ocnt="${g}"]`);if(i){const n=opts.filter(o=>(o.group||'Altro')===g&&optSel(s,o)).length;i.textContent=n||'';}});
+  const sm=root.querySelector('[data-ocnt="SUMMARY"]');if(sm)sm.textContent=s.accessories.length||'';
+}
+function optToggle(si,code,on){
+  const s=S.solutions[si],o=machineOptionals(s.code).find(x=>x.code===code);if(!o)return;
+  const ai=s.accessories.findIndex(a=>a.code===code);
+  if(!on){if(ai>=0)s.accessories.splice(ai,1);return;}
+  if(ai>=0||!optPriceOk(o))return;
+  const item={code:o.code,desc:optDesc(o),group:o.group||'Altro',qty:Math.max(1,+OPT_QTY[si+'|'+code]||1),price:Number(liteP(o))||0,img:''};
+  s.accessories.push(item);const u=imgUrlForCode(code);if(u)item.img=u;
+}
+function wireOptPane(si){
+  const root=optSolRoot(si);if(!root)return;
+  const pane=root.querySelector('.opane');if(!pane)return;
+  pane.querySelectorAll('[data-otgl]').forEach(cb=>cb.onchange=()=>{
+    const[i,code]=cb.dataset.otgl.split('|');optToggle(+i,code,cb.checked);
+    const card=cb.closest('.ocard');if(card)card.classList.toggle('sel',cb.checked);
+    if(cb.checked){const sel=S.solutions[+i].accessories.find(a=>a.code===code);const q=card&&card.querySelector('[data-oqty]');if(sel&&q)q.value=sel.qty;}
+    optRefresh(+i);});
+  pane.querySelectorAll('[data-oqty]').forEach(inp=>inp.oninput=()=>{
+    const[i,code]=inp.dataset.oqty.split('|');const n=Math.max(1,+inp.value||1);
+    OPT_QTY[i+'|'+code]=n;const a=S.solutions[+i].accessories.find(x=>x.code===code);if(a){a.qty=n;optRefresh(+i);}});
+  if(optTabOf(si)==='SUMMARY')wireAccRows(pane);
+}
+function optRedrawView(si){
+  const root=optSolRoot(si);if(!root)return;
+  const ov=root.querySelector('.optview');if(!ov)return;
+  ov.outerHTML=optViewHtml(si);wireOptView(si);
+}
+function wireOptView(si){
+  const root=optSolRoot(si);if(!root)return;
+  root.querySelectorAll('[data-otab]').forEach(b=>b.onclick=()=>{const[i,g]=b.dataset.otab.split('|');OPT_TAB[+i]=g;optRedrawView(+i);});
+  const sin=root.querySelector('[data-osearch]');
+  if(sin)sin.oninput=e=>{OPT_SEARCH[si]=e.target.value;const p=root.querySelector('.opane');p.innerHTML=optPaneHtml(si);wireOptPane(si);};
+  const all=root.querySelector('[data-oall]');
+  if(all)all.onclick=()=>{
+    const s=S.solutions[si],cur=optTabOf(si),q=String(OPT_SEARCH[si]||'').trim().toLowerCase();
+    machineOptionals(s.code).filter(o=>q?(o.code+' '+optDesc(o)+' '+(o.desc||'')).toLowerCase().includes(q):(o.group||'Altro')===cur).forEach(o=>optToggle(si,o.code,true));
+    optRedrawView(si);};
+  wireOptPane(si);
+}
+// righe degli accessori selezionati (riepilogo): modifica, immagini, righe libere, ricerca nel catalogo
+function wireAccRows(v){
+  v.querySelectorAll('[data-acc]').forEach(inp=>inp.oninput=e=>{
+    const[si,ai,f]=inp.dataset.acc.split('-');S.solutions[si].accessories[ai][f]=(f==='qty'||f==='price')?+e.target.value:(f==='disc'?(e.target.value.trim()===''?null:e.target.value.trim()):e.target.value);optRefresh(+si);});
+  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',free:true,qty:1,price:0,img:''});stepOptions();});
+  v.querySelectorAll('[data-accdel]').forEach(b=>b.onclick=()=>{const[si,ai]=b.dataset.accdel.split('-');S.solutions[si].accessories.splice(ai,1);stepOptions();});
+  v.querySelectorAll('[data-addspare]').forEach(b=>b.onclick=()=>{
+    const[si,code]=b.dataset.addspare.split('|');const o=machineSpares(S.solutions[si].code).find(x=>x.code===code);if(o)addItem(+si,o);});
+  v.querySelectorAll('[data-accimgadd]').forEach(inp=>inp.onchange=e=>{
+    const[si,ai]=inp.dataset.accimgadd.split('-').map(Number);const file=e.target.files[0];if(!file)return;
+    const r=new FileReader();r.onload=ev=>{S.solutions[si].accessories[ai].img=ev.target.result;stepOptions();};r.readAsDataURL(file);});
+  v.querySelectorAll('[data-accimgdel]').forEach(b=>b.onclick=e=>{e.stopPropagation();e.preventDefault();
+    const[si,ai]=b.dataset.accimgdel.split('-').map(Number);S.solutions[si].accessories[ai].img='';stepOptions();});
+  S.solutions.forEach((s,si)=>{
+    const inp=v.querySelector('#accpick-'+si),sg=v.querySelector('#accsugg-'+si);if(!inp)return;
+    function show(){
+      const q=inp.value.trim().toLowerCase();
+      let list=DATA.accessories;
+      if(q)list=list.filter(a=>(a.code+' '+a.desc).toLowerCase().includes(q));
+      list=list.slice(0,60);
+      if(!list.length){sg.style.display='none';return;}
+      sg.innerHTML=list.map(a=>`<div data-code="${esc(a.code)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:12.5px;display:flex;justify-content:space-between;gap:10px">
+        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span><span style="color:#2b2b2b;white-space:nowrap">${money(a.price)}</span></div>`).join('');
+      sg.style.display='block';
+      sg.querySelectorAll('[data-code]').forEach(d=>d.onmousedown=ev=>{ev.preventDefault();
+        const acc=DATA.accessories.find(a=>a.code===d.dataset.code);if(!acc)return;
+        const item={code:acc.code,desc:acc.desc||'',group:acc.group||'Altro',qty:1,price:acc.price||0,img:''};
+        s.accessories.push(item);const _u=imgUrlForCode(acc.code);if(_u)item.img=_u;stepOptions();});
+    }
+    inp.oninput=show;inp.onfocus=show;
+    inp.onblur=()=>setTimeout(()=>{if(sg)sg.style.display='none';},150);
+  });
+}
+function stepOptions(){
+  const v=$('#view');
+  if(!S.solutions.length){v.innerHTML=`<div class="card"><h2>${t('step_options')}</h2><p class="hint">${t('add_product_first')}</p></div>`;return;}
+  const LT=lineTotals();
+  const solHtml=S.solutions.map((s,si)=>{
     const imgs=ensureImgs(s);
-    const showAll=showAllAcc[si];
-    const chipsOf=(arr,kind)=>arr.map(o=>`<button class="chip" style="cursor:pointer" data-add${kind}="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('');
-    // optionals of THIS machine (from the backend matrix), grouped Filtrazione / Struttura / Costruzione / ...
-    const isSel=o=>s.accessories.some(a=>a.code===o.code);
-    const optChip=o=>`<button class="chip opt${o.check?' chk':''}${isSel(o)?' sel':''}" aria-pressed="${isSel(o)}" data-addopt="${si}|${esc(o.code)}" title="${esc(optDesc(o))}${(o.note_it||o.note)?' — '+esc(o.note_it||o.note):''}${o.check?' — '+esc(t('verify_price')):''}">
-        <span class="oc">${isSel(o)?'✓':'+'} ${esc(o.code)}${o.check?' <span style="color:#d97706">⚠</span>':''}</span>${optDesc(o)?`<span class="od">${esc(optDesc(o).length>70?optDesc(o).slice(0,68)+'…':optDesc(o))}</span>`:''}<span class="op">${money(liteP(o))}</span></button>`;
-    const optGroups=OPT_GROUP_ORDER.map(g=>{const arr=opts.filter(o=>(o.group||'Altro')===g);
-      return arr.length?`<details class="optgrp" data-optgrp="${si}|${esc(g)}"${OPT_OPEN.has(si+'|'+g)?' open':''}><summary class="optgrp-t">${esc(optGroupLabel(g))} (${arr.length})${arr.filter(isSel).length?` <span class="optgrp-n">${arr.filter(isSel).length} ✓</span>`:''}</summary><div class="optchips">${arr.map(optChip).join('')}</div></details>`:'';}).join('');
-    const loadHint=(!MATRIX_INFO.machines&&!s.sparesOnly&&!s.custom)?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--red);border-radius:8px;color:var(--red-700)">📦 ${t('load_matrix_hint')}</div>`:'';
-    const optBlock=loadHint+(opts.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('selectable_options')} (${opts.length})
-        <button class="btn ghost sm" data-addallopt="${si}" style="margin-left:8px">+ ${t('add_all_options')}</button></div>${optGroups}`
-      :(s.sparesOnly||s.custom?'':`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${MATRIX_INFO.machines?t('no_options_machine'):t('no_options_machine')}</div>`));;
-    const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${chipsOf(spares,'spare')}</div>`:'';
     const editor=s.sparesOnly?`<div style="margin:8px 0;display:grid;grid-template-columns:1fr;gap:6px">
         <input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('spares_sale_title')}">
         <textarea class="pe" data-sol="${si}-desc" placeholder="${t('spares_sale_desc_ph')}" style="min-height:56px">${esc(s.desc||'')}</textarea>
-      </div>`:!s.custom?`<div class="solro">${imgs[0]?`<img class="imgthumb" src="${imgs[0]}">`:''}<div><b>${esc(s.name)}</b><div class="cd">${esc(s.code)} · ${esc([s.specs.loa,s.specs.cabins&&(s.specs.cabins+' '+t('cabins_short'))].filter(Boolean).join(' · '))}</div></div></div>`:`<details class="prodedit" open style="margin:8px 0">
+      </div>`:!s.custom?'':`<details class="prodedit" open style="margin:8px 0">
       <summary style="cursor:pointer;font-size:12px;color:#4a4a4a;font-weight:700">✏️ ${t('edit_product')}</summary>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:6px;margin-top:8px;align-items:end">
         <label class="fl">${t('machine_name')}<input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('new_machine')}"></label>
@@ -1235,7 +1497,7 @@ function stepOptions(){
         ${SPEC_FIELDS.map(([k])=>`<label class="fl">${t('spec_'+k)}<input class="pe" data-solspec="${si}-${k}" value="${esc(s.specs[k]||'')}" placeholder="${t('spec_'+k)}"></label>`).join('')}
       </div>
     </details>`;
-    return `<div class="sol">
+    return `<div class="sol" data-optsol="${si}">
       <div class="head"><div><div class="nm">${solLabel(LT.sols[si])} — ${esc(s.name)}${s.sparesOnly?` <span class="badge" style="background:#4a4a4a">${t('spares_sale_badge')}</span>`:''}</div>
       ${s.sparesOnly?'':`<div class="cd">${esc(s.code)}</div>`}</div>${mvBtns(si)}</div>
       ${si>0?`<label style="display:flex;align-items:center;gap:8px;margin:8px 0 2px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;background:${s.sameOrder?'#eaf6ef':'transparent'}">
@@ -1250,18 +1512,7 @@ function stepOptions(){
           <button class="xbtn" data-imgdel="${si}-${ii}" title="Rimuovi" style="position:absolute;right:-7px;top:-7px">✕</button>
         </span>`).join('')}
       </div>`}
-      ${s.sparesOnly?'':optBlock}
-      ${s.sparesOnly?'':sprBlock}
-      <div style="margin-top:10px;font-size:12.5px;font-weight:700;color:#4a4a4a">${t('accessories')}</div>
-      <div style="position:relative;margin-top:4px">
-        <input class="search" style="margin:0" id="accpick-${si}" autocomplete="off" placeholder="🔎 ${esc(t('ph_acc_search'))}">
-        <div id="accsugg-${si}" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:20;max-height:240px;overflow:auto;display:none"></div>
-      </div>
-      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span>${t('unit_price')}</span><span>${t('discount')} %</span><span></span></div>`:''}
-      ${accRows}
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="hint" style="margin:0">${t('add_free_accessory')}:</span>
-        ${OPT_GROUP_ORDER.filter(g=>g!=='Altro').map(g=>`<button class="btn ghost sm" data-accadd="${si}" data-grp="${esc(g)}">+ ${esc(optGroupLabel(g))}</button>`).join('')}
-        <button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${esc(optGroupLabel('Altro'))}</button></div>
+      ${s.sparesOnly?`<div style="margin-top:10px">${optSummaryHtml(si)}</div>`:optViewHtml(si)}
     </div>`;
   }).join('');
   v.innerHTML=`
@@ -1287,7 +1538,6 @@ function stepOptions(){
     <label class="fld" style="margin-top:14px">${t('notes')}<textarea id="o_notes">${esc(S.notes)}</textarea></label>
   </div>${selectedDrawer()}`;
   wireDrawer();
-  v.querySelectorAll('details[data-optgrp]').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)OPT_OPEN.add(d.dataset.optgrp);else OPT_OPEN.delete(d.dataset.optgrp);}));
   $('#o_disc').oninput=e=>{S.discount=Math.max(0,Math.min(100,+e.target.value||0));};
   $('#o_disc2').oninput=e=>{S.discount2=Math.max(0,Math.min(100,+e.target.value||0));};
   $('#o_disc3').oninput=e=>{S.discount3=Math.max(0,Math.min(100,+e.target.value||0));};
@@ -1297,8 +1547,6 @@ function stepOptions(){
   bind('o_pay','payment');bind('o_excl','exclusions');bind('o_notes','notes');
   wireMove(v);
   v.querySelectorAll('[data-sameorder]').forEach(inp=>inp.onchange=e=>{S.solutions[+inp.dataset.sameorder].sameOrder=e.target.checked;stepOptions();});
-  v.querySelectorAll('[data-acc]').forEach(inp=>inp.oninput=e=>{
-    const[si,ai,f]=inp.dataset.acc.split('-');S.solutions[si].accessories[ai][f]=(f==='qty'||f==='price')?+e.target.value:(f==='disc'?(e.target.value.trim()===''?null:e.target.value.trim()):e.target.value);});
   v.querySelectorAll('[data-sol]').forEach(inp=>inp.oninput=e=>{
     const p=inp.dataset.sol.split('-');const si=+p[0];const f=p[1];const s=S.solutions[si];
     if(f==='name')s.name=e.target.value;else if(f==='code')s.code=e.target.value;
@@ -1307,43 +1555,7 @@ function stepOptions(){
     else if(f==='disc')s.disc=(e.target.value.trim()===''?null:e.target.value.trim());});
   v.querySelectorAll('[data-solspec]').forEach(inp=>inp.oninput=e=>{
     const p=inp.dataset.solspec.split('-');S.solutions[+p[0]].specs[p[1]]=e.target.value;});
-  v.querySelectorAll('[data-accadd]').forEach(b=>b.onclick=()=>{S.solutions[+b.dataset.accadd].accessories.push({code:'',desc:'',group:b.dataset.grp||'Altro',free:true,qty:1,price:0,img:''});stepOptions();});
-  v.querySelectorAll('[data-accdel]').forEach(b=>b.onclick=()=>{const[si,ai]=b.dataset.accdel.split('-');S.solutions[si].accessories.splice(ai,1);stepOptions();});
-  function addAcc(si,acc){
-    const price=acc.price;
-    const item={code:acc.code,desc:acc.desc||'',group:acc.group||'Altro',qty:1,price:price||0,img:''};
-    S.solutions[si].accessories.push(item);
-    const _u=imgUrlForCode(acc.code);if(_u)item.img=_u;
-    stepOptions();
-  }
-  // optionals & spares chips (from the price lists)
-  v.querySelectorAll('[data-addopt]').forEach(b=>b.onclick=()=>{
-    const[si,code]=b.dataset.addopt.split('|');const o=machineOptionals(S.solutions[si].code).find(x=>x.code===code);if(!o)return;
-    const ai=S.solutions[si].accessories.findIndex(a=>a.code===code);
-    if(ai>=0){S.solutions[si].accessories.splice(ai,1);stepOptions();}   // secondo clic: deseleziona
-    else addItem(+si,o);});
-  v.querySelectorAll('[data-addspare]').forEach(b=>b.onclick=()=>{
-    const[si,code]=b.dataset.addspare.split('|');const o=machineSpares(S.solutions[si].code).find(x=>x.code===code);if(o)addItem(+si,o);});
-  v.querySelectorAll('[data-addallopt]').forEach(b=>b.onclick=()=>{
-    const si=+b.dataset.addallopt;machineOptionals(S.solutions[si].code).forEach(o=>addItem(si,o));});
-  // accessory free-text picker (full catalog) as extra fallback
-  S.solutions.forEach((s,si)=>{
-    const inp=$('#accpick-'+si),sg=$('#accsugg-'+si);if(!inp)return;
-    function show(){
-      const q=inp.value.trim().toLowerCase();
-      let list=DATA.accessories;
-      if(q)list=list.filter(a=>(a.code+' '+a.desc).toLowerCase().includes(q));
-      list=list.slice(0,60);
-      if(!list.length){sg.style.display='none';return;}
-      sg.innerHTML=list.map(a=>`<div data-code="${esc(a.code)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:12.5px;display:flex;justify-content:space-between;gap:10px">
-        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span><span style="color:#2b2b2b;white-space:nowrap">${money(a.price)}</span></div>`).join('');
-      sg.style.display='block';
-      sg.querySelectorAll('[data-code]').forEach(d=>d.onmousedown=ev=>{ev.preventDefault();
-        const acc=DATA.accessories.find(a=>a.code===d.dataset.code);if(acc)addAcc(si,acc);});
-    }
-    inp.oninput=show;inp.onfocus=show;
-    inp.onblur=()=>setTimeout(()=>{if(sg)sg.style.display='none';},150);
-  });
+  S.solutions.forEach((s,si)=>{if(s.sparesOnly)wireAccRows(optSolRoot(si));else wireOptView(si);});
   v.querySelectorAll('[data-imgadd]').forEach(inp=>inp.onchange=e=>{
     const si=+inp.dataset.imgadd;const files=[...e.target.files];if(!files.length)return;
     let pending=files.length;const urls=[];
@@ -1353,17 +1565,9 @@ function stepOptions(){
       r.readAsDataURL(file);});});
   v.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{const[si,ii]=b.dataset.imgdel.split('-').map(Number);
     const s=S.solutions[si];ensureImgs(s);s.imgs.splice(ii,1);s.img=s.imgs[0]||'';stepOptions();});
-  v.querySelectorAll('[data-accimgadd]').forEach(inp=>inp.onchange=e=>{
-    const[si,ai]=inp.dataset.accimgadd.split('-').map(Number);const file=e.target.files[0];if(!file)return;
-    const r=new FileReader();r.onload=ev=>{S.solutions[si].accessories[ai].img=ev.target.result;stepOptions();};r.readAsDataURL(file);});
-  v.querySelectorAll('[data-accimgdel]').forEach(b=>b.onclick=e=>{e.stopPropagation();e.preventDefault();
-    const[si,ai]=b.dataset.accimgdel.split('-').map(Number);S.solutions[si].accessories[ai].img='';stepOptions();});
   v.querySelectorAll('[data-imgmain]').forEach(b=>b.onclick=()=>{const[si,ii]=b.dataset.imgmain.split('-').map(Number);
     const s=S.solutions[si];ensureImgs(s);const[m]=s.imgs.splice(ii,1);s.imgs.unshift(m);s.img=s.imgs[0]||'';stepOptions();});
 }
-
-/* ============== STEP 5: QUOTE / PREVIEW ============== */
-// cascading discount levels (e.g. 40+5+3): each level applies to what remains after the previous one
 </script>
 <script>
 /* Configuratore Yacht — modulo "quote" */
@@ -1413,7 +1617,7 @@ function lineTotals(opts){
       const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
-      rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
+      rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',descEn:accEnDesc(s,a),group:a.group||'Altro',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
     const baseTot=rows.reduce((x,r)=>x+r.total,0);
     if(!opts.noNet&&s.net&&!s.sparesOnly&&rows.length){
       const T=netTarget(s,baseTot),boat=rows[0],bm=itemMult(s.disc),nt=boat.total+(T-baseTot);
@@ -1521,6 +1725,7 @@ window.addEventListener('resize',()=>{if(typeof step!=='undefined'&&step===3)fit
 function numFmt(n,c){const d=c==='JPY'?0:2;return new Intl.NumberFormat(LANG==='en'?'en-GB':'it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);}
 function curSelectHtml(){
   const [c,sym,cc]=curInfo(S.cur||'EUR');
+  if(S.listino==='USD')return `<div class="curdd"><span class="curbtn" style="cursor:default">${flagImg(cc)}<b>${sym}</b><span>${c}</span></span></div>`;   // listino in dollari: valuta fissa
   return `<div class="curdd"><button type="button" class="curbtn" data-fx="ddbtn" title="${esc(t('net_cur'))}">${flagImg(cc)}<b>${sym}</b><span>${c}</span><i>▾</i></button>
     <div class="curlist" hidden>${CURRENCIES.map(([k,sy,fc,nm])=>`<button type="button" class="curopt${k===c?' on':''}" data-fx-cur="${k}">${flagImg(fc)}<b>${sy}</b><span>${k} · ${nm}</span></button>`).join('')}</div></div>`;
 }
@@ -1541,8 +1746,8 @@ function netPanelHtml(){
         ${Math.abs(diff)>0.004?`<em>${diff<0?'−':'+'}${moneyIn(Math.abs(diff),c)}</em>`:''}</div>
     </div>`;}).join('');
   const rate=curRate();
-  const info=c==='EUR'?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
-  const flag=c==='EUR'?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
+  const info=(c==='EUR'||S.listino==='USD')?'':`<span>${t('net_fx')}: 1 € = <b>${rate?rate.toLocaleString(LANG==='en'?'en-GB':'it-IT',{maximumFractionDigits:4}):'—'} ${c}</b>${S.fxDate?' · '+esc(S.fxDate.split('-').reverse().join('/')):''}${FX.failed?' · <i>'+t('net_fx_fail')+'</i>':''}</span> <button class="btn ghost sm" data-fx="refresh">↻ ${t('net_fx_update')}</button>`;
+  const flag=(c==='EUR'||S.listino==='USD')?'':`<span class="fxflag">${flagImg(curInfo(c)[2],16)} ${t('net_show_doc').replace('%c',c)}</span>`;
   return `<div class="card app-noprint netpanel"><h2>${t('net_title')}</h2><p class="hint">${t('net_hint')}</p>${rows}<div class="fxbar">${info}${flag}</div></div>`;
 }
 function wireNetPanel(v){
@@ -1655,6 +1860,7 @@ function stepQuote(){
     const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
     const hero=(m&&heroOf(m,s.img))||s.img||'';
     const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
+    if(!s.sparesOnly){html+=solutionPagesHtml(sd,pk,isPkgLast,label);return;}   // pagine barca + optional impaginate come il listino Azimut
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
       <div class="sl-eyebrow">${label}</div>`;
@@ -1708,6 +1914,7 @@ function stepQuote(){
       <h2>${t('step_quote')}</h2><p class="hint">${t('hint_quote')}</p>
       <div class="doc-tools">
         <button class="btn prim" id="btnPrint">🖨 ${t('print_pdf')}</button>
+        <button class="btn prim" id="btnXlsx" style="background:#2e6b3a">📊 ${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:#1f7a4d">✅ ${t('save_all')}</button>
         <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
@@ -1722,6 +1929,7 @@ function stepQuote(){
   wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
+  $('#btnXlsx').onclick=downloadOfferXlsx;
   // inline editing directly in the document preview
   v.querySelectorAll('[data-editname]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editname].name=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editspec]').forEach(el=>el.addEventListener('blur',()=>{const[si,k]=el.dataset.editspec.split('|');S.solutions[+si].specs[k]=el.textContent.trim();stepQuote();}));
@@ -1751,6 +1959,178 @@ function stepQuote(){
   });
 }
 function suggestedFilename(){return (S.offerNum||'OFFER').replace(/[^\w\-]/g,'_')+'_'+(S.client||'CLIENT').replace(/[^\w\-]/g,'_').toUpperCase();}
+</script>
+<script>
+/* Configuratore Yacht — modulo "quote-pages": pagine barca e optional del documento, impaginate come il listino Azimut
+   (copertina modello con «Caratteristiche principali», poi gli optional per categoria: codice, descrizione, prezzo, immagine). */
+const PG_LIMIT=224, PG_HEAD=17, PG_ROW=27, PG_TOT=92;   // mm: spazio utile di una pagina dopo il logo · titolo categoria · riga optional · blocco totali
+// descrizione inglese originale del listino (la riga in italiano resta quella principale)
+function accEnDesc(s,a){
+  if(a.free||!a.code)return '';
+  const lists=[typeof machineOptionals==='function'?machineOptionals(s.code):[],...Object.values(MACHINE_OPTIONALS||{})];
+  for(const l of lists){const o=(l||[]).find(x=>x.code===a.code);if(o)return o.desc||'';}
+  return '';
+}
+function docSym(){return curInfo(docCur())[1];}
+function pgGroupHead(g){return `<div class="op-h"><span class="it">${esc(optGroupLabel(g)).toUpperCase()}</span>&nbsp;/&nbsp;<span class="en">${esc(OPT_GROUP_EN[g]||g).toUpperCase()}</span></div>`;}
+function pgRow(r){
+  const disc=r.disc&&r.disc!=='0';
+  const en=(r.descEn&&r.descEn!==r.desc)?r.descEn:'';
+  return `<div class="op-row"><div class="op-t"><b class="op-code">${esc(r.code)}</b><span class="op-d1">${esc(r.desc||'')}</span>${en?`<span class="op-d2">${esc(en)}</span>`:''}</div>
+    <div class="op-pr"><b>${moneyD(r.total)}</b>${disc?`<s>${moneyD(r.partial)}</s>`:''}${r.qty>1?`<em>× ${r.qty}</em>`:''}</div>
+    <div class="op-img">${r.img?`<img src="${r.img}" alt="">`:IMG_PH}</div></div>`;
+}
+function pgTotals(sd,pk,showPkg){
+  const boat=sd.rows[0],opt=sd.rows.slice(1).reduce((x,r)=>x+r.partial,0);   // a listino: lo sconto si vede nella riga dedicata
+  const hasDisc=sd.listTot-sd.solTot>0.005;
+  const row=(lbl,val,strong)=>`<div class="tt-row${strong?' strong':''}"><span>${lbl}</span><span>${val}</span></div>`;
+  let h='<div class="tt-box">'+row(L2('PREZZO BARCA','BOAT PRICE'),moneyD(boat?boat.partial:0))+row(L2('TOTALE OPTIONAL','TOTAL OF OPTIONALS'),moneyD(opt));
+  if(hasDisc)h+=row(L2('SCONTO APPLICATO','DISCOUNT APPLIED'),'−'+moneyD(sd.listTot-sd.solTot));
+  h+=row(L2('TOTALE','TOTAL'),moneyD(sd.solTot))+row(L2('IVA (0 %)','VAT (0 %)'),L2('esclusa','excluded'))+row(L2('PREZZO FINALE','FINAL PRICE'),moneyD(sd.solTot),true)+'</div>';
+  if(showPkg&&pk.members.length>1)h+=`<div class="tt-box pkg">${row(`${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})`,moneyD(pk.net),true)}</div>`;
+  return h;
+}
+function solutionPagesHtml(sd,pk,isPkgLast,label){
+  const {s,rows}=sd;
+  const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
+  const hero=(m&&heroOf(m,s.img))||s.img||'';
+  const sp=effSpecs(s),boat=rows[0];
+  const lbl2=(it,en)=>`<b>${en}</b><i>${it}</i>`;
+  const ovRows=[['Motorizzazione kw/mhp','Engines kw/mhp',sp.engine],['Velocità max/crociera','Speed top/cruise',sp.speed],['Lunghezza f.t.','Length overall',sp.loa],['Larghezza max','Max beam',sp.beam],['Cabine','Cabins',sp.cabins]]
+    .filter(r=>r[2]!=null&&String(r[2]).trim()!=='')
+    .map(r=>`<div class="ov-row"><div class="ov-l">${lbl2(r[0],r[1])}</div><div class="ov-v">${esc(locSpec(r[2]))}</div></div>`).join('')
+    +`<div class="ov-row"><div class="ov-l">${lbl2('Prezzi ('+docSym()+')','Prices ('+docSym()+')')}</div><div class="ov-v">${moneyD(boat?boat.partial:0)}</div></div>`;
+  const head=`<div class="plogo">${logoLight(30)}</div>`;
+  let html=`<div class="page"><div class="pad">${head}
+    <div class="sl-eyebrow">${label}</div>
+    <div class="sl-title">${esc(s.name)}</div>
+    ${hero?`<img class="ov-hero" src="${hero}" alt="">`:''}
+    <div class="op-h ov-h"><span class="en">OVERALL CHARACTERISTICS</span>&nbsp;/&nbsp;<span class="it">CARATTERISTICHE PRINCIPALI</span></div>
+    <div class="ov-tbl">${ovRows}</div>
+    ${footer()}</div></div>`;
+  // optional per categoria, in ordine di gruppo; le pagine si riempiono a righe di altezza fissa
+  const opts=rows.slice(1);
+  const items=[];
+  OPT_GROUP_ORDER.forEach(g=>{const rs=opts.filter(r=>(r.group||'Altro')===g);if(rs.length){items.push({h:g});rs.forEach(r=>items.push({r}));}});
+  opts.filter(r=>!OPT_GROUP_ORDER.includes(r.group||'Altro')).forEach(r=>items.push({r}));
+  const pages=[];let cur=[],used=0;
+  const flush=()=>{pages.push(cur);cur=[];used=0;};
+  items.forEach((it,i)=>{
+    const need=it.h?PG_HEAD+PG_ROW:PG_ROW;                 // un titolo non resta mai solo in fondo alla pagina
+    if(used+need>PG_LIMIT&&cur.length)flush();
+    cur.push(it);used+=it.h?PG_HEAD:PG_ROW;
+  });
+  if(cur.length&&used+PG_TOT>PG_LIMIT)flush();            // i totali non entrano: pagina nuova
+  const body=its=>its.map(it=>it.h?pgGroupHead(it.h):pgRow(it.r)).join('');
+  const last=cur;                                          // l'ultima pagina porta anche i totali
+  pages.forEach(p=>{html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(p)}${footer()}</div></div>`;});
+  html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(last)}${pgTotals(sd,pk,isPkgLast)}${footer()}</div></div>`;
+  return html;
+}
+</script>
+<script>
+/* Configuratore Yacht — modulo "export-xlsx": l'offerta in Excel con la stessa impaginazione del catalogo Azimut
+   (foglio inglese + foglio «_IT», colonne Qty / Price List / sconto, totali con formule, foglio «service» con i dati strutturati). */
+const XL_GREY='FFCCCCCC', XL_ORANGE='FFFFC000';
+function xlSheetName(base,used){
+  let n=String(base).replace(/^Ferretti Yachts\s*/i,'').replace(/[\\\/?*\[\]:]/g,' ').trim().slice(0,26)||'Offerta';
+  let k=n,i=2;while(used.has(k.toLowerCase())){k=n.slice(0,24)+'_'+i++;}
+  used.add(k.toLowerCase());return k;
+}
+function xlFill(cell,argb){cell.fill={type:'pattern',pattern:'solid',fgColor:{argb}};}
+function xlAddSheet(wb,sd,lang,name){
+  const {s,rows}=sd,it=lang==='it',rate=curRate()||1;
+  const L=(a,b)=>it?a:b;
+  const sym=curInfo(docCur())[1],fmt=`#,##0.00 "${sym}"`;
+  const ws=wb.addWorksheet(name);
+  [12,60,5,17,17,20,17,20,20,40].forEach((w,i)=>ws.getColumn(i+1).width=w);
+  const sp=effSpecs(s);
+  // intestazione modello
+  ws.mergeCells('A2:B2');ws.getCell('A2').value=String(s.name).replace(/^Ferretti Yachts\s*/i,'Ferretti ');
+  ws.getCell('A2').font={bold:true,size:24};
+  'ABCDEFGHIJ'.split('').forEach(c=>xlFill(ws.getCell(c+'2'),XL_GREY));
+  ws.getCell('A3').value=L('MOTORI:','ENGINES:');ws.getCell('B3').value=sp.engine||'';
+  ws.getCell('F3').value=L('IVA:','VAT:');ws.getCell('G3').value=0;ws.getCell('G3').numFmt='0%';
+  ['F3','G3'].forEach(a=>{ws.getCell(a).font={bold:true};xlFill(ws.getCell(a),XL_ORANGE);});
+  ws.getCell('A4').value=L('VELOCITÀ','SPEED');ws.getCell('B4').value=sp.speed||'';
+  const head=(r,first,title,last)=>{
+    const h=['',title,L('Qtà','Qty'),L('Prezzo Listino','Price List'),L('Prezzo esc IVA','Price exc VAT'),L('Prezzo incl IVA','Price Inc VAT'),L('Sconto %','Discount %'),L('Prezzo esc IVA incl Sconto','Price ex VAT incl. Discount'),L('Prezzo incl IVA incl Sconto','Price inc VAT incl. Discount'),last];
+    h[0]=first;
+    h.forEach((v,i)=>{const c=ws.getCell(r,i+1);c.value=v;c.font={bold:true};xlFill(c,XL_GREY);});
+  };
+  const line=(r,r0,code,desc,qty,unit,disc,note)=>{
+    const g=Math.round((disc||0)*10000)/10000;
+    const val=unit*qty,vat=val*0,h=val-g*val,ii=h;   // IVA = 0 di partenza (cella G3 modificabile)
+    ws.getCell(r,1).value=code||'';ws.getCell(r,2).value=desc||'';ws.getCell(r,2).alignment={wrapText:true,vertical:'top'};
+    ws.getCell(r,3).value=qty;ws.getCell(r,4).value=unit;
+    ws.getCell(r,5).value={formula:`D${r}*C${r}`,result:val};
+    ws.getCell(r,6).value={formula:`E${r}*$G$3+E${r}`,result:val+vat};
+    ws.getCell(r,7).value=g;ws.getCell(r,7).numFmt='0.##%';
+    ws.getCell(r,8).value={formula:`E${r}-G${r}*E${r}`,result:h};
+    ws.getCell(r,9).value={formula:`F${r}-G${r}*F${r}`,result:ii+vat*(1-g)};
+    if(note)ws.getCell(r,10).value=note;
+    [4,5,6,8,9].forEach(c=>ws.getCell(r,c).numFmt=fmt);
+  };
+  const dsc=r=>r.partial>0?1-r.total/r.partial:0;
+  // barca standard
+  head(6,'',L('BARCA STANDARD','STANDARD BOAT'),'');
+  const boat=rows[0];
+  line(7,7,'',String(s.name).replace(/^Ferretti Yachts\s*/i,'Ferretti '),boat.qty,boat.unit*rate,dsc(boat));
+  // optional
+  head(9,L('Codice','Code'),L('OPTIONAL','OPTIONALS'),L('Note','Note'));
+  let r=11,first=0,lastRow=0;
+  const opts=rows.slice(1);
+  OPT_GROUP_ORDER.concat(['__altri']).forEach(g=>{
+    const rs=opts.filter(x=>g==='__altri'?!OPT_GROUP_ORDER.includes(x.group||'Altro'):(x.group||'Altro')===g);
+    if(!rs.length)return;
+    ws.getCell(r,2).value=(it?optGroupLabel(g).toUpperCase():(OPT_GROUP_EN[g]||g).toUpperCase());
+    for(let c=1;c<=9;c++)xlFill(ws.getCell(r,c),XL_GREY);
+    r++;
+    rs.forEach(x=>{
+      const en=(x.descEn&&x.descEn!==x.desc)?x.descEn:'';
+      line(r,0,x.code,it?x.desc:(en||x.desc),x.qty,x.unit*rate,dsc(x));
+      if(!first)first=r;lastRow=r;r++;});
+  });
+  const tot=r+1,grand=tot+4;
+  const sumOf=col=>first?{formula:`SUM(${col}${first}:${col}${lastRow})`,result:opts.reduce((x,o)=>x+(col==='H'||col==='I'?o.total:o.partial)*rate,0)}:0;
+  ws.getCell(tot,2).value=L('TOTALE OPTIONAL','TOTAL OF OPTIONALS');
+  ['E','F','H','I'].forEach(c=>{const cell=ws.getCell(c+tot);cell.value=sumOf(c);cell.numFmt=fmt;});
+  const bTot=boat.total*rate,bPar=boat.partial*rate,oTot=opts.reduce((x,o)=>x+o.total*rate,0),oPar=opts.reduce((x,o)=>x+o.partial*rate,0);
+  ws.getCell(grand,2).value=L('SOMMA TOTALE','GRAND TOTAL');
+  [['E',bPar+oPar],['F',bPar+oPar],['H',bTot+oTot],['I',bTot+oTot]].forEach(([c,v])=>{const cell=ws.getCell(c+grand);cell.value={formula:`${c}7+${c}${tot}`,result:v};cell.numFmt=fmt;});
+  [tot,grand].forEach(rr=>{for(let c=1;c<=9;c++){const cell=ws.getCell(rr,c);cell.font={bold:true,size:12};xlFill(cell,XL_GREY);}});
+  ws.getCell(grand+2,1).value=L(`Prezzi IVA esclusa. Validità offerta: ${S.validity||'30'} giorni. ${S.incoterm||'Ex Works'}.`,`Prices exclusive of VAT. Offer validity: ${S.validity||'30'} days. ${S.incoterm||'Ex Works'}.`);
+  return {tot,grand};
+}
+async function buildOfferXlsx(){
+  if(typeof ExcelJS==='undefined')throw new Error('ExcelJS non caricato');
+  const wb=new ExcelJS.Workbook();wb.creator=(S.rep&&S.rep.name)||BRAND.legalName;wb.created=new Date();
+  const {sols}=lineTotals(),used=new Set(),svc=[];
+  sols.filter(sd=>!sd.s.sparesOnly).forEach(sd=>{
+    const nm=xlSheetName(sd.s.name,used);
+    xlAddSheet(wb,sd,'en',nm);
+    xlAddSheet(wb,sd,'it',xlSheetName(nm+'_IT',used));
+    svc.push(sd);
+  });
+  if(!svc.length)throw new Error('nessuna imbarcazione da esportare');
+  // foglio «service»: dati strutturati (stesso schema usato dai configuratori Azimut), utile per re-importare l'offerta
+  const rate=curRate()||1,sd0=svc[0],s0=sd0.s;
+  const sections=OPT_GROUP_ORDER.map((g,i)=>({id:i+1,name_en:(OPT_GROUP_EN[g]||g).toUpperCase(),name_local:optGroupLabel(g).toUpperCase(),
+    items:sd0.rows.slice(1).filter(x=>(x.group||'Altro')===g).map(x=>({code:x.code,name_en:x.descEn||x.desc,name_local:x.desc,price:x.unit*rate,quantity:x.qty,discount:Math.round(((x.partial>0?1-x.total/x.partial:0))*10000)/10000,price_discount:x.total*rate,market:docCur(),_selected:true}))})).filter(x=>x.items.length);
+  const svcData={dealer:(S.rep&&S.rep.email)||'',offerNum:S.offerNum,listino:S.listino||'EUR',
+    boatModel:{name:s0.name,code:s0.code,engines:effSpecs(s0).engine||'',speed:effSpecs(s0).speed||'',price:sd0.rows[0].unit*rate,market:docCur(),discount:0},
+    boatSections:sections,currentVAT:0,customBoatPrice:0};
+  wb.addWorksheet('service').getCell('A1').value=JSON.stringify(svcData);
+  const buf=await wb.xlsx.writeBuffer();
+  return new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+async function downloadOfferXlsx(){
+  try{
+    const blob=await buildOfferXlsx();
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=suggestedFilename()+'.xlsx';
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+  }catch(e){console.error(e);flash(L2('Excel non generato: ','Excel not generated: ')+(e&&e.message||e),4000);}
+}
 </script>
 <script>
 /* Configuratore Yacht — modulo "router" */
@@ -2174,7 +2554,8 @@ async function saveOfferComplete(){
   const btn=document.getElementById('btnSaveAll');
   if(btn){btn.disabled=true;btn.textContent='⏳ '+t('saving_all');}
   try{
-    let pdfOk=false, pdfBlob=null;
+    let pdfOk=false, pdfBlob=null, xlsxBlob=null;
+    try{ xlsxBlob=await buildOfferXlsx(); }catch(e){ console.warn('Excel non generato',e); }   // prima del salvataggio: poi lo stato si azzera
     // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
     if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
     else if(window.showDirectoryPicker){
@@ -2182,6 +2563,7 @@ async function saveOfferComplete(){
         const fh=await dir.getFileHandle(suggestedFilename()+'.pdf',{create:true});
         const w=await fh.createWritable(); await w.write(blob); await w.close();
         pdfOk=true;
+        if(xlsxBlob){try{const fx=await dir.getFileHandle(suggestedFilename()+'.xlsx',{create:true});const wx=await fx.createWritable();await wx.write(xlsxBlob);await wx.close();}catch(e){console.error('xlsx save failed',e);}}
         try{
           const base=String(S.offerNum||'').replace(/_REV\d+$/i,'');
           const snapshot={__yachtOffer:true,baseOfferNum:base,savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))};
@@ -2192,6 +2574,7 @@ async function saveOfferComplete(){
     }
     const {saved:regOk,num,row:regRow,ghSaved}=await writeRegistryEntry();
     if(ghSaved&&pdfBlob){ try{pdfOk=(await ghUploadPdf(regRow,pdfBlob))||pdfOk;}catch(e){console.error(e);} }
+    if(ghSaved&&xlsxBlob){ try{await ghUploadFile(regRow,xlsxBlob,'.xlsx','Excel');}catch(e){console.error(e);} }
     let clientRes={target:'none'};
     if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
@@ -2230,7 +2613,7 @@ function resetOffer(){
   S.client='';S.contact='';S.role='';S.phone='';S.email='';S.subject=t('def_subject');S.intro='';S.isRevisionOffer=false;
   S.app={use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''};
   S.solutions=[];S.discount=0;S.discount2=0;S.discount3=0;
-  S.validity='30';S.lead='';S.warranty='';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
+  S.validity='30';S.lead='';S.warranty='';S.listino='EUR';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
   S.delivery=t('def_delivery');S.packaging=t('def_packaging');S.payment=t('def_payment');
   S.exclusions='';S.notes='';
   applyNextOfferNumber();
@@ -3129,17 +3512,18 @@ async function ghSaveOffer(row,snapshot){
   }
   throw new Error('numero offerta non riservabile');
 }
-async function ghUploadPdf(row,blob){
+async function ghUploadFile(row,blob,ext,label){
   if(!GH.ok||!blob)return false;
-  const path=ghOfferPath(row.num,row.date)+'.pdf';
+  const path=ghOfferPath(row.num,row.date)+ext;
   const b64=await ghBlobB64(blob);
-  let r=await ghPut(path,b64,`PDF offerta ${row.num}`);
+  let r=await ghPut(path,b64,`${label} offerta ${row.num}`);
   if(r.status===422||r.status===409){      // già presente (revisione): aggiorna con lo sha attuale
     const cur=await ghApi(`${ghRepoPath()}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(GH.cfg.branch)}`);
-    if(cur.ok)r=await ghPut(path,b64,`PDF offerta ${row.num} (aggiornato)`,cur.body.sha);
+    if(cur.ok)r=await ghPut(path,b64,`${label} offerta ${row.num} (aggiornato)`,cur.body.sha);
   }
   return r.ok;
 }
+function ghUploadPdf(row,blob){return ghUploadFile(row,blob,'.pdf','PDF');}
 // aggiorna esito/valore di un'offerta già salvata (dashboard), conservando lo snapshot
 async function ghUpdateOffer(row){
   if(!GH.ok||!row.ghPath)return false;
@@ -3421,7 +3805,7 @@ function applyXlsxBuffer(buf,fileName){
             name:norm(get('Nome','Name','name')),
             desc:norm(get('Descrizione_EN','Descrizione','Description','desc')),
             atex:/^(si|sì|yes|x|true|1)$/i.test(norm(get('ATEX','Atex','atex'))),
-            price:num(get('Prezzo','Prezzo_EUR','Price')),
+            price:num(get('Prezzo','Prezzo_EUR','Price')),priceUsd:num(get('Prezzo_USD','Price_USD','USD')),
             loa:norm(get('LOA','LOA_m')),beam:norm(get('Larghezza','Larghezza_m')),draft:norm(get('Pescaggio','Pescaggio_m')),
             hull:norm(get('Lunghezza_scafo','Lunghezza_scafo_m')),cabins:norm(get('Cabine')),
             engine:norm(get('Motore_Standard')),speed:norm(get('Velocita','Velocità')),engine_opt:norm(get('Motore_Optional')),speed_opt:norm(get('Velocita_Optional')),
@@ -3449,6 +3833,7 @@ function applyXlsxBuffer(buf,fileName){
       out.machines.forEach(m=>{const b=base.get(m.code)||{};const r={...b};
         Object.keys(m).forEach(k=>{if(m[k]!==''&&m[k]!=null&&!(k==='atex'&&!m[k]&&b.atex))r[k]=m[k];});
         if(!m.price&&b.price)r.price=b.price;
+        if(!m.priceUsd&&b.priceUsd)r.priceUsd=b.priceUsd;
         merged.set(m.code,r);});
       base.forEach((b,c)=>{if(!merged.has(c))merged.set(c,b);});   // modelli non presenti nel file: restano (senza prezzo)
       out.machines=[...merged.values()].map(m=>({...m,category:m.category||'OTHER',name:m.name||m.code}));
@@ -3462,6 +3847,67 @@ function applyXlsxBuffer(buf,fileName){
     }
   }
 }
+</script>
+<script>
+/* Configuratore Yacht — modulo "hubspot": il passo 1 (Cliente) prende i dati dal CRM HubSpot.
+   Il configuratore gira in un iframe aperto dalla scheda sul Deal. Contratto (versione 1):
+     la scheda HubSpot invia al configuratore, con postMessage, un oggetto
+       { source:'yacht-configurator', v:1, type:'context', payload:{ portalId, deal:{id,name}, company:{id,name},
+         contact:{id,name,role,email,phone}, owner:{name,email,phone}, apiBase, token } }
+     `token` è una sessione a scadenza breve emessa dal backend del cliente (mai il token HubSpot);
+     `apiBase` è l'indirizzo del backend del cliente, usato per cercare clienti e salvare sul Deal.
+   Sicurezza: si accettano messaggi solo da origini HubSpot (elenco sotto) e solo dalla finestra che incornicia la pagina;
+   ogni valore è ridotto a testo semplice e lunghezza limitata prima di toccare lo stato. */
+const HS={
+  active:false, ctx:null, apiBase:'', token:'',
+  origins:['https://app.hubspot.com','https://app-eu1.hubspot.com','https://app-na2.hubspot.com','https://app.hubspotqa.com']
+};
+function hsOriginOk(o){
+  if(HS.origins.includes(o))return true;
+  return /^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);   // solo in sviluppo locale
+}
+function hsStr(v,n){return String(v==null?'':v).replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n||200);}
+function hsApiBaseOk(u){try{const x=new URL(u);return x.protocol==='https:'||(x.protocol==='http:'&&/^(localhost|127\.0\.0\.1)$/.test(x.hostname));}catch(_){return false;}}
+function hsApply(p){
+  if(!p||typeof p!=='object')return false;
+  const co=p.company||{},ct=p.contact||{},ow=p.owner||{},dl=p.deal||{};
+  HS.ctx={portalId:hsStr(p.portalId,20),dealId:hsStr(dl.id,30),dealName:hsStr(dl.name,150),companyId:hsStr(co.id,30),contactId:hsStr(ct.id,30)};
+  if(hsApiBaseOk(p.apiBase)&&typeof p.token==='string'&&p.token.length<4096){HS.apiBase=p.apiBase.replace(/\/+$/,'');HS.token=p.token;}
+  if(co.name)S.client=hsStr(co.name);
+  if(ct.name)S.contact=hsStr(ct.name);
+  if(ct.role)S.role=hsStr(ct.role);
+  if(ct.email)S.email=hsStr(ct.email,120);
+  if(ct.phone)S.phone=hsStr(ct.phone,40);
+  if(ow.name)S.rep=Object.assign({name:'',email:'',phone:''},S.rep,{name:hsStr(ow.name),email:hsStr(ow.email,120),phone:hsStr(ow.phone,40)});
+  if(dl.name&&(!S.subject||S.subject===t('def_subject')))S.subject=hsStr(dl.name,150);
+  S.hubspot=Object.assign({},HS.ctx);                 // salvato con l'offerta: serve a riportare il risultato sul Deal giusto
+  HS.active=true;
+  if(typeof step!=='undefined'&&step===0&&typeof render==='function')render();
+  return true;
+}
+window.addEventListener('message',ev=>{
+  if(!hsOriginOk(ev.origin)||ev.source!==window.parent)return;
+  const d=ev.data;
+  if(d&&d.source==='yacht-configurator'&&d.v===1&&d.type==='context')hsApply(d.payload);
+});
+// ricerca clienti nel CRM (autocompletamento del passo 1): il backend del cliente interroga HubSpot, qui non passa nessun token HubSpot
+async function hsSearchClients(q){
+  if(!HS.active||!HS.apiBase||!HS.token)return null;
+  try{
+    const r=await fetch(HS.apiBase+'/clients?q='+encodeURIComponent(q),{headers:{Authorization:'Bearer '+HS.token},cache:'no-store'});
+    if(!r.ok)return null;
+    const j=await r.json();
+    return (Array.isArray(j.clients)?j.clients:[]).slice(0,40).map(c=>({company:hsStr(c.company),contact:hsStr(c.contact),role:hsStr(c.role),email:hsStr(c.email,120),phone:hsStr(c.phone,40)}));
+  }catch(_){return null;}
+}
+function hsBannerHtml(){
+  if(!HS.active||!HS.ctx)return '';
+  return `<div class="hsbar">🔗 ${L2('Dati dal CRM HubSpot','Data from HubSpot CRM')}${HS.ctx.dealName?` · <b>${esc(HS.ctx.dealName)}</b>`:''}${HS.ctx.dealId?` <span>Deal #${esc(HS.ctx.dealId)}</span>`:''}</div>`;
+}
+// la scheda sa che il configuratore è pronto a ricevere i dati (si scrive solo a un'origine HubSpot nota)
+try{
+  if(window.parent!==window&&document.referrer){const o=new URL(document.referrer).origin;if(hsOriginOk(o))window.parent.postMessage({source:'yacht-configurator',v:1,type:'ready'},o);}
+}catch(_){}
 </script>
 <script>
 /* Configuratore Yacht — modulo "init" */

@@ -23,7 +23,7 @@ function buildMachineListHtml(){
       <div class="info"><div class="nm">${esc(m.name)} ${protBadge(m)}</div>
       <div class="meta">${esc(m.code)} · ${esc([m.subcategory&&m.subcategory!==m.name?m.subcategory:'',meta].filter(Boolean).join(' · ')||m.category)}</div></div>
       <div class="pr">${priceOf(m)?money(priceOf(m)):'<span style="color:var(--muted);font-size:12px;font-weight:600">'+t('price_tbd')+'</span>'}</div>
-      <button class="btn prim sm" data-add="${esc(m.code)}">+ ${t('add')}</button></div>`;
+      <button class="btn prim sm" data-add="${esc(m.code)}"${(S.listino==='USD'&&!priceOf(m))?' disabled title="'+esc(L2('Prezzo non disponibile nel listino $','Price not available in the $ price list'))+'"':''}>+ ${t('add')}</button></div>`;
   }).join('');
   return html||'<p class="hint">'+t('no_results')+'</p>';
 }
@@ -46,8 +46,14 @@ function stepProduct(){
   v.innerHTML=`
   <div class="card">
     <h2>${t('step_product')}</h2><p class="hint">${t('hint_product')}</p>
+    <div class="stp-t"><b>1</b>${L2('Listino','Price list')}</div>
+    <div class="lsel"><button data-listino="EUR" class="${S.listino!=='USD'?'sel':''}">${flagImg('eu',20)} L € · Euro</button>
+      <button data-listino="USD" class="${S.listino==='USD'?'sel':''}">${flagImg('us',20)} L $ · ${L2('Dollaro USA','US Dollar')}</button></div>
+    ${S.listino==='USD'&&!DATA.machines.some(m=>Number(m.priceUsd)>0)?`<p class="hint" style="margin:8px 0 0;color:var(--red-700)">${L2('Listino in dollari non ancora caricato: manca la colonna «Prezzo_USD» nel listino barche. I modelli restano non selezionabili finché non arriva.','Dollar price list not loaded yet: the «Prezzo_USD» column is missing from the boat price list. Models cannot be selected until it is loaded.')}</p>`:''}
+    <div class="stp-t"><b>2</b>${L2('Classe della barca','Yacht class')}</div>
     <div class="cat-grid">${catHtml}</div>
-    <div style="margin-top:12px"><span class="hint" style="margin-right:6px">${t('protection_f')}:</span>${protHtml}</div>
+    <div class="stp-t"><b>3</b>${L2('Modello','Model')}</div>
+    <div style="margin-bottom:4px"><span class="hint" style="margin-right:6px">${t('protection_f')}:</span>${protHtml}</div>
     ${subHtml}
     <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
     <div class="mlist">${listHtml}</div>
@@ -58,6 +64,7 @@ function stepProduct(){
     ${S.solutions.length?renderSolList():'<p class="hint">'+t('none_selected')+'</p>'}
   </div>
   ${selectedDrawer()}`;
+  v.querySelectorAll('[data-listino]').forEach(b=>b.onclick=()=>setListino(b.dataset.listino));
   v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=(curCat===b.dataset.c?null:b.dataset.c);curSub=null;stepProduct();});
   v.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{curProt=b.dataset.prot;curSub=null;stepProduct();});
   v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{curSub=b.dataset.sub||null;stepProduct();});
@@ -69,6 +76,14 @@ function stepProduct(){
   wireMove(v);
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
+}
+// listino prezzi: € oppure $ (due listini distinti, non una conversione); cambiarlo azzera i prodotti scelti
+function setListino(l){
+  if((S.listino||'EUR')===l)return;
+  if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
+  S.solutions=[];S.listino=l;delete S.net;
+  if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
+  stepProduct();
 }
 let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){

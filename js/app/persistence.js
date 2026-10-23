@@ -390,7 +390,8 @@ async function saveOfferComplete(){
   const btn=document.getElementById('btnSaveAll');
   if(btn){btn.disabled=true;btn.textContent='⏳ '+t('saving_all');}
   try{
-    let pdfOk=false, pdfBlob=null;
+    let pdfOk=false, pdfBlob=null, xlsxBlob=null;
+    try{ xlsxBlob=await buildOfferXlsx(); }catch(e){ console.warn('Excel non generato',e); }   // prima del salvataggio: poi lo stato si azzera
     // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
     if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
     else if(window.showDirectoryPicker){
@@ -398,6 +399,7 @@ async function saveOfferComplete(){
         const fh=await dir.getFileHandle(suggestedFilename()+'.pdf',{create:true});
         const w=await fh.createWritable(); await w.write(blob); await w.close();
         pdfOk=true;
+        if(xlsxBlob){try{const fx=await dir.getFileHandle(suggestedFilename()+'.xlsx',{create:true});const wx=await fx.createWritable();await wx.write(xlsxBlob);await wx.close();}catch(e){console.error('xlsx save failed',e);}}
         try{
           const base=String(S.offerNum||'').replace(/_REV\d+$/i,'');
           const snapshot={__yachtOffer:true,baseOfferNum:base,savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))};
@@ -408,6 +410,7 @@ async function saveOfferComplete(){
     }
     const {saved:regOk,num,row:regRow,ghSaved}=await writeRegistryEntry();
     if(ghSaved&&pdfBlob){ try{pdfOk=(await ghUploadPdf(regRow,pdfBlob))||pdfOk;}catch(e){console.error(e);} }
+    if(ghSaved&&xlsxBlob){ try{await ghUploadFile(regRow,xlsxBlob,'.xlsx','Excel');}catch(e){console.error(e);} }
     let clientRes={target:'none'};
     if(regOk){ try{clientRes=await saveClientIfNew();}catch(_){} try{settingsAfterSave();}catch(e){console.warn(e);} }
     if(regOk){
@@ -446,7 +449,7 @@ function resetOffer(){
   S.client='';S.contact='';S.role='';S.phone='';S.email='';S.subject=t('def_subject');S.intro='';S.isRevisionOffer=false;
   S.app={use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''};
   S.solutions=[];S.discount=0;S.discount2=0;S.discount3=0;
-  S.validity='30';S.lead='';S.warranty='';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
+  S.validity='30';S.lead='';S.warranty='';S.listino='EUR';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
   S.delivery=t('def_delivery');S.packaging=t('def_packaging');S.payment=t('def_payment');
   S.exclusions='';S.notes='';
   applyNextOfferNumber();
