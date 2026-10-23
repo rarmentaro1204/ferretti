@@ -42,7 +42,7 @@ function refreshMachineList(){
 }
 // cambio di schermata: l'attuale esce in 150 ms, la nuova entra dal basso con un leggero scaglionamento
 function goP(n){
-  const st=document.querySelector('.pstage');PANIM=true;
+  const st=document.querySelector('.pstage');PANIM=true;PCHOSEN=true;   // l'utente naviga di sua scelta: non si salta più ai modelli
   if(st&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){st.classList.add('leaving');setTimeout(()=>{PSTEP=n;stepProduct();},150);}
   else{PSTEP=n;stepProduct();}
 }
@@ -101,15 +101,37 @@ function stepProduct(){
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
 }
-// listino prezzi: € oppure $ (il $ è il listino euro + 10%); cambiarlo azzera i prodotti scelti
-function setListino(l){
-  if((S.listino||'EUR')!==l){
-    if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
-    S.solutions=[];S.listino=l;delete S.net;
-    if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
-  }
-  PCHOSEN=true;goP(1);
+// Cambio di listino (€ ⇄ $): le scelte restano e si riprezzano da sole sul listino richiamato.
+// Barche e optional del listino prendono il prezzo dell'altro listino; righe libere («Customizzazione»), barche personalizzate
+// e prezzo netto manuale, che non hanno un listino, si convertono con lo stesso +10%.
+function switchListino(l){
+  if(l!=='USD')l='EUR';
+  if((S.listino||'EUR')===l)return false;
+  const f=l==='USD'?USD_MARKUP:1/USD_MARKUP,r2=n=>Math.round((Number(n)||0)*100)/100;
+  S.listino=l;
+  S.solutions.forEach(sl=>{
+    if(sl.custom||sl.sparesOnly)sl.unit=r2(sl.unit*f);
+    else{const m=DATA.machines.find(x=>x.code===sl.code);sl.unit=m?priceOf(m):r2(sl.unit*f);}
+    sl.accessories.forEach(a=>{
+      const o=(a.free||!a.code)?null:machineOptionals(sl.code).concat(machineSpares(sl.code)).find(x=>x.code===a.code);
+      const p=o?liteP(o):null;
+      a.price=(p!=null&&p!=='')?Number(p):r2(a.price*f);
+    });
+    if(sl.net&&Number(sl.net.manual)>0)sl.net.manual=r2(sl.net.manual*f);
+  });
+  if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
+  return true;
 }
+function setListino(l){switchListino(l);PCHOSEN=true;goP(1);}
+// interruttore € | $ presente anche nei passi Optional e Offerta
+function listinoSwitchHtml(){
+  const u=S.listino==='USD';
+  return `<div class="lsw" role="group" aria-label="${esc(L2('Listino','Price list'))}"><button data-lsw="EUR" class="${u?'':'on'}">€</button><button data-lsw="USD" class="${u?'on':''}">$</button></div>`;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-lsw]');if(!b)return;
+  if(switchListino(b.dataset.lsw))render();
+});
 let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
   const items=S.solutions.map((s,i)=>`<div class="ditem">

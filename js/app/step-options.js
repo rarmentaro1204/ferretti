@@ -150,7 +150,7 @@ function optViewHtml(si){
   const none=!opts.length&&!s.custom?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${t('no_options_machine')}</div>`:'';
   const wide=cur==='SUMMARY';
   return `<div class="optview">${loadHint}${none}
-    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}"><span>🛒</span><b>${sd?moneyD(sd.solTot):''}</b></div></div>
+    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}">${listinoSwitchHtml()}<b>${sd?moneyD(sd.solTot):''}</b></div></div>
     <div class="ogrid${wide?' wide':''}">
       <div class="oleft">${hero?`<img class="ohero" src="${hero}" alt="">`:`<div class="ohero ph">${esc(s.name)}</div>`}
         <div class="oname"><b>${esc(s.name)}</b><span>${esc(s.code)}</span></div></div>

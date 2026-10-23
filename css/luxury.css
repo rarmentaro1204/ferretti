@@ -164,3 +164,10 @@ details.issuer>summary::before{content:'+ ';color:var(--lx-gold)}details.issuer[
 
 .savenote{border:1px solid var(--lx-line);border-left:2px solid var(--lx-gold);background:#f7f4ee;padding:14px 18px;font-family:var(--lx-sans);font-size:12.5px;font-weight:300;line-height:1.7;color:#4a4943}
 .savenote b{font-weight:500}
+
+/* interruttore listino € | $ */
+.lsw{display:inline-flex;border:1px solid var(--lx-line);margin-right:14px;vertical-align:middle}
+.lsw button{border:none;background:transparent;font-family:var(--lx-serif);font-size:19px;line-height:1;padding:7px 15px;color:var(--lx-mute);transition:background-color .2s,color .2s}
+.lsw button.on{background:var(--lx-ink);color:#fff}
+@media (hover:hover) and (pointer:fine){.lsw button:not(.on):hover{color:var(--lx-ink);background:#f7f4ee}}
+.ocart{display:flex;align-items:center}

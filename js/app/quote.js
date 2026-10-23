@@ -344,7 +344,7 @@ function stepQuote(){
         <button class="btn prim" id="btnPrint">${t('print_pdf')}</button>
         <button class="btn ghost" id="btnXlsx">${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:var(--lx-petrol)">${t('save_all')}</button>
-        <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
+        ${listinoSwitchHtml()}<span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
       <div class="savenote">
         ${t('save_note')}

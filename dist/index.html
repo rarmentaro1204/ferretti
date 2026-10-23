@@ -789,6 +789,13 @@ details.issuer>summary::before{content:'+ ';color:var(--lx-gold)}details.issuer[
 
 .savenote{border:1px solid var(--lx-line);border-left:2px solid var(--lx-gold);background:#f7f4ee;padding:14px 18px;font-family:var(--lx-sans);font-size:12.5px;font-weight:300;line-height:1.7;color:#4a4943}
 .savenote b{font-weight:500}
+
+/* interruttore listino € | $ */
+.lsw{display:inline-flex;border:1px solid var(--lx-line);margin-right:14px;vertical-align:middle}
+.lsw button{border:none;background:transparent;font-family:var(--lx-serif);font-size:19px;line-height:1;padding:7px 15px;color:var(--lx-mute);transition:background-color .2s,color .2s}
+.lsw button.on{background:var(--lx-ink);color:#fff}
+@media (hover:hover) and (pointer:fine){.lsw button:not(.on):hover{color:var(--lx-ink);background:#f7f4ee}}
+.ocart{display:flex;align-items:center}
 </style>
 </head>
 <body>
@@ -1299,7 +1306,7 @@ function refreshMachineList(){
 }
 // cambio di schermata: l'attuale esce in 150 ms, la nuova entra dal basso con un leggero scaglionamento
 function goP(n){
-  const st=document.querySelector('.pstage');PANIM=true;
+  const st=document.querySelector('.pstage');PANIM=true;PCHOSEN=true;   // l'utente naviga di sua scelta: non si salta più ai modelli
   if(st&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){st.classList.add('leaving');setTimeout(()=>{PSTEP=n;stepProduct();},150);}
   else{PSTEP=n;stepProduct();}
 }
@@ -1358,15 +1365,37 @@ function stepProduct(){
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
 }
-// listino prezzi: € oppure $ (il $ è il listino euro + 10%); cambiarlo azzera i prodotti scelti
-function setListino(l){
-  if((S.listino||'EUR')!==l){
-    if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
-    S.solutions=[];S.listino=l;delete S.net;
-    if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
-  }
-  PCHOSEN=true;goP(1);
+// Cambio di listino (€ ⇄ $): le scelte restano e si riprezzano da sole sul listino richiamato.
+// Barche e optional del listino prendono il prezzo dell'altro listino; righe libere («Customizzazione»), barche personalizzate
+// e prezzo netto manuale, che non hanno un listino, si convertono con lo stesso +10%.
+function switchListino(l){
+  if(l!=='USD')l='EUR';
+  if((S.listino||'EUR')===l)return false;
+  const f=l==='USD'?USD_MARKUP:1/USD_MARKUP,r2=n=>Math.round((Number(n)||0)*100)/100;
+  S.listino=l;
+  S.solutions.forEach(sl=>{
+    if(sl.custom||sl.sparesOnly)sl.unit=r2(sl.unit*f);
+    else{const m=DATA.machines.find(x=>x.code===sl.code);sl.unit=m?priceOf(m):r2(sl.unit*f);}
+    sl.accessories.forEach(a=>{
+      const o=(a.free||!a.code)?null:machineOptionals(sl.code).concat(machineSpares(sl.code)).find(x=>x.code===a.code);
+      const p=o?liteP(o):null;
+      a.price=(p!=null&&p!=='')?Number(p):r2(a.price*f);
+    });
+    if(sl.net&&Number(sl.net.manual)>0)sl.net.manual=r2(sl.net.manual*f);
+  });
+  if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
+  return true;
 }
+function setListino(l){switchListino(l);PCHOSEN=true;goP(1);}
+// interruttore € | $ presente anche nei passi Optional e Offerta
+function listinoSwitchHtml(){
+  const u=S.listino==='USD';
+  return `<div class="lsw" role="group" aria-label="${esc(L2('Listino','Price list'))}"><button data-lsw="EUR" class="${u?'':'on'}">€</button><button data-lsw="USD" class="${u?'on':''}">$</button></div>`;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-lsw]');if(!b)return;
+  if(switchListino(b.dataset.lsw))render();
+});
 let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
   const items=S.solutions.map((s,i)=>`<div class="ditem">
@@ -1577,7 +1606,7 @@ function optViewHtml(si){
   const none=!opts.length&&!s.custom?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${t('no_options_machine')}</div>`:'';
   const wide=cur==='SUMMARY';
   return `<div class="optview">${loadHint}${none}
-    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}"><span>🛒</span><b>${sd?moneyD(sd.solTot):''}</b></div></div>
+    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}">${listinoSwitchHtml()}<b>${sd?moneyD(sd.solTot):''}</b></div></div>
     <div class="ogrid${wide?' wide':''}">
       <div class="oleft">${hero?`<img class="ohero" src="${hero}" alt="">`:`<div class="ohero ph">${esc(s.name)}</div>`}
         <div class="oname"><b>${esc(s.name)}</b><span>${esc(s.code)}</span></div></div>
@@ -2104,7 +2133,7 @@ function stepQuote(){
         <button class="btn prim" id="btnPrint">${t('print_pdf')}</button>
         <button class="btn ghost" id="btnXlsx">${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:var(--lx-petrol)">${t('save_all')}</button>
-        <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
+        ${listinoSwitchHtml()}<span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
       <div class="savenote">
         ${t('save_note')}
