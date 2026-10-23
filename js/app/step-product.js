@@ -10,6 +10,12 @@ const BAND_ORDER=['Fino a 20 m','20–25 m','25–30 m','Oltre 30 m'];
 function protOf(m){return m.subcategory||'—';}
 function protBadge(m){return '';}
 function subCounts(){const c={};DATA.machines.filter(m=>m.category===curCat&&(!curProt||protOf(m)===curProt)).forEach(m=>{const s=m.subcategory||m.family||'—';c[s]=(c[s]||0)+1;});return c;}
+// Listino $ = listino € + 10% (se il listino barche ha una colonna Prezzo_USD, vale quella)
+const USD_MARKUP=1.10;
+function usdOf(e){return Math.round((Number(e)||0)*USD_MARKUP);}
+// passo Prodotto a tre schermate: 0 listino · 1 gamma · 2 modello
+let PSTEP=0, PANIM=false, PCHOSEN=false;
+function machineImg(m){return heroOf(m,imgUrlForCode(m.code));}
 function buildMachineListHtml(){
   let list=DATA.machines;
   if(curCat)list=list.filter(m=>m.category===curCat);
@@ -17,73 +23,92 @@ function buildMachineListHtml(){
   if(curProt)list=list.filter(m=>protOf(m)===curProt);
   if(search){const q=search.toLowerCase();list=list.filter(m=>(m.name+' '+m.code+' '+(m.family||'')+' '+(m.subcategory||'')+' '+(m.category||'')).toLowerCase().includes(q));}
   list=list.slice(0,300);
-  const html=list.map(m=>{
-    const meta=[m.loa,m.cabins,m.engine].filter(Boolean).join(' · ');
-    return `<div class="mrow">
-      <div class="info"><div class="nm">${esc(m.name)} ${protBadge(m)}</div>
-      <div class="meta">${esc(m.code)} · ${esc([m.subcategory&&m.subcategory!==m.name?m.subcategory:'',meta].filter(Boolean).join(' · ')||m.category)}</div></div>
-      <div class="pr">${priceOf(m)?money(priceOf(m)):'<span style="color:var(--muted);font-size:12px;font-weight:600">'+t('price_tbd')+'</span>'}</div>
-      <button class="btn prim sm" data-add="${esc(m.code)}"${(S.listino==='USD'&&!priceOf(m))?' disabled title="'+esc(L2('Prezzo non disponibile nel listino $','Price not available in the $ price list'))+'"':''}>+ ${t('add')}</button></div>`;
+  const html=list.map((m,i)=>{
+    const meta=[m.loa,m.cabins&&(m.cabins+' '+t('cabins_short'))].filter(Boolean).join(' · ');
+    const img=machineImg(m),ex=S.solutions.find(x=>x.code===m.code);
+    return `<div class="mcard${ex?' on':''}" style="--i:${Math.min(i,10)}">
+      <div class="mimg">${img?`<img src="${img}" alt="" loading="lazy">`:''}</div>
+      <div class="mbody"><div class="mnm">${esc(String(m.name).replace(/^Ferretti Yachts\s*/i,''))}</div>
+        <div class="mmeta">${esc(meta||m.category)}</div>
+        <div class="mfoot"><div class="mpr">${priceOf(m)?listMoney(priceOf(m)):'<span>'+t('price_tbd')+'</span>'}</div>
+          <button class="btn prim sm" data-add="${esc(m.code)}">${ex?'✓ ×'+ex.qty:L2('Aggiungi','Add')}</button></div></div></div>`;
   }).join('');
   return html||'<p class="hint">'+t('no_results')+'</p>';
 }
 function refreshMachineList(){
-  const box=document.querySelector('.mlist'); if(!box)return;
+  const box=document.querySelector('.mgrid'); if(!box)return;
   box.innerHTML=buildMachineListHtml();
   box.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addSolution(b.dataset.add));
 }
+// cambio di schermata: l'attuale esce in 150 ms, la nuova entra dal basso con un leggero scaglionamento
+function goP(n){
+  const st=document.querySelector('.pstage');PANIM=true;
+  if(st&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){st.classList.add('leaving');setTimeout(()=>{PSTEP=n;stepProduct();},150);}
+  else{PSTEP=n;stepProduct();}
+}
+function pCrumbsHtml(){
+  const lv=S.listino==='USD'?'$ · USD':'€ · EUR';
+  const items=[[L2('Listino','Price list'),PCHOSEN||PSTEP>0?lv:'—'],[L2('Gamma','Range'),curCat&&PSTEP>1?curCat:'—'],[L2('Modello','Model'),S.solutions.length?S.solutions.map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).join(', '):'—']];
+  return `<div class="pcrumbs">${items.map(([k,val],i)=>`<button class="pcr${i===PSTEP?' on':''}${i<PSTEP?' done':''}" ${i<PSTEP?`data-pgo="${i}"`:'disabled'}><i>${i+1}</i><span>${esc(k)}</span><b>${esc(val)}</b></button>`).join('')}</div>`;
+}
+function pStageHtml(){
+  if(PSTEP===0){
+    return `<div class="phead"><div class="peyebrow">${L2('Passo 1 di 3','Step 1 of 3')}</div><h3>${L2('Scegli il listino','Choose the price list')}</h3></div>
+    <div class="ptiles two">
+      <button class="ptile" data-listino="EUR" style="--i:0"><span class="psym">€</span><span class="pt">${L2('Listino Euro','Euro price list')}</span><span class="ps">L€ · ${L2('prezzi in euro','prices in euro')}</span></button>
+      <button class="ptile" data-listino="USD" style="--i:1"><span class="psym">$</span><span class="pt">${L2('Listino Dollaro','Dollar price list')}</span><span class="ps">L$ · ${L2('listino euro + 10%','euro price list + 10%')}</span></button>
+    </div>`;
+  }
+  if(PSTEP===1){
+    const counts=catCounts();
+    const cats=Object.keys(counts).sort((a,b)=>catOrderOf(a)-catOrderOf(b)||counts[b]-counts[a]);
+    return `<div class="phead"><div class="peyebrow">${L2('Passo 2 di 3','Step 2 of 3')}</div><h3>${L2('Scegli la gamma','Choose the range')}</h3></div>
+    <div class="ptiles">${cats.map((c,i)=>{const first=DATA.machines.find(m=>m.category===c),img=first?machineImg(first):'';
+      return `<button class="ptile photo" data-c="${esc(c)}" style="--i:${i}">${img?`<span class="pimg"><img src="${img}" alt="" loading="lazy"></span>`:''}<span class="pt">${esc(c)}</span><span class="ps">${counts[c]} ${t('models')}</span></button>`;}).join('')}</div>`;
+  }
+  const protCounts={};DATA.machines.filter(m=>!curCat||m.category===curCat).forEach(m=>{const p=protOf(m);protCounts[p]=(protCounts[p]||0)+1;});
+  const protHtml=['',...BAND_ORDER.filter(b=>protCounts[b]),...Object.keys(protCounts).filter(b=>!BAND_ORDER.includes(b))].map(p=>`<button class="chip${p===curProt?' sel':''}" data-prot="${p}">${p?esc(p):t('all_f')}${p?' · '+protCounts[p]:''}</button>`).join('');
+  return `<div class="phead"><div class="peyebrow">${L2('Passo 3 di 3','Step 3 of 3')}</div><h3>${L2('Scegli il modello','Choose the model')}</h3></div>
+    <div class="pfilters"><span class="hint">${t('protection_f')}</span>${protHtml}</div>
+    <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
+    <div class="mgrid">${buildMachineListHtml()}</div>
+    <button class="btn ghost" id="btnCustom" style="margin-top:14px">+ ${t('add_custom')}</button>`;
+}
 function stepProduct(){
   const v=$('#view');
-  const counts=catCounts();
-  const cats=Object.keys(counts).sort((a,b)=>catOrderOf(a)-catOrderOf(b)||counts[b]-counts[a]);
-  const catHtml=cats.map(c=>`<button class="cat${c===curCat?' sel':''}" data-c="${esc(c)}">
-     <div class="ttl">${esc(c)}</div><div class="cnt">${counts[c]} ${t('models')}</div></button>`).join('');
-  const listHtml=buildMachineListHtml();
-  const protCounts={};DATA.machines.filter(m=>!curCat||m.category===curCat).forEach(m=>{const p=protOf(m);protCounts[p]=(protCounts[p]||0)+1;});
-  const protHtml=['',...BAND_ORDER.filter(b=>protCounts[b]),...Object.keys(protCounts).filter(b=>!BAND_ORDER.includes(b))].map(p=>`<button class="chip${p===curProt?' sel':''}" data-prot="${p}" style="border:1px solid var(--line);cursor:pointer;${p===curProt?'background:var(--red);color:#fff':''}">${p?esc(p):t('all_f')}${p?' · '+protCounts[p]:''}</button>`).join('');
-  const sc=curCat?subCounts():{};
-  const subHtml=false&&curCat&&Object.keys(sc).length>1?`<div style="margin-top:10px">${['',...Object.keys(sc)].map(s=>`<button class="chip${(s||null)===curSub?' sel':''}" data-sub="${esc(s)}" style="border:1px solid var(--line);cursor:pointer;${(s||null)===curSub?'background:var(--navy);color:#fff':''}">${s?esc(s)+' · '+sc[s]:t('all_f')}</button>`).join('')}</div>`:'';
+  if(PSTEP===0&&!PCHOSEN&&S.solutions.length)PSTEP=2;   // tornando al passo con prodotti già scelti: si riparte dai modelli
+  const anim=PANIM;PANIM=false;
   v.innerHTML=`
-  <div class="card">
-    <h2>${t('step_product')}</h2><p class="hint">${t('hint_product')}</p>
-    <div class="stp-t"><b>1</b>${L2('Listino','Price list')}</div>
-    <div class="lsel"><button data-listino="EUR" class="${S.listino!=='USD'?'sel':''}">${flagImg('eu',20)} L € · Euro</button>
-      <button data-listino="USD" class="${S.listino==='USD'?'sel':''}">${flagImg('us',20)} L $ · ${L2('Dollaro USA','US Dollar')}</button></div>
-    ${S.listino==='USD'&&!DATA.machines.some(m=>Number(m.priceUsd)>0)?`<p class="hint" style="margin:8px 0 0;color:var(--red-700)">${L2('Listino in dollari non ancora caricato: manca la colonna «Prezzo_USD» nel listino barche. I modelli restano non selezionabili finché non arriva.','Dollar price list not loaded yet: the «Prezzo_USD» column is missing from the boat price list. Models cannot be selected until it is loaded.')}</p>`:''}
-    <div class="stp-t"><b>2</b>${L2('Classe della barca','Yacht class')}</div>
-    <div class="cat-grid">${catHtml}</div>
-    <div class="stp-t"><b>3</b>${L2('Modello','Model')}</div>
-    <div style="margin-bottom:4px"><span class="hint" style="margin-right:6px">${t('protection_f')}:</span>${protHtml}</div>
-    ${subHtml}
-    <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
-    <div class="mlist">${listHtml}</div>
-    <button class="btn ghost" id="btnCustom" style="margin-top:10px">➕ ${t('add_custom')}</button>
+  <div class="card pcard">
+    <h2>${t('step_product')}</h2>
+    ${pCrumbsHtml()}
+    <div class="pstage${anim?' in':''}">${pStageHtml()}</div>
   </div>
   <div class="card">
     <h2>${t('selected_solutions')} (${S.solutions.length})</h2>
     ${S.solutions.length?renderSolList():'<p class="hint">'+t('none_selected')+'</p>'}
   </div>
   ${selectedDrawer()}`;
+  v.querySelectorAll('[data-pgo]').forEach(b=>b.onclick=()=>goP(+b.dataset.pgo));
   v.querySelectorAll('[data-listino]').forEach(b=>b.onclick=()=>setListino(b.dataset.listino));
-  v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=(curCat===b.dataset.c?null:b.dataset.c);curSub=null;stepProduct();});
+  v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=b.dataset.c;curSub=null;curProt='';search='';goP(2);});
   v.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{curProt=b.dataset.prot;curSub=null;stepProduct();});
-  v.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{curSub=b.dataset.sub||null;stepProduct();});
-  $('#i_search').oninput=e=>{search=e.target.value;refreshMachineList();};
+  if($('#i_search'))$('#i_search').oninput=e=>{search=e.target.value;refreshMachineList();};
   v.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addSolution(b.dataset.add));
   if($('#btnCustom'))$('#btnCustom').onclick=addCustomSolution;
-  if($('#btnSpares'))$('#btnSpares').onclick=addSparesSolution;
   v.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.solutions.splice(+b.dataset.del,1);stepProduct();});
   wireMove(v);
   v.querySelectorAll('[data-qty]').forEach(inp=>inp.oninput=e=>{S.solutions[+inp.dataset.qty].qty=Math.max(1,+e.target.value||1);});
   wireDrawer();
 }
-// listino prezzi: € oppure $ (due listini distinti, non una conversione); cambiarlo azzera i prodotti scelti
+// listino prezzi: € oppure $ (il $ è il listino euro + 10%); cambiarlo azzera i prodotti scelti
 function setListino(l){
-  if((S.listino||'EUR')===l)return;
-  if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
-  S.solutions=[];S.listino=l;delete S.net;
-  if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
-  stepProduct();
+  if((S.listino||'EUR')!==l){
+    if(S.solutions.length&&!confirm(L2('Cambiando listino i prodotti selezionati vengono rimossi. Continuare?','Changing price list removes the selected products. Continue?')))return;
+    S.solutions=[];S.listino=l;delete S.net;
+    if(l==='USD'){S.cur='USD';S.fxRate=1;S.fxDate='';}else fxSelect('EUR');
+  }
+  PCHOSEN=true;goP(1);
 }
 let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){

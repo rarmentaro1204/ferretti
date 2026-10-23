@@ -79,7 +79,7 @@ const OPT_TAB={}, OPT_SEARCH={}, OPT_QTY={};   // per soluzione: categoria apert
 const IMG_PH='<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="90" fill="#e4e4e4"/><rect x="27" y="20" width="66" height="50" rx="5" fill="none" stroke="#c9c9c9" stroke-width="5"/><circle cx="44" cy="37" r="6" fill="#c9c9c9"/><path d="M31 66l20-20 12 12 9-9 17 17z" fill="#c9c9c9"/></svg>';
 function listMoney(p){return (S.listino==='USD')?fmtCur(p,'USD'):money(p);}
 function optSel(s,o){return s.accessories.find(a=>a.code===o.code);}
-function optPriceOk(o){const p=liteP(o);return p!=null&&p!==''&&(S.listino!=='USD'||Number(p)>0);}
+function optPriceOk(o){const p=liteP(o);return p!=null&&p!=='';}
 function optGroupsOf(s){const opts=machineOptionals(s.code);return OPT_GROUP_ORDER.filter(g=>opts.some(o=>(o.group||'Altro')===g));}
 function optTabOf(si){const gs=optGroupsOf(S.solutions[si]);let c=OPT_TAB[si];if(c!=='SUMMARY'&&!gs.includes(c))c=gs[0]||'SUMMARY';OPT_TAB[si]=c;return c;}
 function optSolRoot(si){return document.querySelector(`[data-optsol="${si}"]`);}
@@ -128,9 +128,7 @@ function optSummaryHtml(si){
       </div>
       ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span>${t('unit_price')}</span><span>${t('discount')} %</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
       ${accRowsHtml(si)}
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="hint" style="margin:0">${t('add_free_accessory')}:</span>
-        ${OPT_GROUP_ORDER.filter(g=>g!=='Altro').map(g=>`<button class="btn ghost sm" data-accadd="${si}" data-grp="${esc(g)}">+ ${esc(optGroupLabel(g))}</button>`).join('')}
-        <button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${esc(optGroupLabel('Altro'))}</button></div>`;
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${L2('Customizzazione','Customization')}</button></div>`;
 }
 function optPaneHtml(si){
   const s=S.solutions[si],cur=optTabOf(si);
@@ -267,7 +265,7 @@ function stepOptions(){
         <input type="checkbox" data-sameorder="${si}" ${s.sameOrder?'checked':''}> ${t('same_order_chk')}</label>`:''}
       ${editor}
       ${(s.sparesOnly||!s.custom)?'':`<div class="addbar" style="flex-wrap:wrap;gap:10px">
-        <label class="btn ghost sm" style="display:inline-flex;align-items:center">➕ ${t('add_image')}
+        <label class="btn ghost sm" style="display:inline-flex;align-items:center">${t('add_image')}
           <input type="file" accept="image/*" multiple style="display:none" data-imgadd="${si}"></label>
         ${imgs.map((u,ii)=>`<span style="position:relative;display:inline-block">
           <img class="imgthumb" src="${u}"${ii===0?' style="outline:2px solid var(--red);outline-offset:1px"':''}>

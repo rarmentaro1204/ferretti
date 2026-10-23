@@ -388,7 +388,7 @@ async function doRecall(pdfName,dir){
 }
 async function saveOfferComplete(){
   const btn=document.getElementById('btnSaveAll');
-  if(btn){btn.disabled=true;btn.textContent='⏳ '+t('saving_all');}
+  if(btn){btn.disabled=true;btn.textContent=''+t('saving_all');}
   try{
     let pdfOk=false, pdfBlob=null, xlsxBlob=null;
     try{ xlsxBlob=await buildOfferXlsx(); }catch(e){ console.warn('Excel non generato',e); }   // prima del salvataggio: poi lo stato si azzera
@@ -429,7 +429,7 @@ async function saveOfferComplete(){
       applyNextOfferNumber();
       render();
     }
-  } finally { if(btn){btn.disabled=false;btn.textContent='✅ '+t('save_all');} }
+  } finally { if(btn){btn.disabled=false;btn.textContent=''+t('save_all');} }
 }
 async function registerOffer(){
   const {saved,num}=await writeRegistryEntry();
@@ -449,7 +449,7 @@ function resetOffer(){
   S.client='';S.contact='';S.role='';S.phone='';S.email='';S.subject=t('def_subject');S.intro='';S.isRevisionOffer=false;
   S.app={use:'',area:'',guests:'',crew:'',flag:'',port:'',interior:'',notes:''};
   S.solutions=[];S.discount=0;S.discount2=0;S.discount3=0;
-  S.validity='30';S.lead='';S.warranty='';S.listino='EUR';S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
+  S.validity='30';S.lead='';S.warranty='';S.listino='EUR';PSTEP=0;PCHOSEN=false;curCat=null;S.cur='EUR';S.fxRate=1;S.curShow=false;delete S.net;
   S.delivery=t('def_delivery');S.packaging=t('def_packaging');S.payment=t('def_payment');
   S.exclusions='';S.notes='';
   applyNextOfferNumber();

@@ -1,6 +1,6 @@
 /* Configuratore Yacht — modulo "init" */
 /* ============== INIT ============== */
-$('#brandLogo').innerHTML=logoDark(30);
+$('#brandLogo').innerHTML=logoLight(30);
 setupLoader();
 $('#dashBtn').onclick=()=>toggleDashboard(!DASH);
 $('#offersBtn').onclick=openOfferList;

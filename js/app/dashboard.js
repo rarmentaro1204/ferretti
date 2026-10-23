@@ -195,7 +195,7 @@ function renderDashboard(){
   const st=statsOf(rows);
   const head=`<div class="card">
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
-      <h2 style="margin:0">📊 ${dt('title')}</h2>
+      <h2 style="margin:0">${dt('title')}</h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
         <label class="fld" style="min-width:110px">${dt('year')}<select id="d_year">${years.map(y=>`<option${y===dashYear?' selected':''}>${y}</option>`).join('')}</select></label>
         <label class="fld" style="min-width:220px">${dt('rep')}<select id="d_rep"><option value="">${dt('all')}</option>${reps.map(r=>`<option${r===dashRep?' selected':''}>${esc(r)}</option>`).join('')}</select></label>

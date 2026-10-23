@@ -20,9 +20,9 @@ function stepCustomer(){
   <div class="card">
     <h2>${t('step_customer')}</h2><p class="hint">${t('hint_customer')}</p>
     ${typeof hsBannerHtml==='function'?hsBannerHtml():''}
-    <button class="btn prim" id="btnOffers" style="margin-bottom:12px;margin-right:8px">📚 ${LANG==='it'?'Richiama un\'offerta':'Recall an offer'}</button>
-    ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">🔄 ${t('recall_offer')}</button>`:''}
-    <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">📤 ${t('recall_upload')}</button>
+    <button class="btn prim" id="btnOffers" style="margin-bottom:12px;margin-right:8px">${LANG==='it'?'Richiama un\'offerta':'Recall an offer'}</button>
+    ${window.showDirectoryPicker?`<button class="btn ghost" id="btnRecall" style="margin-bottom:12px">${t('recall_offer')}</button>`:''}
+    <button class="btn ghost" id="btnRecallUpload" style="margin-bottom:12px">${t('recall_upload')}</button>
     <div class="grid g3">
       <label class="fld">${t('f_rep')}<input id="i_rep" list="repList" value="${esc(S.rep.name)}" autocomplete="off"><datalist id="repList">${repOpts}</datalist></label>
       <label class="fld">${t('f_repmail')}<input id="i_repmail" value="${esc(S.rep.email)}"></label>

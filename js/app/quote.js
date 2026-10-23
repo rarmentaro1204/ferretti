@@ -45,7 +45,7 @@ function lineTotals(opts){
       const key=String(a.code||'').trim().toLowerCase()+'|'+String(a.desc||'').trim().toLowerCase();
       if(key==='|'||seenAcc.has(key))return;   // niente righe vuote né doppioni
       seenAcc.add(key);
-      rows.push(mk({code:a.code||(a.group?optGroupLabel(a.group):a.desc),desc:a.desc||'',descEn:accEnDesc(s,a),group:a.group||'Altro',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
+      rows.push(mk({code:a.code||(a.free?'Customizzazione':(a.group?optGroupLabel(a.group):a.desc)),desc:a.desc||'',descEn:accEnDesc(s,a),group:a.group||'Altro',unit:a.price,qty:a.qty,partial:a.price*a.qty,img:a.img},a.disc));});
     const baseTot=rows.reduce((x,r)=>x+r.total,0);
     if(!opts.noNet&&s.net&&!s.sparesOnly&&rows.length){
       const T=netTarget(s,baseTot),boat=rows[0],bm=itemMult(s.disc),nt=boat.total+(T-baseTot);
@@ -341,12 +341,12 @@ function stepQuote(){
     <div class="card app-noprint">
       <h2>${t('step_quote')}</h2><p class="hint">${t('hint_quote')}</p>
       <div class="doc-tools">
-        <button class="btn prim" id="btnPrint">🖨 ${t('print_pdf')}</button>
-        <button class="btn prim" id="btnXlsx" style="background:#2e6b3a">📊 ${L2('Scarica Excel','Download Excel')}</button>
-        <button class="btn prim" id="btnSaveAll" style="background:#1f7a4d">✅ ${t('save_all')}</button>
+        <button class="btn prim" id="btnPrint">${t('print_pdf')}</button>
+        <button class="btn ghost" id="btnXlsx">${L2('Scarica Excel','Download Excel')}</button>
+        <button class="btn prim" id="btnSaveAll" style="background:var(--lx-petrol)">${t('save_all')}</button>
         <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
-      <div style="background:#fff7e6;border:1px solid #ffe1a8;border-radius:9px;padding:12px 14px;font-size:12.5px;color:#7a5b00;line-height:1.6">
+      <div class="savenote">
         ${t('save_note')}
       </div>
     </div>
