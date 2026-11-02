@@ -199,7 +199,7 @@ function renderDashboard(){
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
         <label class="fld" style="min-width:110px">${dt('year')}<select id="d_year">${years.map(y=>`<option${y===dashYear?' selected':''}>${y}</option>`).join('')}</select></label>
         <label class="fld" style="min-width:220px">${dt('rep')}<select id="d_rep"><option value="">${dt('all')}</option>${reps.map(r=>`<option${r===dashRep?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
-        ${hasDemoRows()?`<button class="btn sm" id="d_demoToggle" style="background:#FFD017;color:#171717">${demoVisible()?'Nascondi demo':'Mostra demo'}</button>${hasRealRows()&&demoVisible()?`<button class="btn sm" id="d_demoOnly" style="background:${demoOnly()?'#1f7a4d':'#4a4a4a'};color:#fff">${demoOnly()?'✓ Solo demo (presentazione)':'Solo demo (presentazione)'}</button>`:''}<button class="btn ghost sm" id="d_demoDel">Elimina offerte demo</button>`:`<button class="btn ghost sm" id="d_demo">Carica offerte demo</button>`}
+        ${hasDemoRows()?`<button class="btn ghost sm" id="d_demoDel">Elimina offerte demo</button>`:''}
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
@@ -346,16 +346,8 @@ const DEMO_ONLY_LS='yacht_demo_only';
 function demoOnly(){try{return localStorage.getItem(DEMO_ONLY_LS)==='1'&&hasDemoRows()&&demoVisible();}catch(_){return false;}}
 function setDemoOnly(on){try{localStorage.setItem(DEMO_ONLY_LS,on?'1':'0');}catch(_){}}
 function offerRows(){return REGISTRY.rows.filter(r=>demoOnly()?!!r.demo:(!r.demo||demoVisible()));}
-function ensureDemoSeed(){
-  let deleted=false;try{deleted=localStorage.getItem(DEMO_LS_DELETED)==='1';}catch(_){}
-  const demo=REGISTRY.rows.filter(r=>r.demo);
-  // le 10 complete devono avere 15+ optional: se erano state create prima del caricamento del listino optional, si rigenerano
-  const poor=MATRIX_INFO.machines&&demo.some(r=>r.accN!=null&&(r.accN<15||r.dv!==2));
-  if(!deleted&&!hasDemoRows()&&DATA.machines&&DATA.machines.length)installDemo();
-  else if(!deleted&&poor)installDemo();
-  // demo creata con una versione precedente (senza validità): rigenerala
-  else if(!deleted&&hasDemoRows()&&REGISTRY.rows.filter(r=>r.demo).length!==42&&DATA.machines&&DATA.machines.length)installDemo();
-}
+// offerte demo non più usate: se un browser le ha ancora in memoria, si tolgono da sole
+function ensureDemoSeed(){if(hasDemoRows())removeDemo();}
 function removeDemo(){
   REGISTRY.rows.filter(r=>r.demo).forEach(r=>{try{localStorage.removeItem(SNAP_LS+r.num);}catch(_){}});
   REGISTRY.rows=REGISTRY.rows.filter(r=>!r.demo);
