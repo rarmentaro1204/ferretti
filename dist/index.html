@@ -134,7 +134,7 @@ textarea{resize:vertical;min-height:80px}
 .sol .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .sol .head .nm{font-weight:800;color:var(--navy);font-size:16px}
 .sol .head .cd{font-size:12px;color:var(--muted)}
-.acc-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2.6fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,.8fr) 30px;gap:8px;min-width:0;margin-top:8px;align-items:center}
+.acc-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,3fr) minmax(0,.7fr) 30px;gap:8px;min-width:0;margin-top:8px;align-items:center}
 .mvbtns{display:inline-flex;gap:4px}
 .mvbtns .xbtn{background:var(--steel);font-size:10px}
 .mvbtns .xbtn:disabled{opacity:.3;cursor:default}
@@ -888,7 +888,7 @@ const Y={
   hint_customer:"Referente commerciale, dati offerta e cliente (armatore o rappresentante).",
   step_application:"Programma di navigazione", hint_application:"Descrivi l'uso previsto dell'imbarcazione (facoltativo ma consigliato).",
   hint_product:"Scegli la gamma, poi aggiungi una o più imbarcazioni come soluzioni.",
-  hint_options:"Scegli gli optional del listino o aggiungi righe libere per gruppo; poi imposta le condizioni commerciali. I dati tecnici della barca non si modificano.",
+  hint_options:"Scegli gli optional o aggiungi righe libere per gruppo; poi imposta le condizioni dell’offerta. I dati tecnici della barca non si modificano.",
   pres_title:"I modelli proposti", pres_brochure:"Scheda ufficiale e brochure (su richiesta)",
   ph_subject:"offerta imbarcazione", def_subject:"Offerta imbarcazione", offer_n:"Offerta N.",
   intro_default:"Gentile Cliente,\n\nin seguito alla Vostra gradita richiesta, siamo lieti di sottoporVi la nostra migliore offerta per l'imbarcazione e gli allestimenti indicati, alle condizioni di seguito riportate.\n\nRestiamo a Vostra disposizione per ogni ulteriore chiarimento e cogliamo l'occasione per porgere i nostri migliori saluti.",
@@ -924,7 +924,7 @@ const Y={
   hint_customer:"Sales contact, offer details and customer data (owner or representative).",
   step_application:"Cruising programme", hint_application:"Describe the intended use of the yacht (optional but recommended).",
   hint_product:"Pick a range, then add one or more yachts as solutions.",
-  hint_options:"Pick options from the price list or add free rows by group, then set the commercial terms. The yacht's technical data cannot be edited.",
+  hint_options:"Pick options or add free rows by group, then set the offer terms. The yacht's technical data cannot be edited.",
   pres_title:"Models offered", pres_brochure:"Official model page and brochure (on request)",
   ph_subject:"yacht offer", def_subject:"Yacht offer", offer_n:"Offer No.",
   intro_default:"Dear Customer,\n\nfollowing your kind request, we are pleased to submit our best offer for the yacht and outfitting listed, under the conditions set out below.\n\nWe remain at your disposal for any further clarification and take this opportunity to send our best regards.",
@@ -1294,7 +1294,7 @@ function buildMachineListHtml(){
       <div class="mimg">${img?`<img src="${img}" alt="" loading="lazy">`:''}</div>
       <div class="mbody"><div class="mnm">${esc(String(m.name).replace(/^Ferretti Yachts\s*/i,''))}</div>
         <div class="mmeta">${esc(meta||m.category)}</div>
-        <div class="mfoot"><div class="mpr">${priceOf(m)?listMoney(priceOf(m)):'<span>'+t('price_tbd')+'</span>'}</div>
+        <div class="mfoot"><div class="mpr"></div>
           <button class="btn prim sm" data-add="${esc(m.code)}">${ex?'✓ ×'+ex.qty:L2('Aggiungi','Add')}</button></div></div></div>`;
   }).join('');
   return html||'<p class="hint">'+t('no_results')+'</p>';
@@ -1311,28 +1311,20 @@ function goP(n){
   else{PSTEP=n;stepProduct();}
 }
 function pCrumbsHtml(){
-  const lv=S.listino==='USD'?'$ · USD':'€ · EUR';
-  const items=[[L2('Listino','Price list'),PCHOSEN||PSTEP>0?lv:'—'],[L2('Gamma','Range'),curCat&&PSTEP>1?curCat:'—'],[L2('Modello','Model'),S.solutions.length?S.solutions.map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).join(', '):'—']];
-  return `<div class="pcrumbs">${items.map(([k,val],i)=>`<button class="pcr${i===PSTEP?' on':''}${i<PSTEP?' done':''}" ${i<PSTEP?`data-pgo="${i}"`:'disabled'}><i>${i+1}</i><span>${esc(k)}</span><b>${esc(val)}</b></button>`).join('')}</div>`;
+  const items=[[L2('Gamma','Range'),curCat&&PSTEP>1?curCat:'—'],[L2('Modello','Model'),S.solutions.length?S.solutions.map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).join(', '):'—']];
+  return `<div class="pcrumbs">${items.map(([k,val],i)=>`<button class="pcr${i+1===PSTEP?' on':''}${i+1<PSTEP?' done':''}" ${i+1<PSTEP?`data-pgo="${i+1}"`:'disabled'}><i>${i+1}</i><span>${esc(k)}</span><b>${esc(val)}</b></button>`).join('')}</div>`;
 }
 function pStageHtml(){
-  if(PSTEP===0){
-    return `<div class="phead"><div class="peyebrow">${L2('Passo 1 di 3','Step 1 of 3')}</div><h3>${L2('Scegli il listino','Choose the price list')}</h3></div>
-    <div class="ptiles two">
-      <button class="ptile" data-listino="EUR" style="--i:0"><span class="psym">€</span><span class="pt">${L2('Listino Euro','Euro price list')}</span><span class="ps">L€ · ${L2('prezzi in euro','prices in euro')}</span></button>
-      <button class="ptile" data-listino="USD" style="--i:1"><span class="psym">$</span><span class="pt">${L2('Listino Dollaro','Dollar price list')}</span><span class="ps">L$ · ${L2('listino euro + 10%','euro price list + 10%')}</span></button>
-    </div>`;
-  }
   if(PSTEP===1){
     const counts=catCounts();
     const cats=Object.keys(counts).sort((a,b)=>catOrderOf(a)-catOrderOf(b)||counts[b]-counts[a]);
-    return `<div class="phead"><div class="peyebrow">${L2('Passo 2 di 3','Step 2 of 3')}</div><h3>${L2('Scegli la gamma','Choose the range')}</h3></div>
+    return `<div class="phead"><div class="peyebrow">${L2('Passo 1 di 2','Step 1 of 2')}</div><h3>${L2('Scegli la gamma','Choose the range')}</h3></div>
     <div class="ptiles">${cats.map((c,i)=>{const first=DATA.machines.find(m=>m.category===c),img=first?machineImg(first):'';
       return `<button class="ptile photo" data-c="${esc(c)}" style="--i:${i}">${img?`<span class="pimg"><img src="${img}" alt="" loading="lazy"></span>`:''}<span class="pt">${esc(c)}</span><span class="ps">${counts[c]} ${t('models')}</span></button>`;}).join('')}</div>`;
   }
   const protCounts={};DATA.machines.filter(m=>!curCat||m.category===curCat).forEach(m=>{const p=protOf(m);protCounts[p]=(protCounts[p]||0)+1;});
   const protHtml=['',...BAND_ORDER.filter(b=>protCounts[b]),...Object.keys(protCounts).filter(b=>!BAND_ORDER.includes(b))].map(p=>`<button class="chip${p===curProt?' sel':''}" data-prot="${p}">${p?esc(p):t('all_f')}${p?' · '+protCounts[p]:''}</button>`).join('');
-  return `<div class="phead"><div class="peyebrow">${L2('Passo 3 di 3','Step 3 of 3')}</div><h3>${L2('Scegli il modello','Choose the model')}</h3></div>
+  return `<div class="phead"><div class="peyebrow">${L2('Passo 2 di 2','Step 2 of 2')}</div><h3>${L2('Scegli il modello','Choose the model')}</h3></div>
     <div class="pfilters"><span class="hint">${t('protection_f')}</span>${protHtml}</div>
     <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
     <div class="mgrid">${buildMachineListHtml()}</div>
@@ -1340,7 +1332,7 @@ function pStageHtml(){
 }
 function stepProduct(){
   const v=$('#view');
-  if(PSTEP===0&&!PCHOSEN&&S.solutions.length)PSTEP=2;   // tornando al passo con prodotti già scelti: si riparte dai modelli
+  if(PSTEP<1)PSTEP=(!PCHOSEN&&S.solutions.length)?2:1;   // tornando al passo con prodotti già scelti: si riparte dai modelli
   const anim=PANIM;PANIM=false;
   v.innerHTML=`
   <div class="card pcard">
@@ -1354,7 +1346,6 @@ function stepProduct(){
   </div>
   ${selectedDrawer()}`;
   v.querySelectorAll('[data-pgo]').forEach(b=>b.onclick=()=>goP(+b.dataset.pgo));
-  v.querySelectorAll('[data-listino]').forEach(b=>b.onclick=()=>setListino(b.dataset.listino));
   v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=b.dataset.c;curSub=null;curProt='';search='';goP(2);});
   v.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{curProt=b.dataset.prot;curSub=null;stepProduct();});
   if($('#i_search'))$('#i_search').oninput=e=>{search=e.target.value;refreshMachineList();};
@@ -1400,7 +1391,7 @@ let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
   const items=S.solutions.map((s,i)=>`<div class="ditem">
       ${s.img?`<img class="imgthumb" style="width:36px;height:36px" src="${s.img}">`:'<span style="width:36px"></span>'}
-      <div style="flex:1;min-width:0"><div class="nm">${esc(s.name)}</div><div class="cd">${esc(s.code)} · ×${s.qty} · ${money(s.unit)}</div></div>
+      <div style="flex:1;min-width:0"><div class="nm">${esc(s.name)}</div><div class="cd">${esc(s.code)} · ×${s.qty}</div></div>
       <button class="xbtn" data-ddel="${i}">✕</button></div>`).join('');
   return `<div class="drawer${drawerOpen?'':' closed'}" id="drawer">
     <div class="dtab" data-drawer-toggle>▸ ${t('selected_solutions')} (${S.solutions.length})</div>
@@ -1422,7 +1413,7 @@ function wireMove(root){root.querySelectorAll('[data-mv]').forEach(b=>b.onclick=
 function renderSolList(){
   return S.solutions.map((s,i)=>`<div class="sol">
     <div class="head"><div><div class="nm">${esc(s.name)} ${s.atex?'<span class="badge">ATEX</span>':''}${s.sparesOnly?'<span class="badge" style="background:#4a4a4a">'+t('spares_sale_badge')+'</span>':''}</div>
-    <div class="cd">${s.sparesOnly?(s.accessories.length+' '+t('accessories').toLowerCase()):esc(s.code)+' · '+money(s.unit)}</div></div>
+    <div class="cd">${s.sparesOnly?(s.accessories.length+' '+t('accessories').toLowerCase()):esc(s.code)}</div></div>
     <span style="display:inline-flex;gap:6px;align-items:center">${mvBtns(i)}<button class="xbtn" data-del="${i}">✕</button></span></div>
     ${s.sparesOnly?'':`<div class="addbar"><label class="fld" style="max-width:120px">${t('qty')}
       <input type="number" min="1" value="${s.qty}" data-qty="${i}"></label></div>`}
@@ -1535,7 +1526,7 @@ const OPT_TAB={}, OPT_SEARCH={}, OPT_QTY={};   // per soluzione: categoria apert
 const IMG_PH='<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="90" fill="#e4e4e4"/><rect x="27" y="20" width="66" height="50" rx="5" fill="none" stroke="#c9c9c9" stroke-width="5"/><circle cx="44" cy="37" r="6" fill="#c9c9c9"/><path d="M31 66l20-20 12 12 9-9 17 17z" fill="#c9c9c9"/></svg>';
 function listMoney(p){return (S.listino==='USD')?fmtCur(p,'USD'):money(p);}
 function optSel(s,o){return s.accessories.find(a=>a.code===o.code);}
-function optPriceOk(o){const p=liteP(o);return p!=null&&p!=='';}
+function optPriceOk(o){return true;}   // nessun prezzo nel configuratore: ogni optional è selezionabile
 function optGroupsOf(s){const opts=machineOptionals(s.code);return OPT_GROUP_ORDER.filter(g=>opts.some(o=>(o.group||'Altro')===g));}
 function optTabOf(si){const gs=optGroupsOf(S.solutions[si]);let c=OPT_TAB[si];if(c!=='SUMMARY'&&!gs.includes(c))c=gs[0]||'SUMMARY';OPT_TAB[si]=c;return c;}
 function optSolRoot(si){return document.querySelector(`[data-optsol="${si}"]`);}
@@ -1548,9 +1539,8 @@ function optCardHtml(si,o){
   return `<div class="ocard${sel?' sel':''}${ok?'':' na'}" data-ocard="${si}|${esc(o.code)}">
     <div class="oimg">${img?`<img src="${img}" alt="">`:IMG_PH}</div>
     <div class="otxt"><div class="oti">${esc(it||o.code)}</div>${en?`<div class="oen">${esc(en)}</div>`:''}
-      <div class="ocode">${esc(o.code)}${o.check?` <span style="color:#d97706" title="${esc(t('verify_price'))}">⚠</span>`:''}${(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
+      <div class="ocode">${esc(o.code)}${(o.note_it||o.note)&&!/prezz|price/i.test(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
     <div class="oside">
-      <div class="opr">${ok?listMoney(liteP(o)):'<span title="'+esc(L2('Prezzo non disponibile in questo listino','Price not available in this price list'))+'">—</span>'}</div>
       <label class="oqty">${L2('Quantità','Quantity')}<input type="number" min="1" value="${qty}" data-oqty="${si}|${esc(o.code)}"></label>
       <label class="tgl"><input type="checkbox" data-otgl="${si}|${esc(o.code)}" ${sel?'checked':''} ${ok?'':'disabled'}><span></span></label>
     </div></div>`;
@@ -1568,21 +1558,19 @@ function accRowsHtml(si){
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
         <input placeholder="${t('description')}" value="${esc(accItDesc(s,a))}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
-        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(listMoney(a.price))}">`}
-        <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">
         <button class="xbtn" data-accdel="${si}-${ai}">✕</button>
       </div></div>`).join('');
 }
 function optSummaryHtml(si){
   const s=S.solutions[si],spares=machineSpares(s.code);
   const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${spares.map(o=>`<button class="chip" style="cursor:pointer" data-addspare="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('')}</div>`:'';
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${spares.map(o=>`<button class="chip" style="cursor:pointer" data-addspare="${si}|${esc(o.code)}">+ ${esc(o.code)} </button>`).join('')}</div>`:'';
   return `${sprBlock}<div style="font-size:12.5px;font-weight:700;color:#4a4a4a">${t('accessories')}</div>
       <div style="position:relative;margin-top:4px">
         <input class="search" style="margin:0" id="accpick-${si}" autocomplete="off" placeholder="🔎 ${esc(t('ph_acc_search'))}">
         <div id="accsugg-${si}" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:20;max-height:240px;overflow:auto;display:none"></div>
       </div>
-      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span>${t('unit_price')}</span><span>${t('discount')} %</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
+      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
       ${accRowsHtml(si)}
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${L2('Customizzazione','Customization')}</button></div>`;
 }
@@ -1606,7 +1594,7 @@ function optViewHtml(si){
   const none=!opts.length&&!s.custom?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${t('no_options_machine')}</div>`:'';
   const wide=cur==='SUMMARY';
   return `<div class="optview">${loadHint}${none}
-    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}">${listinoSwitchHtml()}<b>${sd?moneyD(sd.solTot):''}</b></div></div>
+    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart"></div></div>
     <div class="ogrid${wide?' wide':''}">
       <div class="oleft">${hero?`<img class="ohero" src="${hero}" alt="">`:`<div class="ohero ph">${esc(s.name)}</div>`}
         <div class="oname"><b>${esc(s.name)}</b><span>${esc(s.code)}</span></div></div>
@@ -1618,7 +1606,6 @@ function optViewHtml(si){
 function optRefresh(si){
   const root=optSolRoot(si);if(!root)return;
   const s=S.solutions[si],opts=machineOptionals(s.code),sd=lineTotals().sols[si];
-  const cb=root.querySelector('.ocart b');if(cb&&sd)cb.textContent=moneyD(sd.solTot);
   OPT_GROUP_ORDER.forEach(g=>{const i=root.querySelector(`[data-ocnt="${g}"]`);if(i){const n=opts.filter(o=>(o.group||'Altro')===g&&optSel(s,o)).length;i.textContent=n||'';}});
   const sm=root.querySelector('[data-ocnt="SUMMARY"]');if(sm)sm.textContent=s.accessories.length||'';
 }
@@ -1682,7 +1669,7 @@ function wireAccRows(v){
       list=list.slice(0,60);
       if(!list.length){sg.style.display='none';return;}
       sg.innerHTML=list.map(a=>`<div data-code="${esc(a.code)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:12.5px;display:flex;justify-content:space-between;gap:10px">
-        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span><span style="color:#2b2b2b;white-space:nowrap">${money(a.price)}</span></div>`).join('');
+        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span></div>`).join('');
       sg.style.display='block';
       sg.querySelectorAll('[data-code]').forEach(d=>d.onmousedown=ev=>{ev.preventDefault();
         const acc=DATA.accessories.find(a=>a.code===d.dataset.code);if(!acc)return;
@@ -1704,11 +1691,9 @@ function stepOptions(){
         <textarea class="pe" data-sol="${si}-desc" placeholder="${t('spares_sale_desc_ph')}" style="min-height:56px">${esc(s.desc||'')}</textarea>
       </div>`:!s.custom?'':`<details class="prodedit" open style="margin:8px 0">
       <summary style="cursor:pointer;font-size:12px;color:#4a4a4a;font-weight:700">✏️ ${t('edit_product')}</summary>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:6px;margin-top:8px;align-items:end">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px;margin-top:8px;align-items:end">
         <label class="fl">${t('machine_name')}<input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('new_machine')}"></label>
         <label class="fl">${t('code')}<input class="pe" data-sol="${si}-code" value="${esc(s.code)}" placeholder="${t('code')}"></label>
-        <label class="fl">${t('unit_price')}<input class="pe" type="number" step="0.01" data-sol="${si}-unit" value="${s.unit}" placeholder="${t('unit_price')}"></label>
-        <label class="fl">${t('discount')} % ${t('machine_disc_sfx')}<input class="pe" type="text" inputmode="decimal" data-sol="${si}-disc" value="${s.disc==null?'':esc(s.disc)}" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})"></label>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
         ${SPEC_FIELDS.map(([k])=>`<label class="fl">${t('spec_'+k)}<input class="pe" data-solspec="${si}-${k}" value="${esc(s.specs[k]||'')}" placeholder="${t('spec_'+k)}"></label>`).join('')}
@@ -1736,32 +1721,19 @@ function stepOptions(){
   <div class="card"><h2>${t('step_options')}</h2><p class="hint">${t('hint_options')}</p>${solHtml}</div>
   <div class="card"><h2>${t('commercial_terms')}</h2>
     <div class="grid g3">
-      <label class="fld">${t('discount')} % (1°+2°+3°)
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="number" id="o_disc" value="${S.discount}" style="flex:1">
-          <span style="color:#8592a8">+</span>
-          <input type="number" id="o_disc2" value="${S.discount2||''}" placeholder="0" style="flex:1">
-          <span style="color:#8592a8">+</span>
-          <input type="number" id="o_disc3" value="${S.discount3||''}" placeholder="0" style="flex:1">
-        </div>
-      </label>
       <label class="fld">${t('sc_validity')}<input id="o_val" value="${esc(S.validity)}"></label>
       <label class="fld">${t('sc_lead')}<input id="o_lead" value="${esc(S.lead)}"></label>
       <label class="fld">${t('sc_incoterm')}<select id="o_inc">${INCOTERMS.map(x=>`<option value="${x}"${(S.incoterm||INCOTERMS[0])===x?' selected':''}>${x}</option>`).join('')}</select></label>
-      <label class="fld">${t('sc_payment')}<input id="o_pay" value="${esc(S.payment)}" placeholder="${esc(t('def_payment'))}"></label>
     </div>
     <label class="fld" style="margin-top:14px">${t('exclusions')}
       <textarea id="o_excl" placeholder="${esc(t('def_exclusions'))}">${esc(S.exclusions)}</textarea></label>
     <label class="fld" style="margin-top:14px">${t('notes')}<textarea id="o_notes">${esc(S.notes)}</textarea></label>
   </div>${selectedDrawer()}`;
   wireDrawer();
-  $('#o_disc').oninput=e=>{S.discount=Math.max(0,Math.min(100,+e.target.value||0));};
-  $('#o_disc2').oninput=e=>{S.discount2=Math.max(0,Math.min(100,+e.target.value||0));};
-  $('#o_disc3').oninput=e=>{S.discount3=Math.max(0,Math.min(100,+e.target.value||0));};
   const bind=(id,k)=>{$('#'+id).oninput=e=>S[k]=e.target.value;};
   bind('o_val','validity');bind('o_lead','lead');
   $('#o_inc').onchange=e=>{S.incoterm=e.target.value;};
-  bind('o_pay','payment');bind('o_excl','exclusions');bind('o_notes','notes');
+  bind('o_excl','exclusions');bind('o_notes','notes');
   wireMove(v);
   v.querySelectorAll('[data-sameorder]').forEach(inp=>inp.onchange=e=>{S.solutions[+inp.dataset.sameorder].sameOrder=e.target.checked;stepOptions();});
   v.querySelectorAll('[data-sol]').forEach(inp=>inp.oninput=e=>{
@@ -2067,13 +2039,8 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${moneyD(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc==='0'?'—':r.disc+'%'}</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
-    // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
-    const rowChunks=[priceRowsArr];
-    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
-      <th class="c">${t('qty')}</th><th class="r">${t('partial')}</th><th class="c">${t('discount')}</th>
-      <th class="r">${t('total')}</th></tr>`;
+    const spRows=rows.map(r=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="c">${r.qty}</td></tr>`);
+    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="c">${t('qty')}</th></tr>`;
     const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
     const hero=(m&&heroOf(m,s.img))||s.img||'';
     const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
@@ -2081,22 +2048,14 @@ function stepQuote(){
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
       <div class="sl-eyebrow">${label}</div>`;
-    if(s.sparesOnly){
-      html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
-    } else {
-      const keys=['loa','beam','draft','hull','cabins','persons','engine','speed','disp_empty','disp_full','fuel','water'];
-      html+=`<div class="sl-title">${esc(s.name)}</div>
-      ${hero?`<img class="sl-hero" src="${hero}">`:''}
-      <div class="sl-figs">${figsHtml(s,keys)}</div>`;
-    }
-    html+=`<table class="ptable">${ptableHead}${rowChunks[0].join('')}</table>`;
-    html+=`${totalsHtml(sd,pk,isPkgLast)}
+    html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
+    html+=`<table class="ptable">${ptableHead}${spRows.join('')}</table>
       ${footer()}
     </div></div>`;
   });
   // supply + general conditions page
   const sc=[['sc_validity',(S.validity||'30')+' '+t('days')+'.'],['sc_lead',S.lead?S.lead+' '+t('weeks_from_order')+'.':t('def_lead')],
-    ['sc_incoterm',S.incoterm||'Ex Works'],['sc_payment',S.payment||t('def_payment')]];
+    ['sc_incoterm',S.incoterm||'Ex Works']];
   const scRows=sc.map(([k,val])=>`<tr><td>${t(k)}</td><td>${esc(val)}</td></tr>`).join('');
   const exclItems=(S.exclusions||t('def_exclusions')).split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
   html+=`<div class="page"><div class="pad">
@@ -2131,22 +2090,18 @@ function stepQuote(){
       <h2>${t('step_quote')}</h2><p class="hint">${t('hint_quote')}</p>
       <div class="doc-tools">
         <button class="btn prim" id="btnPrint">${t('print_pdf')}</button>
-        <button class="btn ghost" id="btnXlsx">${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:var(--lx-petrol)">${t('save_all')}</button>
-        ${listinoSwitchHtml()}<span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
+        <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
       <div class="savenote">
         ${t('save_note')}
       </div>
     </div>
-    ${netPanelHtml()}
     <div class="pages">${html}</div>`;
   repaginateQuote();
   fitPreview();
-  wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
-  $('#btnXlsx').onclick=downloadOfferXlsx;
   // inline editing directly in the document preview
   v.querySelectorAll('[data-editname]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editname].name=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editspec]').forEach(el=>el.addEventListener('blur',()=>{const[si,k]=el.dataset.editspec.split('|');S.solutions[+si].specs[k]=el.textContent.trim();stepQuote();}));
@@ -2158,13 +2113,6 @@ function stepQuote(){
   v.querySelectorAll('[data-delextra]').forEach(el=>el.onclick=()=>{const[si,ei]=el.dataset.delextra.split('|').map(Number);S.solutions[si].extraSpecs.splice(ei,1);stepQuote();});
   v.querySelectorAll('[data-editmark]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editmark].marking=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editdesc]').forEach(el=>el.addEventListener('blur',()=>{const[si,ri]=el.dataset.editdesc.split('|').map(Number);const s=S.solutions[si];if(ri===0)s.tableDesc=el.textContent.trim();else if(s.accessories[ri-1])s.accessories[ri-1].desc=el.textContent.trim();stepQuote();}));
-  v.querySelectorAll('[data-editprice]').forEach(el=>el.addEventListener('blur',()=>{
-    const[si,ri]=el.dataset.editprice.split('|').map(Number);const s=S.solutions[si];
-    const raw=String(el.textContent).replace(/[^0-9,.-]/g,'');
-    const n=parseFloat(raw.replace(/\./g,'').replace(',','.'))||0;
-    if(ri===0)s.unit=n;else if(s.accessories[ri-1])s.accessories[ri-1].price=n;
-    stepQuote();
-  }));
   v.querySelectorAll('[data-addrowimg]').forEach(inp=>inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
     const[si,ri]=inp.dataset.addrowimg.split('|').map(Number);
@@ -2194,18 +2142,8 @@ function pgRow(r){
   const disc=r.disc&&r.disc!=='0';
   const en=(r.descEn&&r.descEn!==r.desc)?r.descEn:'';
   return `<div class="op-row"><div class="op-t"><b class="op-code">${esc(r.code)}</b><span class="op-d1">${esc(r.desc||'')}</span>${en?`<span class="op-d2">${esc(en)}</span>`:''}</div>
-    <div class="op-pr"><b>${moneyD(r.total)}</b>${disc?`<s>${moneyD(r.partial)}</s>`:''}${r.qty>1?`<em>× ${r.qty}</em>`:''}</div>
+    <div class="op-pr">${r.qty>1?`<em>× ${r.qty}</em>`:''}</div>
     <div class="op-img">${r.img?`<img src="${r.img}" alt="">`:IMG_PH}</div></div>`;
-}
-function pgTotals(sd,pk,showPkg){
-  const boat=sd.rows[0],opt=sd.rows.slice(1).reduce((x,r)=>x+r.partial,0);   // a listino: lo sconto si vede nella riga dedicata
-  const hasDisc=sd.listTot-sd.solTot>0.005;
-  const row=(lbl,val,strong)=>`<div class="tt-row${strong?' strong':''}"><span>${lbl}</span><span>${val}</span></div>`;
-  let h='<div class="tt-box">'+row(L2('PREZZO BARCA','BOAT PRICE'),moneyD(boat?boat.partial:0))+row(L2('TOTALE OPTIONAL','TOTAL OF OPTIONALS'),moneyD(opt));
-  if(hasDisc)h+=row(L2('SCONTO APPLICATO','DISCOUNT APPLIED'),'−'+moneyD(sd.listTot-sd.solTot));
-  h+=row(L2('TOTALE','TOTAL'),moneyD(sd.solTot))+row(L2('IVA (0 %)','VAT (0 %)'),L2('esclusa','excluded'))+row(L2('PREZZO FINALE','FINAL PRICE'),moneyD(sd.solTot),true)+'</div>';
-  if(showPkg&&pk.members.length>1)h+=`<div class="tt-box pkg">${row(`${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})`,moneyD(pk.net),true)}</div>`;
-  return h;
 }
 function solutionPagesHtml(sd,pk,isPkgLast,label){
   const {s,rows}=sd;
@@ -2216,7 +2154,7 @@ function solutionPagesHtml(sd,pk,isPkgLast,label){
   const ovRows=[['Motorizzazione kw/mhp','Engines kw/mhp',sp.engine],['Velocità max/crociera','Speed top/cruise',sp.speed],['Lunghezza f.t.','Length overall',sp.loa],['Larghezza max','Max beam',sp.beam],['Cabine','Cabins',sp.cabins]]
     .filter(r=>r[2]!=null&&String(r[2]).trim()!=='')
     .map(r=>`<div class="ov-row"><div class="ov-l">${lbl2(r[0],r[1])}</div><div class="ov-v">${esc(locSpec(r[2]))}</div></div>`).join('')
-    +`<div class="ov-row"><div class="ov-l">${lbl2('Prezzi ('+docSym()+')','Prices ('+docSym()+')')}</div><div class="ov-v">${moneyD(boat?boat.partial:0)}</div></div>`;
+;
   const head=`<div class="plogo">${logoLight(30)}</div>`;
   let html=`<div class="page"><div class="pad">${head}
     <div class="sl-eyebrow">${label}</div>
@@ -2237,122 +2175,10 @@ function solutionPagesHtml(sd,pk,isPkgLast,label){
     if(used+need>PG_LIMIT&&cur.length)flush();
     cur.push(it);used+=it.h?PG_HEAD:PG_ROW;
   });
-  if(cur.length&&used+PG_TOT>PG_LIMIT)flush();            // i totali non entrano: pagina nuova
+  if(cur.length)flush();
   const body=its=>its.map(it=>it.h?pgGroupHead(it.h):pgRow(it.r)).join('');
-  const last=cur;                                          // l'ultima pagina porta anche i totali
   pages.forEach(p=>{html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(p)}${footer()}</div></div>`;});
-  html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(last)}${pgTotals(sd,pk,isPkgLast)}${footer()}</div></div>`;
   return html;
-}
-</script>
-<script>
-/* Configuratore Yacht — modulo "export-xlsx": l'offerta in Excel con la stessa impaginazione del catalogo Azimut
-   (foglio inglese + foglio «_IT», colonne Qty / Price List / sconto, totali con formule, foglio «service» con i dati strutturati). */
-const XL_GREY='FFCCCCCC', XL_ORANGE='FFFFC000';
-function xlSheetName(base,used){
-  let n=String(base).replace(/^Ferretti Yachts\s*/i,'').replace(/[\\\/?*\[\]:]/g,' ').trim().slice(0,26)||'Offerta';
-  let k=n,i=2;while(used.has(k.toLowerCase())){k=n.slice(0,24)+'_'+i++;}
-  used.add(k.toLowerCase());return k;
-}
-function xlFill(cell,argb){cell.fill={type:'pattern',pattern:'solid',fgColor:{argb}};}
-function xlAddSheet(wb,sd,lang,name){
-  const {s,rows}=sd,it=lang==='it',rate=curRate()||1;
-  const L=(a,b)=>it?a:b;
-  const sym=curInfo(docCur())[1],fmt=`#,##0.00 "${sym}"`;
-  const ws=wb.addWorksheet(name);
-  [12,60,5,17,17,20,17,20,20,40].forEach((w,i)=>ws.getColumn(i+1).width=w);
-  const sp=effSpecs(s);
-  // intestazione modello
-  ws.mergeCells('A2:B2');ws.getCell('A2').value=String(s.name).replace(/^Ferretti Yachts\s*/i,'Ferretti ');
-  ws.getCell('A2').font={bold:true,size:24};
-  'ABCDEFGHIJ'.split('').forEach(c=>xlFill(ws.getCell(c+'2'),XL_GREY));
-  ws.getCell('A3').value=L('MOTORI:','ENGINES:');ws.getCell('B3').value=sp.engine||'';
-  ws.getCell('F3').value=L('IVA:','VAT:');ws.getCell('G3').value=0;ws.getCell('G3').numFmt='0%';
-  ['F3','G3'].forEach(a=>{ws.getCell(a).font={bold:true};xlFill(ws.getCell(a),XL_ORANGE);});
-  ws.getCell('A4').value=L('VELOCITÀ','SPEED');ws.getCell('B4').value=sp.speed||'';
-  const head=(r,first,title,last)=>{
-    const h=['',title,L('Qtà','Qty'),L('Prezzo Listino','Price List'),L('Prezzo esc IVA','Price exc VAT'),L('Prezzo incl IVA','Price Inc VAT'),L('Sconto %','Discount %'),L('Prezzo esc IVA incl Sconto','Price ex VAT incl. Discount'),L('Prezzo incl IVA incl Sconto','Price inc VAT incl. Discount'),last];
-    h[0]=first;
-    h.forEach((v,i)=>{const c=ws.getCell(r,i+1);c.value=v;c.font={bold:true};xlFill(c,XL_GREY);});
-  };
-  const line=(r,r0,code,desc,qty,unit,disc,note)=>{
-    const g=Math.round((disc||0)*10000)/10000;
-    const val=unit*qty,vat=val*0,h=val-g*val,ii=h;   // IVA = 0 di partenza (cella G3 modificabile)
-    ws.getCell(r,1).value=code||'';ws.getCell(r,2).value=desc||'';ws.getCell(r,2).alignment={wrapText:true,vertical:'top'};
-    ws.getCell(r,3).value=qty;ws.getCell(r,4).value=unit;
-    ws.getCell(r,5).value={formula:`D${r}*C${r}`,result:val};
-    ws.getCell(r,6).value={formula:`E${r}*$G$3+E${r}`,result:val+vat};
-    ws.getCell(r,7).value=g;ws.getCell(r,7).numFmt='0.##%';
-    ws.getCell(r,8).value={formula:`E${r}-G${r}*E${r}`,result:h};
-    ws.getCell(r,9).value={formula:`F${r}-G${r}*F${r}`,result:ii+vat*(1-g)};
-    if(note)ws.getCell(r,10).value=note;
-    [4,5,6,8,9].forEach(c=>ws.getCell(r,c).numFmt=fmt);
-  };
-  const dsc=r=>r.partial>0?1-r.total/r.partial:0;
-  // barca standard
-  head(6,'',L('BARCA STANDARD','STANDARD BOAT'),'');
-  const boat=rows[0];
-  line(7,7,'',String(s.name).replace(/^Ferretti Yachts\s*/i,'Ferretti '),boat.qty,boat.unit*rate,dsc(boat));
-  // optional
-  head(9,L('Codice','Code'),L('OPTIONAL','OPTIONALS'),L('Note','Note'));
-  let r=11,first=0,lastRow=0;
-  const opts=rows.slice(1);
-  OPT_GROUP_ORDER.concat(['__altri']).forEach(g=>{
-    const rs=opts.filter(x=>g==='__altri'?!OPT_GROUP_ORDER.includes(x.group||'Altro'):(x.group||'Altro')===g);
-    if(!rs.length)return;
-    ws.getCell(r,2).value=(it?optGroupLabel(g).toUpperCase():(OPT_GROUP_EN[g]||g).toUpperCase());
-    for(let c=1;c<=9;c++)xlFill(ws.getCell(r,c),XL_GREY);
-    r++;
-    rs.forEach(x=>{
-      const en=(x.descEn&&x.descEn!==x.desc)?x.descEn:'';
-      line(r,0,x.code,it?x.desc:(en||x.desc),x.qty,x.unit*rate,dsc(x));
-      if(!first)first=r;lastRow=r;r++;});
-  });
-  const tot=r+1,grand=tot+4;
-  const sumOf=col=>first?{formula:`SUM(${col}${first}:${col}${lastRow})`,result:opts.reduce((x,o)=>x+(col==='H'||col==='I'?o.total:o.partial)*rate,0)}:0;
-  ws.getCell(tot,2).value=L('TOTALE OPTIONAL','TOTAL OF OPTIONALS');
-  ['E','F','H','I'].forEach(c=>{const cell=ws.getCell(c+tot);cell.value=sumOf(c);cell.numFmt=fmt;});
-  const bTot=boat.total*rate,bPar=boat.partial*rate,oTot=opts.reduce((x,o)=>x+o.total*rate,0),oPar=opts.reduce((x,o)=>x+o.partial*rate,0);
-  ws.getCell(grand,2).value=L('SOMMA TOTALE','GRAND TOTAL');
-  [['E',bPar+oPar],['F',bPar+oPar],['H',bTot+oTot],['I',bTot+oTot]].forEach(([c,v])=>{const cell=ws.getCell(c+grand);cell.value={formula:`${c}7+${c}${tot}`,result:v};cell.numFmt=fmt;});
-  [tot,grand].forEach(rr=>{for(let c=1;c<=9;c++){const cell=ws.getCell(rr,c);cell.font={bold:true,size:12};xlFill(cell,XL_GREY);}});
-  ws.getCell(grand+2,1).value=L(`Prezzi IVA esclusa. Validità offerta: ${S.validity||'30'} giorni. ${S.incoterm||'Ex Works'}.`,`Prices exclusive of VAT. Offer validity: ${S.validity||'30'} days. ${S.incoterm||'Ex Works'}.`);
-  return {tot,grand};
-}
-// ExcelJS (≈1 MB) si scarica solo quando serve davvero: al primo salvataggio o «Scarica Excel»
-let _exceljsP=null;
-function loadExcelJS(){
-  if(typeof ExcelJS!=='undefined')return Promise.resolve();
-  return _exceljsP||(_exceljsP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=res;s.onerror=()=>{_exceljsP=null;rej(new Error('ExcelJS non scaricato'));};document.head.appendChild(s);}));
-}
-async function buildOfferXlsx(){
-  await loadExcelJS();
-  const wb=new ExcelJS.Workbook();wb.creator=(S.rep&&S.rep.name)||BRAND.legalName;wb.created=new Date();
-  const {sols}=lineTotals(),used=new Set(),svc=[];
-  sols.filter(sd=>!sd.s.sparesOnly).forEach(sd=>{
-    const nm=xlSheetName(sd.s.name,used);
-    xlAddSheet(wb,sd,'en',nm);
-    xlAddSheet(wb,sd,'it',xlSheetName(nm+'_IT',used));
-    svc.push(sd);
-  });
-  if(!svc.length)throw new Error('nessuna imbarcazione da esportare');
-  // foglio «service»: dati strutturati (stesso schema usato dai configuratori Azimut), utile per re-importare l'offerta
-  const rate=curRate()||1,sd0=svc[0],s0=sd0.s;
-  const sections=OPT_GROUP_ORDER.map((g,i)=>({id:i+1,name_en:(OPT_GROUP_EN[g]||g).toUpperCase(),name_local:optGroupLabel(g).toUpperCase(),
-    items:sd0.rows.slice(1).filter(x=>(x.group||'Altro')===g).map(x=>({code:x.code,name_en:x.descEn||x.desc,name_local:x.desc,price:x.unit*rate,quantity:x.qty,discount:Math.round(((x.partial>0?1-x.total/x.partial:0))*10000)/10000,price_discount:x.total*rate,market:docCur(),_selected:true}))})).filter(x=>x.items.length);
-  const svcData={dealer:(S.rep&&S.rep.email)||'',offerNum:S.offerNum,listino:S.listino||'EUR',
-    boatModel:{name:s0.name,code:s0.code,engines:effSpecs(s0).engine||'',speed:effSpecs(s0).speed||'',price:sd0.rows[0].unit*rate,market:docCur(),discount:0},
-    boatSections:sections,currentVAT:0,customBoatPrice:0};
-  wb.addWorksheet('service').getCell('A1').value=JSON.stringify(svcData);
-  const buf=await wb.xlsx.writeBuffer();
-  return new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-}
-async function downloadOfferXlsx(){
-  try{
-    const blob=await buildOfferXlsx();
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=suggestedFilename()+'.xlsx';
-    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
-  }catch(e){console.error(e);flash(L2('Excel non generato: ','Excel not generated: ')+(e&&e.message||e),4000);}
 }
 </script>
 <script>
@@ -2587,7 +2413,7 @@ async function writeRegistryEntry(){
     const acc=(s.accessories||[]).filter(a=>a.code||a.desc);
     return acc.length?`[${s.code}] `+acc.map(a=>a.desc?`${a.code||''} - ${a.desc}`.replace(/^ - /,''):a.code).join('; '):'';
   }).filter(Boolean).join(' || ');
-  const row={prog,num,date:S.date,client:S.client,rep:S.rep.name,total:Number(grand.toFixed(2)),
+  const row={prog,num,date:S.date,client:S.client,rep:S.rep.name,total:0,
     machine:machineSummary,addedOptionals:addedOptSummary,note:'',validity:String(S.validity||'30'),lang:LANG,status:'open',outcomeDate:'',wonValue:'',lines:offerLinesFromState()};
   REGISTRY.rows.push(row);S.offerNum=num;persistRegistryLocal();
   let ghSaved=false;
@@ -2778,7 +2604,6 @@ async function saveOfferComplete(){
   if(btn){btn.disabled=true;btn.textContent=''+t('saving_all');}
   try{
     let pdfOk=false, pdfBlob=null, xlsxBlob=null;
-    try{ xlsxBlob=await buildOfferXlsx(); }catch(e){ console.warn('Excel non generato',e); }   // prima del salvataggio: poi lo stato si azzera
     // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
     if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
     else if(window.showDirectoryPicker){
@@ -3272,14 +3097,14 @@ function expirySection(){
   const lab=x=>{const idx=REGISTRY.rows.indexOf(x.r);
     const left=x.exp-now;const c=fmtCountdown(left);
     const tone=left<0?'#8c1412':(left<7*86400000?'#b35c00':'var(--navy)');
-    return `<tr data-expidx="${idx}" style="cursor:pointer"><td><b>${esc(x.r.num)}</b> ${langBadge(x.r)}${x.r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc(x.r.client)}</td>${dashRep?'':`<td>${esc(x.r.rep)}</td>`}<td class="r">${money(x.r.total)}</td><td>${x.exp.toLocaleDateString('it-IT')}</td>
+    return `<tr data-expidx="${idx}" style="cursor:pointer"><td><b>${esc(x.r.num)}</b> ${langBadge(x.r)}${x.r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc(x.r.client)}</td>${dashRep?'':`<td>${esc(x.r.rep)}</td>`}<td>${x.exp.toLocaleDateString('it-IT')}</td>
       <td class="r" style="font-weight:800;color:${tone}" data-cd="${x.exp.getTime()}">${left<0?dt('expAgo')+' ':''}${c.txt}</td></tr>`;};
-  const head=`<tr><th>${dt('num')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th class="r">${dt('value')}</th><th>${dt('expDate')}</th><th class="r">${dt('expLeft')}</th></tr>`;
+  const head=`<tr><th>${dt('num')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th>${dt('expDate')}</th><th class="r">${dt('expLeft')}</th></tr>`;
   const tbl=(rows,empty)=>rows.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px">${head}${rows.map(lab).join('')}</table></div>`:`<p class="hint" style="margin:6px 0">${empty}</p>`;
   const big=next?`<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--navy);color:#fff;margin-bottom:14px">
       <div style="flex:1;min-width:220px"><div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#FFD017">${dt('expNext')}</div>
       <div style="font-size:16px;margin-top:2px"><b>${esc(next.r.num)}</b> · ${esc(next.r.client)}${dashRep?'':' · '+esc(next.r.rep)}</div>
-      <div style="font-size:12.5px;color:#bdbdbd">${dt('expDate')} ${next.exp.toLocaleDateString('it-IT')} · ${money(next.r.total)}</div></div>
+      <div style="font-size:12.5px;color:#bdbdbd">${dt('expDate')} ${next.exp.toLocaleDateString('it-IT')}</div></div>
       <div style="font-size:34px;font-weight:900;letter-spacing:.5px;font-variant-numeric:tabular-nums" id="expBig" data-cd="${next.exp.getTime()}">${fmtCountdown(next.exp-now).txt}</div></div>`
     :`<p class="hint">${dt('expNone')}</p>`;
   return `<div class="card"><h2>${dt('expTitle')} <span style="font-size:15px;color:var(--muted)">· ${all.length} ${dt('expOpenN')}</span></h2>
@@ -3313,8 +3138,8 @@ function monthlyChart(months){
   let g='';
   months.forEach((m,i)=>{
     const x=pad+i*bw, h1=(m.v/max)*(H-60), h2=(m.wv/max)*(H-60);
-    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${money(m.v)}</title></rect>`;
-    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${money(m.wv)}</title></rect>`;
+    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${m.n}</title></rect>`;
+    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${m.wn}</title></rect>`;
     g+=`<text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="#6f6f6f">${dt('monthNames')[i]}</text>`;
     if(m.n)g+=`<text x="${x+bw/2}" y="${H-34-Math.max(h1,h2)}" text-anchor="middle" font-size="11" font-weight="700" fill="#171717">${m.n}</text>`;
   });
@@ -3343,7 +3168,7 @@ function renderDashboard(){
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
-  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova (prezzi inventati) e 10 complete, ognuna con una barca e 15-22 optional (prezzi del listino caricato), numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
+  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova e 10 complete, ognuna con una barca e 15-22 optional, numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
   if(!rows.length){
     v.innerHTML=demoBanner+head+`<div class="card"><p class="hint" style="margin:0">${dt('nodata')}</p></div>`;wireDash();return;
   }
@@ -3352,12 +3177,11 @@ function renderDashboard(){
       <div style="font-size:28px;font-weight:900;color:${c||'var(--navy)'};line-height:1.2">${val}</div>
       <div style="font-size:12px;color:var(--muted)">${sub||'&nbsp;'}</div></div>`;
   const kpis=`<div class="card"><div style="display:flex;flex-wrap:wrap;gap:12px">
-    ${kpi(dt('offers'),st.n,money(st.v))}
-    ${kpi(dt('won'),st.wn,money(st.wv),'var(--red)')}
-    ${kpi(dt('lost'),st.ln,money(st.lv))}
-    ${kpi(dt('open'),st.on,money(st.ov))}
+    ${kpi(dt('offers'),st.n,'')}
+    ${kpi(dt('won'),st.wn,'','var(--red)')}
+    ${kpi(dt('lost'),st.ln,'')}
+    ${kpi(dt('open'),st.on,'')}
     ${kpi(dt('winN'),pct(st.wn,st.n),st.wn+' / '+st.n)}
-    ${kpi(dt('winV'),pct(st.wv,st.v),money(st.wv)+' / '+money(st.v))}
   </div></div>`;
   // per commerciale (solo quando si guardano tutti)
   let byRep='';
@@ -3365,9 +3189,9 @@ function renderDashboard(){
     const all=offerRows().filter(r=>{const d=parseOfferDate(r.date);return d&&d.getFullYear()===dashYear;});
     const names=[...new Set(all.map(r=>String(r.rep||'').trim()||'—'))].sort();
     byRep=`<div class="card"><h2>${dt('byRep')}</h2><div style="overflow:auto"><table class="ptable" style="font-size:13px">
-      <tr><th>${dt('rep')}</th><th class="r">${dt('count')}</th><th class="r">${dt('value')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('wonValue')}</th><th class="r">${dt('rate')}</th><th class="r">${dt('rateV')}</th></tr>
+      <tr><th>${dt('rep')}</th><th class="r">${dt('count')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('rate')}</th></tr>
       ${names.map(n=>{const s=statsOf(all.filter(r=>(String(r.rep||'').trim()||'—')===n));
-        return `<tr style="cursor:pointer" data-pickrep="${esc(n)}"><td><b>${esc(n)}</b></td><td class="r">${s.n}</td><td class="r">${money(s.v)}</td><td class="r">${s.wn}</td><td class="r">${money(s.wv)}</td><td class="r">${pct(s.wn,s.n)}</td><td class="r">${pct(s.wv,s.v)}</td></tr>`;}).join('')}
+        return `<tr style="cursor:pointer" data-pickrep="${esc(n)}"><td><b>${esc(n)}</b></td><td class="r">${s.n}</td><td class="r">${s.wn}</td><td class="r">${pct(s.wn,s.n)}</td></tr>`;}).join('')}
     </table></div></div>`;
   }
   // mese per mese
@@ -3377,18 +3201,17 @@ function renderDashboard(){
   const monthly=`<div class="card"><h2>${dt('monthly')}${dashRep?' · '+esc(dashRep):''} · ${dashYear}</h2>
     ${monthlyChart(months)}
     <div style="overflow:auto;margin-top:10px"><table class="ptable" style="font-size:13px">
-      <tr><th>${dt('month')}</th><th class="r">${dt('count')}</th><th class="r">${dt('value')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('wonValue')}</th><th class="r">${dt('rate')}</th><th class="r">${dt('rateV')}</th></tr>
-      ${months.map((m,i)=>`<tr><td>${dt('monthNames')[i]}</td><td class="r">${m.n||'—'}</td><td class="r">${m.n?money(m.v):'—'}</td><td class="r">${m.wn||'—'}</td><td class="r">${m.wn?money(m.wv):'—'}</td><td class="r">${m.n?pct(m.wn,m.n):'—'}</td><td class="r">${m.n?pct(m.wv,m.v):'—'}</td></tr>`).join('')}
-      <tr style="font-weight:800;background:var(--soft)"><td>${dt('yearTot')}</td><td class="r">${st.n}</td><td class="r">${money(st.v)}</td><td class="r">${st.wn}</td><td class="r">${money(st.wv)}</td><td class="r">${pct(st.wn,st.n)}</td><td class="r">${pct(st.wv,st.v)}</td></tr>
+      <tr><th>${dt('month')}</th><th class="r">${dt('count')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('rate')}</th></tr>
+      ${months.map((m,i)=>`<tr><td>${dt('monthNames')[i]}</td><td class="r">${m.n||'—'}</td><td class="r">${m.wn||'—'}</td><td class="r">${m.n?pct(m.wn,m.n):'—'}</td></tr>`).join('')}
+      <tr style="font-weight:800;background:var(--soft)"><td>${dt('yearTot')}</td><td class="r">${st.n}</td><td class="r">${st.wn}</td><td class="r">${pct(st.wn,st.n)}</td></tr>
     </table></div></div>`;
   // vinte vs offerte
-  const compare=`<div class="card"><h2>${dt('compare')}</h2><div class="grid g2">
-    <div>${barPair(dt('byNumber'),st.n,st.wn,dt('offers'),dt('won'),x=>String(x))}</div>
-    <div>${barPair(dt('byValue'),st.v,st.wv,dt('offered'),dt('wonVal'),money)}</div></div></div>`;
+  const compare=`<div class="card"><h2>${dt('compare')}</h2><div class="grid">
+    <div>${barPair(dt('byNumber'),st.n,st.wn,dt('offers'),dt('won'),x=>String(x))}</div></div></div>`;
   // macchine
   const ms=machineStats(rows);
-  const mTable=(arr,empty)=>arr.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px"><tr><th>${dt('machine')}</th><th class="r">${dt('times')}</th><th class="r">${dt('qty')}</th><th class="r">${dt('valueL')}</th></tr>
-      ${arr.slice(0,15).map(x=>`<tr><td><b>${esc(x.name||x.code)}</b><br><span style="color:var(--muted);font-size:11px">${esc(x.code||'')}</span></td><td class="r">${x.times}</td><td class="r">${x.qty}</td><td class="r">${x.value?money(x.value):'—'}</td></tr>`).join('')}</table></div>`:`<p class="hint">${empty}</p>`;
+  const mTable=(arr,empty)=>arr.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px"><tr><th>${dt('machine')}</th><th class="r">${dt('times')}</th><th class="r">${dt('qty')}</th></tr>
+      ${arr.slice(0,15).map(x=>`<tr><td><b>${esc(x.name||x.code)}</b><br><span style="color:var(--muted);font-size:11px">${esc(x.code||'')}</span></td><td class="r">${x.times}</td><td class="r">${x.qty}</td></tr>`).join('')}</table></div>`:`<p class="hint">${empty}</p>`;
   const catRows=Object.entries(ms.cat).sort((a,b)=>b[1].off-a[1].off);
   const cmax=Math.max(1,...catRows.map(c=>c[1].off));
   const machines=`<div class="card"><h2>${dt('mOffered')} · ${dt('mSold')}</h2><div class="grid g2">
@@ -3402,14 +3225,13 @@ function renderDashboard(){
   const sorted=[...rows].sort((a,b)=>parseOfferDate(b.date)-parseOfferDate(a.date)||String(b.num).localeCompare(String(a.num)));
   const list=`<div class="card"><h2>${dt('list')}</h2><p class="hint">${dt('hintStatus')}</p>
     <div style="overflow:auto"><table class="ptable" style="font-size:13px">
-    <tr><th>${dt('num')}</th><th>${dt('date')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th class="r">${dt('value')}</th><th>${dt('status')}</th><th>${dt('lines')} / ${dt('wonQ')}</th></tr>
+    <tr><th>${dt('num')}</th><th>${dt('date')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th>${dt('status')}</th><th>${dt('lines')}</th></tr>
     ${sorted.map(r=>{const idx=REGISTRY.rows.indexOf(r);const s=rowStatus(r);const ls=rowLines(r);
       const stSel=`<select data-st="${idx}" style="padding:6px;border-radius:7px;border:1px solid var(--line);font-weight:700;color:${s==='won'?'var(--red)':s==='lost'?'#6f6f6f':'var(--navy)'}">
         <option value="open"${s==='open'?' selected':''}>${dt('sOpen')}</option><option value="won"${s==='won'?' selected':''}>${dt('sWon')}</option><option value="lost"${s==='lost'?' selected':''}>${dt('sLost')}</option></select>`;
-      const wonCell=s==='won'?`<div>${ls.map((l,li)=>`<label style="display:block;font-size:12px"><input type="checkbox" data-won="${idx}|${li}"${l.won?' checked':''}> ${esc(l.name||l.code)}${l.qty>1?' ×'+l.qty:''}${l.value?' · '+money(l.value):''}</label>`).join('')}
-        <label style="font-size:12px;display:block;margin-top:4px">${dt('wonQ')} <input type="number" step="0.01" data-wonval="${idx}" value="${rowWonValue(r)}" style="width:120px;padding:5px;border:1px solid var(--line);border-radius:6px"></label></div>`
+      const wonCell=s==='won'?`<div>${ls.map((l,li)=>`<label style="display:block;font-size:12px"><input type="checkbox" data-won="${idx}|${li}"${l.won?' checked':''}> ${esc(l.name||l.code)}${l.qty>1?' ×'+l.qty:''}</label>`).join('')}</div>`
         :`<span style="color:var(--muted);font-size:12px">${esc(String(r.machine||'').slice(0,80))}</span>`;
-      return `<tr><td><b>${esc(r.num)}</b> ${langBadge(r)}</td><td>${esc(parseOfferDate(r.date).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td>${dashRep?'':`<td>${esc(r.rep)}</td>`}<td class="r">${money(r.total)}</td><td>${stSel}</td><td>${wonCell}</td></tr>`;}).join('')}
+      return `<tr><td><b>${esc(r.num)}</b> ${langBadge(r)}</td><td>${esc(parseOfferDate(r.date).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td>${dashRep?'':`<td>${esc(r.rep)}</td>`}<td>${stSel}</td><td>${wonCell}</td></tr>`;}).join('')}
     </table></div></div>`;
   v.innerHTML=demoBanner+head+kpis+expirySection()+byRep+monthly+compare+machines+list;
   wireDash();
@@ -3965,10 +3787,10 @@ async function openOfferList(){
       (!q||(String(r.num)+' '+r.client+' '+r.machine+' '+r.rep).toLowerCase().includes(q)))
       .sort((a,b)=>(parseOfferDate(b.date)||0)-(parseOfferDate(a.date)||0)||(+b.prog||0)-(+a.prog||0));
     const lab={won:'Vinta',lost:'Persa',open:'Aperta'};
-    o.querySelector('#ol_tbl').innerHTML=`<tr><th>Offerta</th><th>Data</th><th>Cliente</th><th>Commerciale</th><th class="r">Valore</th><th>Esito</th><th>Macchine</th></tr>`+
+    o.querySelector('#ol_tbl').innerHTML=`<tr><th>Offerta</th><th>Data</th><th>Cliente</th><th>Commerciale</th><th>Esito</th><th>Macchine</th></tr>`+
       (rows.length?rows.map(r=>{const i=REGISTRY.rows.indexOf(r);
-        return `<tr data-row="${i}" style="cursor:pointer"><td><b>${esc(r.num)}</b> <span class="badge code">${String(r.lang||'it').toUpperCase()}</span>${r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc((parseOfferDate(r.date)||new Date()).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td><td>${esc(r.rep)}</td><td class="r">${money(r.total)}</td><td>${lab[rowStatus(r)]}</td><td style="color:var(--muted);font-size:12px">${esc(String(r.machine||'').slice(0,70))}</td></tr>`;}).join('')
-        :`<tr><td colspan="7" style="color:var(--muted);padding:16px">Nessuna offerta trovata.</td></tr>`);
+        return `<tr data-row="${i}" style="cursor:pointer"><td><b>${esc(r.num)}</b> <span class="badge code">${String(r.lang||'it').toUpperCase()}</span>${r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc((parseOfferDate(r.date)||new Date()).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td><td>${esc(r.rep)}</td><td>${lab[rowStatus(r)]}</td><td style="color:var(--muted);font-size:12px">${esc(String(r.machine||'').slice(0,70))}</td></tr>`;}).join('')
+        :`<tr><td colspan="6" style="color:var(--muted);padding:16px">Nessuna offerta trovata.</td></tr>`);
     o.querySelectorAll('[data-row]').forEach(tr=>tr.onclick=()=>recallFromList(REGISTRY.rows[+tr.dataset.row]));
   };
   const fillReps=()=>{const sel=o.querySelector('#ol_rep'),cur=sel.value;

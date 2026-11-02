@@ -132,14 +132,14 @@ function expirySection(){
   const lab=x=>{const idx=REGISTRY.rows.indexOf(x.r);
     const left=x.exp-now;const c=fmtCountdown(left);
     const tone=left<0?'#8c1412':(left<7*86400000?'#b35c00':'var(--navy)');
-    return `<tr data-expidx="${idx}" style="cursor:pointer"><td><b>${esc(x.r.num)}</b> ${langBadge(x.r)}${x.r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc(x.r.client)}</td>${dashRep?'':`<td>${esc(x.r.rep)}</td>`}<td class="r">${money(x.r.total)}</td><td>${x.exp.toLocaleDateString('it-IT')}</td>
+    return `<tr data-expidx="${idx}" style="cursor:pointer"><td><b>${esc(x.r.num)}</b> ${langBadge(x.r)}${x.r.demo?' <span class="badge" style="background:#FFD017;color:#171717">DEMO</span>':''}</td><td>${esc(x.r.client)}</td>${dashRep?'':`<td>${esc(x.r.rep)}</td>`}<td>${x.exp.toLocaleDateString('it-IT')}</td>
       <td class="r" style="font-weight:800;color:${tone}" data-cd="${x.exp.getTime()}">${left<0?dt('expAgo')+' ':''}${c.txt}</td></tr>`;};
-  const head=`<tr><th>${dt('num')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th class="r">${dt('value')}</th><th>${dt('expDate')}</th><th class="r">${dt('expLeft')}</th></tr>`;
+  const head=`<tr><th>${dt('num')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th>${dt('expDate')}</th><th class="r">${dt('expLeft')}</th></tr>`;
   const tbl=(rows,empty)=>rows.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px">${head}${rows.map(lab).join('')}</table></div>`:`<p class="hint" style="margin:6px 0">${empty}</p>`;
   const big=next?`<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--navy);color:#fff;margin-bottom:14px">
       <div style="flex:1;min-width:220px"><div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#FFD017">${dt('expNext')}</div>
       <div style="font-size:16px;margin-top:2px"><b>${esc(next.r.num)}</b> · ${esc(next.r.client)}${dashRep?'':' · '+esc(next.r.rep)}</div>
-      <div style="font-size:12.5px;color:#bdbdbd">${dt('expDate')} ${next.exp.toLocaleDateString('it-IT')} · ${money(next.r.total)}</div></div>
+      <div style="font-size:12.5px;color:#bdbdbd">${dt('expDate')} ${next.exp.toLocaleDateString('it-IT')}</div></div>
       <div style="font-size:34px;font-weight:900;letter-spacing:.5px;font-variant-numeric:tabular-nums" id="expBig" data-cd="${next.exp.getTime()}">${fmtCountdown(next.exp-now).txt}</div></div>`
     :`<p class="hint">${dt('expNone')}</p>`;
   return `<div class="card"><h2>${dt('expTitle')} <span style="font-size:15px;color:var(--muted)">· ${all.length} ${dt('expOpenN')}</span></h2>
@@ -173,8 +173,8 @@ function monthlyChart(months){
   let g='';
   months.forEach((m,i)=>{
     const x=pad+i*bw, h1=(m.v/max)*(H-60), h2=(m.wv/max)*(H-60);
-    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${money(m.v)}</title></rect>`;
-    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${money(m.wv)}</title></rect>`;
+    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${m.n}</title></rect>`;
+    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${m.wn}</title></rect>`;
     g+=`<text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="#6f6f6f">${dt('monthNames')[i]}</text>`;
     if(m.n)g+=`<text x="${x+bw/2}" y="${H-34-Math.max(h1,h2)}" text-anchor="middle" font-size="11" font-weight="700" fill="#171717">${m.n}</text>`;
   });
@@ -203,7 +203,7 @@ function renderDashboard(){
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
-  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova (prezzi inventati) e 10 complete, ognuna con una barca e 15-22 optional (prezzi del listino caricato), numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
+  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova e 10 complete, ognuna con una barca e 15-22 optional, numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
   if(!rows.length){
     v.innerHTML=demoBanner+head+`<div class="card"><p class="hint" style="margin:0">${dt('nodata')}</p></div>`;wireDash();return;
   }
@@ -212,12 +212,11 @@ function renderDashboard(){
       <div style="font-size:28px;font-weight:900;color:${c||'var(--navy)'};line-height:1.2">${val}</div>
       <div style="font-size:12px;color:var(--muted)">${sub||'&nbsp;'}</div></div>`;
   const kpis=`<div class="card"><div style="display:flex;flex-wrap:wrap;gap:12px">
-    ${kpi(dt('offers'),st.n,money(st.v))}
-    ${kpi(dt('won'),st.wn,money(st.wv),'var(--red)')}
-    ${kpi(dt('lost'),st.ln,money(st.lv))}
-    ${kpi(dt('open'),st.on,money(st.ov))}
+    ${kpi(dt('offers'),st.n,'')}
+    ${kpi(dt('won'),st.wn,'','var(--red)')}
+    ${kpi(dt('lost'),st.ln,'')}
+    ${kpi(dt('open'),st.on,'')}
     ${kpi(dt('winN'),pct(st.wn,st.n),st.wn+' / '+st.n)}
-    ${kpi(dt('winV'),pct(st.wv,st.v),money(st.wv)+' / '+money(st.v))}
   </div></div>`;
   // per commerciale (solo quando si guardano tutti)
   let byRep='';
@@ -225,9 +224,9 @@ function renderDashboard(){
     const all=offerRows().filter(r=>{const d=parseOfferDate(r.date);return d&&d.getFullYear()===dashYear;});
     const names=[...new Set(all.map(r=>String(r.rep||'').trim()||'—'))].sort();
     byRep=`<div class="card"><h2>${dt('byRep')}</h2><div style="overflow:auto"><table class="ptable" style="font-size:13px">
-      <tr><th>${dt('rep')}</th><th class="r">${dt('count')}</th><th class="r">${dt('value')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('wonValue')}</th><th class="r">${dt('rate')}</th><th class="r">${dt('rateV')}</th></tr>
+      <tr><th>${dt('rep')}</th><th class="r">${dt('count')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('rate')}</th></tr>
       ${names.map(n=>{const s=statsOf(all.filter(r=>(String(r.rep||'').trim()||'—')===n));
-        return `<tr style="cursor:pointer" data-pickrep="${esc(n)}"><td><b>${esc(n)}</b></td><td class="r">${s.n}</td><td class="r">${money(s.v)}</td><td class="r">${s.wn}</td><td class="r">${money(s.wv)}</td><td class="r">${pct(s.wn,s.n)}</td><td class="r">${pct(s.wv,s.v)}</td></tr>`;}).join('')}
+        return `<tr style="cursor:pointer" data-pickrep="${esc(n)}"><td><b>${esc(n)}</b></td><td class="r">${s.n}</td><td class="r">${s.wn}</td><td class="r">${pct(s.wn,s.n)}</td></tr>`;}).join('')}
     </table></div></div>`;
   }
   // mese per mese
@@ -237,18 +236,17 @@ function renderDashboard(){
   const monthly=`<div class="card"><h2>${dt('monthly')}${dashRep?' · '+esc(dashRep):''} · ${dashYear}</h2>
     ${monthlyChart(months)}
     <div style="overflow:auto;margin-top:10px"><table class="ptable" style="font-size:13px">
-      <tr><th>${dt('month')}</th><th class="r">${dt('count')}</th><th class="r">${dt('value')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('wonValue')}</th><th class="r">${dt('rate')}</th><th class="r">${dt('rateV')}</th></tr>
-      ${months.map((m,i)=>`<tr><td>${dt('monthNames')[i]}</td><td class="r">${m.n||'—'}</td><td class="r">${m.n?money(m.v):'—'}</td><td class="r">${m.wn||'—'}</td><td class="r">${m.wn?money(m.wv):'—'}</td><td class="r">${m.n?pct(m.wn,m.n):'—'}</td><td class="r">${m.n?pct(m.wv,m.v):'—'}</td></tr>`).join('')}
-      <tr style="font-weight:800;background:var(--soft)"><td>${dt('yearTot')}</td><td class="r">${st.n}</td><td class="r">${money(st.v)}</td><td class="r">${st.wn}</td><td class="r">${money(st.wv)}</td><td class="r">${pct(st.wn,st.n)}</td><td class="r">${pct(st.wv,st.v)}</td></tr>
+      <tr><th>${dt('month')}</th><th class="r">${dt('count')}</th><th class="r">${dt('wonCount')}</th><th class="r">${dt('rate')}</th></tr>
+      ${months.map((m,i)=>`<tr><td>${dt('monthNames')[i]}</td><td class="r">${m.n||'—'}</td><td class="r">${m.wn||'—'}</td><td class="r">${m.n?pct(m.wn,m.n):'—'}</td></tr>`).join('')}
+      <tr style="font-weight:800;background:var(--soft)"><td>${dt('yearTot')}</td><td class="r">${st.n}</td><td class="r">${st.wn}</td><td class="r">${pct(st.wn,st.n)}</td></tr>
     </table></div></div>`;
   // vinte vs offerte
-  const compare=`<div class="card"><h2>${dt('compare')}</h2><div class="grid g2">
-    <div>${barPair(dt('byNumber'),st.n,st.wn,dt('offers'),dt('won'),x=>String(x))}</div>
-    <div>${barPair(dt('byValue'),st.v,st.wv,dt('offered'),dt('wonVal'),money)}</div></div></div>`;
+  const compare=`<div class="card"><h2>${dt('compare')}</h2><div class="grid">
+    <div>${barPair(dt('byNumber'),st.n,st.wn,dt('offers'),dt('won'),x=>String(x))}</div></div></div>`;
   // macchine
   const ms=machineStats(rows);
-  const mTable=(arr,empty)=>arr.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px"><tr><th>${dt('machine')}</th><th class="r">${dt('times')}</th><th class="r">${dt('qty')}</th><th class="r">${dt('valueL')}</th></tr>
-      ${arr.slice(0,15).map(x=>`<tr><td><b>${esc(x.name||x.code)}</b><br><span style="color:var(--muted);font-size:11px">${esc(x.code||'')}</span></td><td class="r">${x.times}</td><td class="r">${x.qty}</td><td class="r">${x.value?money(x.value):'—'}</td></tr>`).join('')}</table></div>`:`<p class="hint">${empty}</p>`;
+  const mTable=(arr,empty)=>arr.length?`<div style="overflow:auto"><table class="ptable" style="font-size:13px"><tr><th>${dt('machine')}</th><th class="r">${dt('times')}</th><th class="r">${dt('qty')}</th></tr>
+      ${arr.slice(0,15).map(x=>`<tr><td><b>${esc(x.name||x.code)}</b><br><span style="color:var(--muted);font-size:11px">${esc(x.code||'')}</span></td><td class="r">${x.times}</td><td class="r">${x.qty}</td></tr>`).join('')}</table></div>`:`<p class="hint">${empty}</p>`;
   const catRows=Object.entries(ms.cat).sort((a,b)=>b[1].off-a[1].off);
   const cmax=Math.max(1,...catRows.map(c=>c[1].off));
   const machines=`<div class="card"><h2>${dt('mOffered')} · ${dt('mSold')}</h2><div class="grid g2">
@@ -262,14 +260,13 @@ function renderDashboard(){
   const sorted=[...rows].sort((a,b)=>parseOfferDate(b.date)-parseOfferDate(a.date)||String(b.num).localeCompare(String(a.num)));
   const list=`<div class="card"><h2>${dt('list')}</h2><p class="hint">${dt('hintStatus')}</p>
     <div style="overflow:auto"><table class="ptable" style="font-size:13px">
-    <tr><th>${dt('num')}</th><th>${dt('date')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th class="r">${dt('value')}</th><th>${dt('status')}</th><th>${dt('lines')} / ${dt('wonQ')}</th></tr>
+    <tr><th>${dt('num')}</th><th>${dt('date')}</th><th>${dt('client')}</th>${dashRep?'':`<th>${dt('rep')}</th>`}<th>${dt('status')}</th><th>${dt('lines')}</th></tr>
     ${sorted.map(r=>{const idx=REGISTRY.rows.indexOf(r);const s=rowStatus(r);const ls=rowLines(r);
       const stSel=`<select data-st="${idx}" style="padding:6px;border-radius:7px;border:1px solid var(--line);font-weight:700;color:${s==='won'?'var(--red)':s==='lost'?'#6f6f6f':'var(--navy)'}">
         <option value="open"${s==='open'?' selected':''}>${dt('sOpen')}</option><option value="won"${s==='won'?' selected':''}>${dt('sWon')}</option><option value="lost"${s==='lost'?' selected':''}>${dt('sLost')}</option></select>`;
-      const wonCell=s==='won'?`<div>${ls.map((l,li)=>`<label style="display:block;font-size:12px"><input type="checkbox" data-won="${idx}|${li}"${l.won?' checked':''}> ${esc(l.name||l.code)}${l.qty>1?' ×'+l.qty:''}${l.value?' · '+money(l.value):''}</label>`).join('')}
-        <label style="font-size:12px;display:block;margin-top:4px">${dt('wonQ')} <input type="number" step="0.01" data-wonval="${idx}" value="${rowWonValue(r)}" style="width:120px;padding:5px;border:1px solid var(--line);border-radius:6px"></label></div>`
+      const wonCell=s==='won'?`<div>${ls.map((l,li)=>`<label style="display:block;font-size:12px"><input type="checkbox" data-won="${idx}|${li}"${l.won?' checked':''}> ${esc(l.name||l.code)}${l.qty>1?' ×'+l.qty:''}</label>`).join('')}</div>`
         :`<span style="color:var(--muted);font-size:12px">${esc(String(r.machine||'').slice(0,80))}</span>`;
-      return `<tr><td><b>${esc(r.num)}</b> ${langBadge(r)}</td><td>${esc(parseOfferDate(r.date).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td>${dashRep?'':`<td>${esc(r.rep)}</td>`}<td class="r">${money(r.total)}</td><td>${stSel}</td><td>${wonCell}</td></tr>`;}).join('')}
+      return `<tr><td><b>${esc(r.num)}</b> ${langBadge(r)}</td><td>${esc(parseOfferDate(r.date).toLocaleDateString('it-IT'))}</td><td>${esc(r.client)}</td>${dashRep?'':`<td>${esc(r.rep)}</td>`}<td>${stSel}</td><td>${wonCell}</td></tr>`;}).join('')}
     </table></div></div>`;
   v.innerHTML=demoBanner+head+kpis+expirySection()+byRep+monthly+compare+machines+list;
   wireDash();

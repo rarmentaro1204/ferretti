@@ -14,18 +14,8 @@ function pgRow(r){
   const disc=r.disc&&r.disc!=='0';
   const en=(r.descEn&&r.descEn!==r.desc)?r.descEn:'';
   return `<div class="op-row"><div class="op-t"><b class="op-code">${esc(r.code)}</b><span class="op-d1">${esc(r.desc||'')}</span>${en?`<span class="op-d2">${esc(en)}</span>`:''}</div>
-    <div class="op-pr"><b>${moneyD(r.total)}</b>${disc?`<s>${moneyD(r.partial)}</s>`:''}${r.qty>1?`<em>× ${r.qty}</em>`:''}</div>
+    <div class="op-pr">${r.qty>1?`<em>× ${r.qty}</em>`:''}</div>
     <div class="op-img">${r.img?`<img src="${r.img}" alt="">`:IMG_PH}</div></div>`;
-}
-function pgTotals(sd,pk,showPkg){
-  const boat=sd.rows[0],opt=sd.rows.slice(1).reduce((x,r)=>x+r.partial,0);   // a listino: lo sconto si vede nella riga dedicata
-  const hasDisc=sd.listTot-sd.solTot>0.005;
-  const row=(lbl,val,strong)=>`<div class="tt-row${strong?' strong':''}"><span>${lbl}</span><span>${val}</span></div>`;
-  let h='<div class="tt-box">'+row(L2('PREZZO BARCA','BOAT PRICE'),moneyD(boat?boat.partial:0))+row(L2('TOTALE OPTIONAL','TOTAL OF OPTIONALS'),moneyD(opt));
-  if(hasDisc)h+=row(L2('SCONTO APPLICATO','DISCOUNT APPLIED'),'−'+moneyD(sd.listTot-sd.solTot));
-  h+=row(L2('TOTALE','TOTAL'),moneyD(sd.solTot))+row(L2('IVA (0 %)','VAT (0 %)'),L2('esclusa','excluded'))+row(L2('PREZZO FINALE','FINAL PRICE'),moneyD(sd.solTot),true)+'</div>';
-  if(showPkg&&pk.members.length>1)h+=`<div class="tt-box pkg">${row(`${t('order_total')} ${sd.pkg} (${pk.members.map((_,k)=>sd.pkg+String.fromCharCode(65+k)).join(' + ')})`,moneyD(pk.net),true)}</div>`;
-  return h;
 }
 function solutionPagesHtml(sd,pk,isPkgLast,label){
   const {s,rows}=sd;
@@ -36,7 +26,7 @@ function solutionPagesHtml(sd,pk,isPkgLast,label){
   const ovRows=[['Motorizzazione kw/mhp','Engines kw/mhp',sp.engine],['Velocità max/crociera','Speed top/cruise',sp.speed],['Lunghezza f.t.','Length overall',sp.loa],['Larghezza max','Max beam',sp.beam],['Cabine','Cabins',sp.cabins]]
     .filter(r=>r[2]!=null&&String(r[2]).trim()!=='')
     .map(r=>`<div class="ov-row"><div class="ov-l">${lbl2(r[0],r[1])}</div><div class="ov-v">${esc(locSpec(r[2]))}</div></div>`).join('')
-    +`<div class="ov-row"><div class="ov-l">${lbl2('Prezzi ('+docSym()+')','Prices ('+docSym()+')')}</div><div class="ov-v">${moneyD(boat?boat.partial:0)}</div></div>`;
+;
   const head=`<div class="plogo">${logoLight(30)}</div>`;
   let html=`<div class="page"><div class="pad">${head}
     <div class="sl-eyebrow">${label}</div>
@@ -57,10 +47,8 @@ function solutionPagesHtml(sd,pk,isPkgLast,label){
     if(used+need>PG_LIMIT&&cur.length)flush();
     cur.push(it);used+=it.h?PG_HEAD:PG_ROW;
   });
-  if(cur.length&&used+PG_TOT>PG_LIMIT)flush();            // i totali non entrano: pagina nuova
+  if(cur.length)flush();
   const body=its=>its.map(it=>it.h?pgGroupHead(it.h):pgRow(it.r)).join('');
-  const last=cur;                                          // l'ultima pagina porta anche i totali
   pages.forEach(p=>{html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(p)}${footer()}</div></div>`;});
-  html+=`<div class="page"><div class="pad">${head}<div class="sl-eyebrow">${label}</div>${body(last)}${pgTotals(sd,pk,isPkgLast)}${footer()}</div></div>`;
   return html;
 }

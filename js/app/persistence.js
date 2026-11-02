@@ -200,7 +200,7 @@ async function writeRegistryEntry(){
     const acc=(s.accessories||[]).filter(a=>a.code||a.desc);
     return acc.length?`[${s.code}] `+acc.map(a=>a.desc?`${a.code||''} - ${a.desc}`.replace(/^ - /,''):a.code).join('; '):'';
   }).filter(Boolean).join(' || ');
-  const row={prog,num,date:S.date,client:S.client,rep:S.rep.name,total:Number(grand.toFixed(2)),
+  const row={prog,num,date:S.date,client:S.client,rep:S.rep.name,total:0,
     machine:machineSummary,addedOptionals:addedOptSummary,note:'',validity:String(S.validity||'30'),lang:LANG,status:'open',outcomeDate:'',wonValue:'',lines:offerLinesFromState()};
   REGISTRY.rows.push(row);S.offerNum=num;persistRegistryLocal();
   let ghSaved=false;
@@ -391,7 +391,6 @@ async function saveOfferComplete(){
   if(btn){btn.disabled=true;btn.textContent=''+t('saving_all');}
   try{
     let pdfOk=false, pdfBlob=null, xlsxBlob=null;
-    try{ xlsxBlob=await buildOfferXlsx(); }catch(e){ console.warn('Excel non generato',e); }   // prima del salvataggio: poi lo stato si azzera
     // con GitHub collegato il PDF va direttamente nella repo (nessuna richiesta di cartella)
     if(GH.ok){ try{pdfBlob=await buildPdfBlob({scale:1.5,q:0.72});}catch(e){console.error(e);} }
     else if(window.showDirectoryPicker){
