@@ -6,7 +6,7 @@ Stesso configuratore HTML (nessun backend) di Ferretti — 4 passi: Cliente → 
 - **Catalogo**: 28 modelli di tutta la flotta (Seadeck 6/7/9, Fly 53–82, S 6/7/8, Magellano 60/66/25m/27m/30m, Verve 42/48, Atlantis 45/51, Grande 26m–44m e Trideck) estratti da azimutyachts.com con `scraper/scrape_azimut.py` → `excel/catalogo_azimut.xlsx` + `images/` (6 foto per modello, esterni per primi). Testi IT/EN, LOA, baglio, immersione, dislocamento, cabine/posti letto, motori standard/optional, velocità, serbatoi, materiale, certificazioni, designer, link alla scheda ufficiale. **Dati da verificare con il listino/specifiche ufficiali.**
 - **Prezzi**: a 0 (nessun listino Azimut disponibile). Si caricano a runtime con **Carica listino** (Excel con `Codice` + `Prezzo`) e **Carica matrice optional**, oppure da `data-private/` in locale (`01_Listino_Prezzi_Azimut.xlsx`, `02_Matrice_Optional_Azimut.xlsx`, in `.gitignore`). Nessun prezzo nel sito pubblicato.
 - **Optional precaricati**: solo la motorizzazione alternativa indicata dal sito (prezzo 0).
-- **Lingue**: italiano e inglese. **Valuta**: EUR; il listino $ = € + 10% è la regola ereditata da Ferretti → **da confermare** (`USD_MARKUP` in `js/app/step-product.js`).
+- **Lingue**: italiano e inglese. **Listino**: unico, in euro (la scelta € | $ è stata eliminata; il codice di conversione resta inutilizzato in `js/app/step-product.js`).
 - **Brand**: ufficiale (palette, Helvetica Neue/Arial, wordmark). Un solo accento rosso per pagina, nessuno sfondo scuro.
 - **Segnaposto**: anagrafica emittente (`js/config/brand.js`), commerciali (`js/data/defaults.js`), condizioni generali (`js/data/general-terms.js`).
 
