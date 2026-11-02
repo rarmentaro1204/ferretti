@@ -234,10 +234,10 @@ function stepQuote(){
     <div class="lt-subject">${esc(S.subject||t('def_subject'))}</div>
     <div class="lt-grid">
       <div><div class="lt-h">${t('l_client')}</div>${toRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
-      <div><div class="lt-h">${esc(BRAND.legalName)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+      <div><div class="lt-h">${esc(BRAND.legalName||BRAND.name)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
     </div>
     <div class="lt-body">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
-    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName)} · ${t('sign_dept')}</span></div>
+    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName||BRAND.name)} · ${t('sign_dept')}</span></div>
     ${footer()}
   </div></div>`;
   // presentazione dei modelli offerti: una pagina A4 intera per modello (foto a tutta larghezza, testo del cantiere, dati principali)

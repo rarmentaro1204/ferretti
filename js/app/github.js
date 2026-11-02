@@ -97,9 +97,8 @@ async function ghRefresh(){
     await Promise.all(Array.from({length:6},worker));
     files.forEach(f=>{if(next[f.sha])rows.push(Object.assign({},next[f.sha],{ghPath:f.path}));});
     try{localStorage.setItem(GH_CACHE,JSON.stringify(next));}catch(_){}
-    // merge: righe remote + righe locali non ancora presenti su GitHub
+    // GitHub è la fonte: le offerte cancellate dalla repo spariscono anche dal registro locale
     const byNum=new Map();
-    REGISTRY.rows.forEach(r=>byNum.set(String(r.num).trim(),r));
     rows.forEach(r=>byNum.set(String(r.num).trim(),r));
     REGISTRY.rows=[...byNum.values()].sort((a,b)=>(+a.prog||0)-(+b.prog||0));
     persistRegistryLocal();

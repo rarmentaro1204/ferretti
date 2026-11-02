@@ -5,13 +5,13 @@
    ========================================================================== */
 const BRAND = {
   name: 'Ferretti Yachts',
-  legalName: '[Ragione sociale emittente]',
+  legalName: '',
   office: 'SALES',
   offerPrefix: 'FY-',
   web: 'www.ferretti-yachts.com',
-  address: ['[Indirizzo]', '[CAP Città (Prov.)] • Italy'],
-  tel: '[Telefono]', fax: '[Fax]', email: '[email@dominio.it]',
-  vat: '[P.IVA]',
+  address: ['', ''],
+  tel: '', fax: '', email: '',
+  vat: '',
   colors: { ink: '#212322', petrol: '#003E4D', stone: '#D1CDC7', mist: '#92989B' }
 };
 // Wordmark provvisorio (da sostituire con l'SVG ufficiale): FERRETTI in Jost 500 spaziato + YACHTS in Jost 300.
@@ -23,10 +23,15 @@ function logoDark(h){return wordmark(h,'#ffffff');}    // su sfondo scuro (coper
 // decorazione di copertina: onde sottili in basso a sinistra
 const COVER_SYMBOL = `<svg class="symbol" viewBox="0 0 400 200" preserveAspectRatio="xMinYMax slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#D1CDC7" stroke-width="1.2">`
   + [0,1,2,3,4,5,6].map(i=>`<path d="M0 ${120+i*14} C 70 ${95+i*14}, 130 ${145+i*14}, 200 ${120+i*14} S 330 ${95+i*14}, 400 ${120+i*14}" opacity="${(0.55-i*0.07).toFixed(2)}"/>`).join('')+`</svg>`;
-function footer(){return `<div class="foot">
-  <span><b>${BRAND.legalName}</b><br>${BRAND.address[0]}<br>${BRAND.address[1]}</span>
-  <span><b>Tel.</b> ${BRAND.tel}<br><b>Email.</b> ${BRAND.email}</span>
-  <span><b>C.F./P.IVA</b> ${BRAND.vat}</span>
+// footer: si stampano solo i dati dell'emittente compilati (nessun segnaposto)
+function footer(){
+  const ok=v=>v&&String(v).trim()&&!/^\s*\[/.test(String(v));
+  const adr=[BRAND.legalName&&ok(BRAND.legalName)?`<b>${BRAND.legalName}</b>`:'',...(BRAND.address||[]).filter(ok)].filter(Boolean).join('<br>');
+  const ct=[ok(BRAND.tel)?`<b>Tel.</b> ${BRAND.tel}`:'',ok(BRAND.email)?`<b>Email.</b> ${BRAND.email}`:''].filter(Boolean).join('<br>');
+  return `<div class="foot">
+  <span>${adr}</span>
+  <span>${ct}</span>
+  <span>${ok(BRAND.vat)?`<b>C.F./P.IVA</b> ${BRAND.vat}`:''}</span>
   <span class="web">${BRAND.web}</span><span class="notch"></span></div>`;}
 
 // Dati dell'emittente (intestazione e piè di pagina del documento): modificabili dal passo Cliente, salvati nel browser.

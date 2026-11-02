@@ -831,13 +831,13 @@ details.issuer>summary::before{content:'+ ';color:var(--lx-gold)}details.issuer[
    ========================================================================== */
 const BRAND = {
   name: 'Ferretti Yachts',
-  legalName: '[Ragione sociale emittente]',
+  legalName: '',
   office: 'SALES',
   offerPrefix: 'FY-',
   web: 'www.ferretti-yachts.com',
-  address: ['[Indirizzo]', '[CAP Città (Prov.)] • Italy'],
-  tel: '[Telefono]', fax: '[Fax]', email: '[email@dominio.it]',
-  vat: '[P.IVA]',
+  address: ['', ''],
+  tel: '', fax: '', email: '',
+  vat: '',
   colors: { ink: '#212322', petrol: '#003E4D', stone: '#D1CDC7', mist: '#92989B' }
 };
 // Wordmark provvisorio (da sostituire con l'SVG ufficiale): FERRETTI in Jost 500 spaziato + YACHTS in Jost 300.
@@ -849,10 +849,15 @@ function logoDark(h){return wordmark(h,'#ffffff');}    // su sfondo scuro (coper
 // decorazione di copertina: onde sottili in basso a sinistra
 const COVER_SYMBOL = `<svg class="symbol" viewBox="0 0 400 200" preserveAspectRatio="xMinYMax slice" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#D1CDC7" stroke-width="1.2">`
   + [0,1,2,3,4,5,6].map(i=>`<path d="M0 ${120+i*14} C 70 ${95+i*14}, 130 ${145+i*14}, 200 ${120+i*14} S 330 ${95+i*14}, 400 ${120+i*14}" opacity="${(0.55-i*0.07).toFixed(2)}"/>`).join('')+`</svg>`;
-function footer(){return `<div class="foot">
-  <span><b>${BRAND.legalName}</b><br>${BRAND.address[0]}<br>${BRAND.address[1]}</span>
-  <span><b>Tel.</b> ${BRAND.tel}<br><b>Email.</b> ${BRAND.email}</span>
-  <span><b>C.F./P.IVA</b> ${BRAND.vat}</span>
+// footer: si stampano solo i dati dell'emittente compilati (nessun segnaposto)
+function footer(){
+  const ok=v=>v&&String(v).trim()&&!/^\s*\[/.test(String(v));
+  const adr=[BRAND.legalName&&ok(BRAND.legalName)?`<b>${BRAND.legalName}</b>`:'',...(BRAND.address||[]).filter(ok)].filter(Boolean).join('<br>');
+  const ct=[ok(BRAND.tel)?`<b>Tel.</b> ${BRAND.tel}`:'',ok(BRAND.email)?`<b>Email.</b> ${BRAND.email}`:''].filter(Boolean).join('<br>');
+  return `<div class="foot">
+  <span>${adr}</span>
+  <span>${ct}</span>
+  <span>${ok(BRAND.vat)?`<b>C.F./P.IVA</b> ${BRAND.vat}`:''}</span>
   <span class="web">${BRAND.web}</span><span class="notch"></span></div>`;}
 
 // Dati dell'emittente (intestazione e piè di pagina del documento): modificabili dal passo Cliente, salvati nel browser.
@@ -1995,10 +2000,10 @@ function stepQuote(){
     <div class="lt-subject">${esc(S.subject||t('def_subject'))}</div>
     <div class="lt-grid">
       <div><div class="lt-h">${t('l_client')}</div>${toRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
-      <div><div class="lt-h">${esc(BRAND.legalName)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
+      <div><div class="lt-h">${esc(BRAND.legalName||BRAND.name)}</div>${fromRows.map(([l,v])=>`<div class="lt-r"><span>${l}</span>${v}</div>`).join('')}</div>
     </div>
     <div class="lt-body">${esc(S.intro||t('intro_default')).replace(/\n/g,'<br>')}</div>
-    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName)} · ${t('sign_dept')}</span></div>
+    <div class="lt-sign"><span>${t('best_regards')}</span><b>${esc(S.rep.name)}</b><span>${esc(BRAND.legalName||BRAND.name)} · ${t('sign_dept')}</span></div>
     ${footer()}
   </div></div>`;
   // presentazione dei modelli offerti: una pagina A4 intera per modello (foto a tutta larghezza, testo del cantiere, dati principali)
@@ -3513,9 +3518,8 @@ async function ghRefresh(){
     await Promise.all(Array.from({length:6},worker));
     files.forEach(f=>{if(next[f.sha])rows.push(Object.assign({},next[f.sha],{ghPath:f.path}));});
     try{localStorage.setItem(GH_CACHE,JSON.stringify(next));}catch(_){}
-    // merge: righe remote + righe locali non ancora presenti su GitHub
+    // GitHub è la fonte: le offerte cancellate dalla repo spariscono anche dal registro locale
     const byNum=new Map();
-    REGISTRY.rows.forEach(r=>byNum.set(String(r.num).trim(),r));
     rows.forEach(r=>byNum.set(String(r.num).trim(),r));
     REGISTRY.rows=[...byNum.values()].sort((a,b)=>(+a.prog||0)-(+b.prog||0));
     persistRegistryLocal();
