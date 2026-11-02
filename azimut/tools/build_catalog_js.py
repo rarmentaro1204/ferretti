@@ -3,7 +3,7 @@
 Uso: python3 tools/build_catalog_js.py excel/catalogo_azimut.xlsx
 Stessa mappatura colonne->campi di js/app/xlsx-loader.js (handleXlsx).
 Genera anche gli optional di partenza (motorizzazione alternativa del sito, prezzo 0)."""
-import json, re, sys
+import json, random, re, sys
 from pathlib import Path
 from openpyxl import load_workbook
 
@@ -40,11 +40,40 @@ def cabine(raw):
     return f"{m.group(1)} + {m.group(2)}" if m.group(2) else m.group(1)
 
 
+# Struttura degli optional (gruppi e numero di voci per gruppo) ricalcata dal configuratore Ferretti, ma ANONIMIZZATA:
+# nessuna descrizione, codice o prezzo del listino originale (riservato). Descrizioni generiche, codici casuali (seme fisso), prezzo 0.
+# (gruppo, numero voci, [(sezione IT, sezione EN), ...]) — le sezioni sono etichette di categoria generiche.
+STRUTTURA_OPTIONAL = [
+    ("Coperta", 43, [("Dotazioni di poppa e giochi d'acqua", "Transom equipment and water toys"), ("Verniciatura e accessori esterni", "Exterior painting and accessories")]),
+    ("Interni", 16, [("Comfort e arredi interni", "Interior comfort and furniture")]),
+    ("Elettronica", 49, [("Navigazione, sicurezza e telecomunicazioni", "Navigation, security and telecommunications"), ("Audio-video e intrattenimento", "Audio-video and entertainment"), ("Impianti elettrici e tecnici", "Electrical and technical equipment")]),
+    ("Comfort", 9, [("Elettrodomestici", "Appliances"), ("Stabilizzatore", "Stabilizer")]),
+    ("Servizi", 7, [("Assistenza e ricambi", "Aftersales and spare parts"), ("Documenti e trasporti", "Documents and transport")]),
+]
+
+
+def optional_generici():
+    rnd = random.Random(20261102)
+    usati, voci, ordine = set(), [], 10
+    for gruppo, n, sezioni in STRUTTURA_OPTIONAL:
+        for k in range(n):
+            while True:
+                code = "OP-" + "".join(rnd.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(5))
+                if code not in usati:
+                    usati.add(code); break
+            it, en = sezioni[k * len(sezioni) // n]
+            voci.append({"code": code, "desc": f"{en} — item {k + 1:02d} (to be defined)", "desc_it": f"{it} — voce {k + 1:02d} (da definire)",
+                         "group": gruppo, "price": 0, "order": ordine})
+            ordine += 1
+    return voci
+
+
 def main(xlsx):
     ws = load_workbook(xlsx)["Macchine"]
     tutte = list(ws.iter_rows(values_only=True))
     i = next(i for i, r in enumerate(tutte[:15]) if r and "Codice" in r)   # salta titolo/sottotitolo
     righe = [dict(zip(tutte[i], r)) for r in tutte[i + 1:]]
+    GENERICI = optional_generici()
     out, optionals = [], {}
     for r in righe:
         if not r.get("Codice"):
@@ -77,11 +106,34 @@ def main(xlsx):
         out.append(m)
         if m["engine_opt"]:
             optionals[code] = [{"code": "ENG-" + code.replace("AZ-", ""), "desc": m["engine_opt"] + (f" — {m['speed_opt']}" if m["speed_opt"] else ""), "group": "Motorizzazione", "price": 0, "order": 1}]
+        optionals.setdefault(code, []).extend(json.loads(json.dumps(GENERICI)))
     dest = RAGGIO / "js" / "data" / "catalogo.js"
     dest.write_text("/* GENERATO da tools/build_catalog_js.py — non modificare a mano. Fonte: %s */\n"
                     "const CATALOGO_YACHT = %s;\nconst OPTIONALS_YACHT = %s;\n"
                     % (Path(xlsx).name, json.dumps(out, ensure_ascii=False), json.dumps(optionals, ensure_ascii=False)), encoding='utf8')
-    print(f"{len(out)} modelli -> {dest}")
+    print(f"{len(out)} modelli -> {dest} · {len(GENERICI)} optional generici per modello")
+    scrivi_matrice(out, optionals, RAGGIO / "excel" / "matrice_optional_azimut_TEMPLATE.xlsx")
+
+
+def scrivi_matrice(modelli, optionals, dest):
+    """Matrice optional in formato 'Carica matrice optional' (fogli Optional_Prezzi + Catalogo_Optional), prezzi a 0 da compilare."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    voci = [("Motorizzazione", o) for o in []] + [(o["group"], o) for o in optionals[next(iter(optionals))] if o["group"] != "Motorizzazione"]
+    wb = Workbook(); ws = wb.active; ws.title = "Optional_Prezzi"
+    ws.append(["Gruppo"] + [g for g, _ in voci])
+    ws.append(["Codice Macchina"] + [o["code"] for _, o in voci])
+    ws.append(["Descrizione"] + [o["desc"] for _, o in voci])
+    for c in ws[1] + ws[2] + ws[3]:
+        c.font = Font(bold=True)
+    for m in modelli:
+        ws.append([m["code"]] + [0] * len(voci))
+    cat = wb.create_sheet("Catalogo_Optional")
+    cat.append(["Codice", "Gruppo", "Ordine", "Descrizione", "Descrizione_IT", "Nota", "Nota_IT"])
+    for g, o in voci:
+        cat.append([o["code"], g, o["order"], o["desc"], o["desc_it"], "", ""])
+    wb.save(dest)
+    print("matrice optional (template, prezzi a 0) ->", dest)
 
 
 if __name__ == "__main__":
