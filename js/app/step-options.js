@@ -92,7 +92,7 @@ function optCardHtml(si,o){
   return `<div class="ocard${sel?' sel':''}${ok?'':' na'}" data-ocard="${si}|${esc(o.code)}">
     <div class="oimg">${img?`<img src="${img}" alt="">`:IMG_PH}</div>
     <div class="otxt"><div class="oti">${esc(it||o.code)}</div>${en?`<div class="oen">${esc(en)}</div>`:''}
-      <div class="ocode">${esc(o.code)}${o.check?` <span style="color:#d97706" title="${esc(t('verify_price'))}">⚠</span>`:''}${(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
+      <div class="ocode">${esc(o.code)}${(o.note_it||o.note)&&!/prezz|price/i.test(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
     <div class="oside">
       <label class="oqty">${L2('Quantità','Quantity')}<input type="number" min="1" value="${qty}" data-oqty="${si}|${esc(o.code)}"></label>
       <label class="tgl"><input type="checkbox" data-otgl="${si}|${esc(o.code)}" ${sel?'checked':''} ${ok?'':'disabled'}><span></span></label>

@@ -173,8 +173,8 @@ function monthlyChart(months){
   let g='';
   months.forEach((m,i)=>{
     const x=pad+i*bw, h1=(m.v/max)*(H-60), h2=(m.wv/max)*(H-60);
-    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${money(m.v)}</title></rect>`;
-    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${money(m.wv)}</title></rect>`;
+    g+=`<rect x="${x+6}" y="${H-30-h1}" width="${bw/2-8}" height="${h1}" fill="#171717"><title>${m.n}</title></rect>`;
+    g+=`<rect x="${x+bw/2}" y="${H-30-h2}" width="${bw/2-8}" height="${h2}" fill="#AA1917"><title>${m.wn}</title></rect>`;
     g+=`<text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="#6f6f6f">${dt('monthNames')[i]}</text>`;
     if(m.n)g+=`<text x="${x+bw/2}" y="${H-34-Math.max(h1,h2)}" text-anchor="middle" font-size="11" font-weight="700" fill="#171717">${m.n}</text>`;
   });
@@ -203,7 +203,7 @@ function renderDashboard(){
         <button class="btn ghost sm" id="d_export">${dt('export')}</button>
         <button class="btn nav sm" id="d_back">${dt('back')}</button>
       </div></div></div>`;
-  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova (prezzi inventati) e 10 complete, ognuna con una barca e 15-22 optional (prezzi del listino caricato), numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
+  const demoBanner=(hasDemoRows()&&demoVisible())?`<div class="card" style="background:#FFF6D1;border-color:#FFD017"><b>OFFERTE DEMO</b> · 42 offerte fittizie: 32 di prova e 10 complete, ognuna con una barca e 15-22 optional, numero «DEMO-…»), richiamabili e modificabili. Restano solo in questo browser: non finiscono nel registro Excel né su GitHub. Si eliminano con «Elimina offerte demo».</div>`:'';
   if(!rows.length){
     v.innerHTML=demoBanner+head+`<div class="card"><p class="hint" style="margin:0">${dt('nodata')}</p></div>`;wireDash();return;
   }
