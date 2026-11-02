@@ -10,3 +10,4 @@ data/_t*.xlsx
 data-private/
 brochures/
 configuratore-offerte-codice.zip
+.netlify
