@@ -1,6 +1,6 @@
 # Configuratore offerte yacht — Ferretti Yachts
 
-Configuratore HTML (nessun backend) a 5 passi: Cliente → Programma di navigazione → Prodotto → Opzioni → Offerta (PDF A4), con registro offerte, richiamo, dashboard e salvataggio su GitHub privata.
+Configuratore HTML (nessun backend) a 4 passi: Cliente → Prodotto → Opzioni → Offerta (PDF A4). **Nessun prezzo è mostrato né stampato**: né nel configuratore, né nell'offerta/PDF, né nella dashboard (il PDF è una presentazione dei modelli e degli optional scelti), con registro offerte, richiamo, dashboard e salvataggio su GitHub privata.
 Derivato dal configuratore Depureco; la guida di passaggio è in `00_LEGGIMI.md` … `04_CHECKLIST_ADATTAMENTO_YACHT.md`.
 
 ## Stato

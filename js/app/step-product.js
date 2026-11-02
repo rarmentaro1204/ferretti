@@ -30,7 +30,7 @@ function buildMachineListHtml(){
       <div class="mimg">${img?`<img src="${img}" alt="" loading="lazy">`:''}</div>
       <div class="mbody"><div class="mnm">${esc(String(m.name).replace(/^Ferretti Yachts\s*/i,''))}</div>
         <div class="mmeta">${esc(meta||m.category)}</div>
-        <div class="mfoot"><div class="mpr">${priceOf(m)?listMoney(priceOf(m)):'<span>'+t('price_tbd')+'</span>'}</div>
+        <div class="mfoot"><div class="mpr"></div>
           <button class="btn prim sm" data-add="${esc(m.code)}">${ex?'✓ ×'+ex.qty:L2('Aggiungi','Add')}</button></div></div></div>`;
   }).join('');
   return html||'<p class="hint">'+t('no_results')+'</p>';
@@ -47,28 +47,20 @@ function goP(n){
   else{PSTEP=n;stepProduct();}
 }
 function pCrumbsHtml(){
-  const lv=S.listino==='USD'?'$ · USD':'€ · EUR';
-  const items=[[L2('Listino','Price list'),PCHOSEN||PSTEP>0?lv:'—'],[L2('Gamma','Range'),curCat&&PSTEP>1?curCat:'—'],[L2('Modello','Model'),S.solutions.length?S.solutions.map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).join(', '):'—']];
-  return `<div class="pcrumbs">${items.map(([k,val],i)=>`<button class="pcr${i===PSTEP?' on':''}${i<PSTEP?' done':''}" ${i<PSTEP?`data-pgo="${i}"`:'disabled'}><i>${i+1}</i><span>${esc(k)}</span><b>${esc(val)}</b></button>`).join('')}</div>`;
+  const items=[[L2('Gamma','Range'),curCat&&PSTEP>1?curCat:'—'],[L2('Modello','Model'),S.solutions.length?S.solutions.map(x=>String(x.name).replace(/^Ferretti Yachts\s*/i,'')).join(', '):'—']];
+  return `<div class="pcrumbs">${items.map(([k,val],i)=>`<button class="pcr${i+1===PSTEP?' on':''}${i+1<PSTEP?' done':''}" ${i+1<PSTEP?`data-pgo="${i+1}"`:'disabled'}><i>${i+1}</i><span>${esc(k)}</span><b>${esc(val)}</b></button>`).join('')}</div>`;
 }
 function pStageHtml(){
-  if(PSTEP===0){
-    return `<div class="phead"><div class="peyebrow">${L2('Passo 1 di 3','Step 1 of 3')}</div><h3>${L2('Scegli il listino','Choose the price list')}</h3></div>
-    <div class="ptiles two">
-      <button class="ptile" data-listino="EUR" style="--i:0"><span class="psym">€</span><span class="pt">${L2('Listino Euro','Euro price list')}</span><span class="ps">L€ · ${L2('prezzi in euro','prices in euro')}</span></button>
-      <button class="ptile" data-listino="USD" style="--i:1"><span class="psym">$</span><span class="pt">${L2('Listino Dollaro','Dollar price list')}</span><span class="ps">L$ · ${L2('listino euro + 10%','euro price list + 10%')}</span></button>
-    </div>`;
-  }
   if(PSTEP===1){
     const counts=catCounts();
     const cats=Object.keys(counts).sort((a,b)=>catOrderOf(a)-catOrderOf(b)||counts[b]-counts[a]);
-    return `<div class="phead"><div class="peyebrow">${L2('Passo 2 di 3','Step 2 of 3')}</div><h3>${L2('Scegli la gamma','Choose the range')}</h3></div>
+    return `<div class="phead"><div class="peyebrow">${L2('Passo 1 di 2','Step 1 of 2')}</div><h3>${L2('Scegli la gamma','Choose the range')}</h3></div>
     <div class="ptiles">${cats.map((c,i)=>{const first=DATA.machines.find(m=>m.category===c),img=first?machineImg(first):'';
       return `<button class="ptile photo" data-c="${esc(c)}" style="--i:${i}">${img?`<span class="pimg"><img src="${img}" alt="" loading="lazy"></span>`:''}<span class="pt">${esc(c)}</span><span class="ps">${counts[c]} ${t('models')}</span></button>`;}).join('')}</div>`;
   }
   const protCounts={};DATA.machines.filter(m=>!curCat||m.category===curCat).forEach(m=>{const p=protOf(m);protCounts[p]=(protCounts[p]||0)+1;});
   const protHtml=['',...BAND_ORDER.filter(b=>protCounts[b]),...Object.keys(protCounts).filter(b=>!BAND_ORDER.includes(b))].map(p=>`<button class="chip${p===curProt?' sel':''}" data-prot="${p}">${p?esc(p):t('all_f')}${p?' · '+protCounts[p]:''}</button>`).join('');
-  return `<div class="phead"><div class="peyebrow">${L2('Passo 3 di 3','Step 3 of 3')}</div><h3>${L2('Scegli il modello','Choose the model')}</h3></div>
+  return `<div class="phead"><div class="peyebrow">${L2('Passo 2 di 2','Step 2 of 2')}</div><h3>${L2('Scegli il modello','Choose the model')}</h3></div>
     <div class="pfilters"><span class="hint">${t('protection_f')}</span>${protHtml}</div>
     <input class="search" id="i_search" placeholder="${esc(t('ph_search'))}" value="${esc(search)}">
     <div class="mgrid">${buildMachineListHtml()}</div>
@@ -76,7 +68,7 @@ function pStageHtml(){
 }
 function stepProduct(){
   const v=$('#view');
-  if(PSTEP===0&&!PCHOSEN&&S.solutions.length)PSTEP=2;   // tornando al passo con prodotti già scelti: si riparte dai modelli
+  if(PSTEP<1)PSTEP=(!PCHOSEN&&S.solutions.length)?2:1;   // tornando al passo con prodotti già scelti: si riparte dai modelli
   const anim=PANIM;PANIM=false;
   v.innerHTML=`
   <div class="card pcard">
@@ -90,7 +82,6 @@ function stepProduct(){
   </div>
   ${selectedDrawer()}`;
   v.querySelectorAll('[data-pgo]').forEach(b=>b.onclick=()=>goP(+b.dataset.pgo));
-  v.querySelectorAll('[data-listino]').forEach(b=>b.onclick=()=>setListino(b.dataset.listino));
   v.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{curCat=b.dataset.c;curSub=null;curProt='';search='';goP(2);});
   v.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{curProt=b.dataset.prot;curSub=null;stepProduct();});
   if($('#i_search'))$('#i_search').oninput=e=>{search=e.target.value;refreshMachineList();};
@@ -136,7 +127,7 @@ let drawerOpen=window.innerWidth>640;   // su telefono il riepilogo parte chiuso
 function selectedDrawer(){
   const items=S.solutions.map((s,i)=>`<div class="ditem">
       ${s.img?`<img class="imgthumb" style="width:36px;height:36px" src="${s.img}">`:'<span style="width:36px"></span>'}
-      <div style="flex:1;min-width:0"><div class="nm">${esc(s.name)}</div><div class="cd">${esc(s.code)} · ×${s.qty} · ${money(s.unit)}</div></div>
+      <div style="flex:1;min-width:0"><div class="nm">${esc(s.name)}</div><div class="cd">${esc(s.code)} · ×${s.qty}</div></div>
       <button class="xbtn" data-ddel="${i}">✕</button></div>`).join('');
   return `<div class="drawer${drawerOpen?'':' closed'}" id="drawer">
     <div class="dtab" data-drawer-toggle>▸ ${t('selected_solutions')} (${S.solutions.length})</div>
@@ -158,7 +149,7 @@ function wireMove(root){root.querySelectorAll('[data-mv]').forEach(b=>b.onclick=
 function renderSolList(){
   return S.solutions.map((s,i)=>`<div class="sol">
     <div class="head"><div><div class="nm">${esc(s.name)} ${s.atex?'<span class="badge">ATEX</span>':''}${s.sparesOnly?'<span class="badge" style="background:#4a4a4a">'+t('spares_sale_badge')+'</span>':''}</div>
-    <div class="cd">${s.sparesOnly?(s.accessories.length+' '+t('accessories').toLowerCase()):esc(s.code)+' · '+money(s.unit)}</div></div>
+    <div class="cd">${s.sparesOnly?(s.accessories.length+' '+t('accessories').toLowerCase()):esc(s.code)}</div></div>
     <span style="display:inline-flex;gap:6px;align-items:center">${mvBtns(i)}<button class="xbtn" data-del="${i}">✕</button></span></div>
     ${s.sparesOnly?'':`<div class="addbar"><label class="fld" style="max-width:120px">${t('qty')}
       <input type="number" min="1" value="${s.qty}" data-qty="${i}"></label></div>`}

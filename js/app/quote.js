@@ -278,13 +278,8 @@ function stepQuote(){
   }
   // solution pages
   sols.forEach((sd,i)=>{const {s,rows,solTot}=sd;const pk=packages[sd.pkg-1];const isPkgLast=sd.pos===sd.pkgSize;
-    const priceRowsArr=rows.map((r,ri)=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="r nw">${moneyD(r.unit)}</td>
-      <td class="c">${r.qty}</td><td class="r nw">${moneyD(r.partial)}</td><td class="c nw">${r.disc==='0'?'—':r.disc+'%'}</td><td class="r nw tt">${moneyD(r.total)}</td></tr>`);
-    // tutte le righe sulla prima pagina: repaginateQuote() sposta le righe in eccesso (e i totali) su pagine di continuazione
-    const rowChunks=[priceRowsArr];
-    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="r">${t('unit_price')}</th>
-      <th class="c">${t('qty')}</th><th class="r">${t('partial')}</th><th class="c">${t('discount')}</th>
-      <th class="r">${t('total')}</th></tr>`;
+    const spRows=rows.map(r=>`<tr><td class="pc">${esc(r.code)}</td><td class="pdesc">${esc(r.desc||'')}</td><td class="c">${r.qty}</td></tr>`);
+    const ptableHead=`<tr><th>${t('code')}</th><th>${t('description')}</th><th class="c">${t('qty')}</th></tr>`;
     const m=!s.custom&&DATA.machines.find(x=>x.code===s.code);
     const hero=(m&&heroOf(m,s.img))||s.img||'';
     const label=`${solLabel(sd).toUpperCase()}${sd.pkgSize>1?' · '+t('same_order').toUpperCase():(packages.length>1?' · '+t('alternative').toUpperCase():'')}`;
@@ -292,22 +287,14 @@ function stepQuote(){
     html+=`<div class="page"><div class="pad">
       <div class="plogo">${logoLight(30)}</div>
       <div class="sl-eyebrow">${label}</div>`;
-    if(s.sparesOnly){
-      html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
-    } else {
-      const keys=['loa','beam','draft','hull','cabins','persons','engine','speed','disp_empty','disp_full','fuel','water'];
-      html+=`<div class="sl-title">${esc(s.name)}</div>
-      ${hero?`<img class="sl-hero" src="${hero}">`:''}
-      <div class="sl-figs">${figsHtml(s,keys)}</div>`;
-    }
-    html+=`<table class="ptable">${ptableHead}${rowChunks[0].join('')}</table>`;
-    html+=`${totalsHtml(sd,pk,isPkgLast)}
+    html+=`<div class="sl-title">${esc(s.name)}</div>${s.desc||s.tableDesc?`<div class="sl-note">${esc(s.desc||s.tableDesc||'')}</div>`:''}`;
+    html+=`<table class="ptable">${ptableHead}${spRows.join('')}</table>
       ${footer()}
     </div></div>`;
   });
   // supply + general conditions page
   const sc=[['sc_validity',(S.validity||'30')+' '+t('days')+'.'],['sc_lead',S.lead?S.lead+' '+t('weeks_from_order')+'.':t('def_lead')],
-    ['sc_incoterm',S.incoterm||'Ex Works'],['sc_payment',S.payment||t('def_payment')]];
+    ['sc_incoterm',S.incoterm||'Ex Works']];
   const scRows=sc.map(([k,val])=>`<tr><td>${t(k)}</td><td>${esc(val)}</td></tr>`).join('');
   const exclItems=(S.exclusions||t('def_exclusions')).split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
   html+=`<div class="page"><div class="pad">
@@ -342,22 +329,18 @@ function stepQuote(){
       <h2>${t('step_quote')}</h2><p class="hint">${t('hint_quote')}</p>
       <div class="doc-tools">
         <button class="btn prim" id="btnPrint">${t('print_pdf')}</button>
-        <button class="btn ghost" id="btnXlsx">${L2('Scarica Excel','Download Excel')}</button>
         <button class="btn prim" id="btnSaveAll" style="background:var(--lx-petrol)">${t('save_all')}</button>
-        ${listinoSwitchHtml()}<span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
+        <span class="fileinfo">${t('filename')}: <b>${esc(suggestedFilename())}.pdf</b></span>
       </div>
       <div class="savenote">
         ${t('save_note')}
       </div>
     </div>
-    ${netPanelHtml()}
     <div class="pages">${html}</div>`;
   repaginateQuote();
   fitPreview();
-  wireNetPanel(v);
   $('#btnPrint').onclick=()=>{document.title=suggestedFilename();window.print();};
   $('#btnSaveAll').onclick=saveOfferComplete;
-  $('#btnXlsx').onclick=downloadOfferXlsx;
   // inline editing directly in the document preview
   v.querySelectorAll('[data-editname]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editname].name=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editspec]').forEach(el=>el.addEventListener('blur',()=>{const[si,k]=el.dataset.editspec.split('|');S.solutions[+si].specs[k]=el.textContent.trim();stepQuote();}));
@@ -369,13 +352,6 @@ function stepQuote(){
   v.querySelectorAll('[data-delextra]').forEach(el=>el.onclick=()=>{const[si,ei]=el.dataset.delextra.split('|').map(Number);S.solutions[si].extraSpecs.splice(ei,1);stepQuote();});
   v.querySelectorAll('[data-editmark]').forEach(el=>el.addEventListener('blur',()=>{S.solutions[+el.dataset.editmark].marking=el.textContent.trim();stepQuote();}));
   v.querySelectorAll('[data-editdesc]').forEach(el=>el.addEventListener('blur',()=>{const[si,ri]=el.dataset.editdesc.split('|').map(Number);const s=S.solutions[si];if(ri===0)s.tableDesc=el.textContent.trim();else if(s.accessories[ri-1])s.accessories[ri-1].desc=el.textContent.trim();stepQuote();}));
-  v.querySelectorAll('[data-editprice]').forEach(el=>el.addEventListener('blur',()=>{
-    const[si,ri]=el.dataset.editprice.split('|').map(Number);const s=S.solutions[si];
-    const raw=String(el.textContent).replace(/[^0-9,.-]/g,'');
-    const n=parseFloat(raw.replace(/\./g,'').replace(',','.'))||0;
-    if(ri===0)s.unit=n;else if(s.accessories[ri-1])s.accessories[ri-1].price=n;
-    stepQuote();
-  }));
   v.querySelectorAll('[data-addrowimg]').forEach(inp=>inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
     const[si,ri]=inp.dataset.addrowimg.split('|').map(Number);

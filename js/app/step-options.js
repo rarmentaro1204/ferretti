@@ -79,7 +79,7 @@ const OPT_TAB={}, OPT_SEARCH={}, OPT_QTY={};   // per soluzione: categoria apert
 const IMG_PH='<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="120" height="90" fill="#e4e4e4"/><rect x="27" y="20" width="66" height="50" rx="5" fill="none" stroke="#c9c9c9" stroke-width="5"/><circle cx="44" cy="37" r="6" fill="#c9c9c9"/><path d="M31 66l20-20 12 12 9-9 17 17z" fill="#c9c9c9"/></svg>';
 function listMoney(p){return (S.listino==='USD')?fmtCur(p,'USD'):money(p);}
 function optSel(s,o){return s.accessories.find(a=>a.code===o.code);}
-function optPriceOk(o){const p=liteP(o);return p!=null&&p!=='';}
+function optPriceOk(o){return true;}   // nessun prezzo nel configuratore: ogni optional è selezionabile
 function optGroupsOf(s){const opts=machineOptionals(s.code);return OPT_GROUP_ORDER.filter(g=>opts.some(o=>(o.group||'Altro')===g));}
 function optTabOf(si){const gs=optGroupsOf(S.solutions[si]);let c=OPT_TAB[si];if(c!=='SUMMARY'&&!gs.includes(c))c=gs[0]||'SUMMARY';OPT_TAB[si]=c;return c;}
 function optSolRoot(si){return document.querySelector(`[data-optsol="${si}"]`);}
@@ -94,7 +94,6 @@ function optCardHtml(si,o){
     <div class="otxt"><div class="oti">${esc(it||o.code)}</div>${en?`<div class="oen">${esc(en)}</div>`:''}
       <div class="ocode">${esc(o.code)}${o.check?` <span style="color:#d97706" title="${esc(t('verify_price'))}">⚠</span>`:''}${(o.note_it||o.note)?' · '+esc(o.note_it||o.note):''}</div></div>
     <div class="oside">
-      <div class="opr">${ok?listMoney(liteP(o)):'<span title="'+esc(L2('Prezzo non disponibile in questo listino','Price not available in this price list'))+'">—</span>'}</div>
       <label class="oqty">${L2('Quantità','Quantity')}<input type="number" min="1" value="${qty}" data-oqty="${si}|${esc(o.code)}"></label>
       <label class="tgl"><input type="checkbox" data-otgl="${si}|${esc(o.code)}" ${sel?'checked':''} ${ok?'':'disabled'}><span></span></label>
     </div></div>`;
@@ -112,21 +111,19 @@ function accRowsHtml(si){
         <input placeholder="${t('code')}" value="${esc(a.code)}" data-acc="${si}-${ai}-code">
         <input placeholder="${t('description')}" value="${esc(accItDesc(s,a))}" data-acc="${si}-${ai}-desc">
         <input type="number" min="1" placeholder="${t('qty')}" value="${a.qty}" data-acc="${si}-${ai}-qty">
-        ${(a.free||!a.code)?`<input type="number" step="0.01" placeholder="${t('unit_price')}" value="${a.price}" data-acc="${si}-${ai}-price">`:`<input type="text" class="ro" readonly tabindex="-1" title="${esc(t('price_locked'))}" value="${esc(listMoney(a.price))}">`}
-        <input type="text" inputmode="decimal" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})" value="${a.disc==null?'':esc(a.disc)}" data-acc="${si}-${ai}-disc">
         <button class="xbtn" data-accdel="${si}-${ai}">✕</button>
       </div></div>`).join('');
 }
 function optSummaryHtml(si){
   const s=S.solutions[si],spares=machineSpares(s.code);
   const sprBlock=spares.length?`<div style="margin:8px 0 4px;font-size:12px;color:#4a4a4a;font-weight:700">${t('spare_parts')} (${spares.length})</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${spares.map(o=>`<button class="chip" style="cursor:pointer" data-addspare="${si}|${esc(o.code)}">+ ${esc(o.code)} <span style="color:#6f6f6f;margin-left:4px">${money(liteP(o))}</span></button>`).join('')}</div>`:'';
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">${spares.map(o=>`<button class="chip" style="cursor:pointer" data-addspare="${si}|${esc(o.code)}">+ ${esc(o.code)} </button>`).join('')}</div>`:'';
   return `${sprBlock}<div style="font-size:12.5px;font-weight:700;color:#4a4a4a">${t('accessories')}</div>
       <div style="position:relative;margin-top:4px">
         <input class="search" style="margin:0" id="accpick-${si}" autocomplete="off" placeholder="🔎 ${esc(t('ph_acc_search'))}">
         <div id="accsugg-${si}" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:20;max-height:240px;overflow:auto;display:none"></div>
       </div>
-      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span>${t('unit_price')}</span><span>${t('discount')} %</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
+      ${s.accessories.length?`<div class="acc-row acc-head" style="margin-left:174px;padding-left:0"><span>${t('code')}</span><span>${t('description')}</span><span>${t('qty')}</span><span></span></div>`:`<p class="hint" style="margin:10px 0">${L2('Nessun optional selezionato.','No options selected.')}</p>`}
       ${accRowsHtml(si)}
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><button class="btn ghost sm" data-accadd="${si}" data-grp="Altro">+ ${L2('Customizzazione','Customization')}</button></div>`;
 }
@@ -150,7 +147,7 @@ function optViewHtml(si){
   const none=!opts.length&&!s.custom?`<div class="hint" style="margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px">${t('no_options_machine')}</div>`:'';
   const wide=cur==='SUMMARY';
   return `<div class="optview">${loadHint}${none}
-    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart" title="${esc(t('total_general'))}">${listinoSwitchHtml()}<b>${sd?moneyD(sd.solTot):''}</b></div></div>
+    <div class="obar"><div class="otabs">${tabs}</div><div class="ocart"></div></div>
     <div class="ogrid${wide?' wide':''}">
       <div class="oleft">${hero?`<img class="ohero" src="${hero}" alt="">`:`<div class="ohero ph">${esc(s.name)}</div>`}
         <div class="oname"><b>${esc(s.name)}</b><span>${esc(s.code)}</span></div></div>
@@ -162,7 +159,6 @@ function optViewHtml(si){
 function optRefresh(si){
   const root=optSolRoot(si);if(!root)return;
   const s=S.solutions[si],opts=machineOptionals(s.code),sd=lineTotals().sols[si];
-  const cb=root.querySelector('.ocart b');if(cb&&sd)cb.textContent=moneyD(sd.solTot);
   OPT_GROUP_ORDER.forEach(g=>{const i=root.querySelector(`[data-ocnt="${g}"]`);if(i){const n=opts.filter(o=>(o.group||'Altro')===g&&optSel(s,o)).length;i.textContent=n||'';}});
   const sm=root.querySelector('[data-ocnt="SUMMARY"]');if(sm)sm.textContent=s.accessories.length||'';
 }
@@ -226,7 +222,7 @@ function wireAccRows(v){
       list=list.slice(0,60);
       if(!list.length){sg.style.display='none';return;}
       sg.innerHTML=list.map(a=>`<div data-code="${esc(a.code)}" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;font-size:12.5px;display:flex;justify-content:space-between;gap:10px">
-        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span><span style="color:#2b2b2b;white-space:nowrap">${money(a.price)}</span></div>`).join('');
+        <span><b>${esc(a.code)}</b> · ${esc(a.desc)}</span></div>`).join('');
       sg.style.display='block';
       sg.querySelectorAll('[data-code]').forEach(d=>d.onmousedown=ev=>{ev.preventDefault();
         const acc=DATA.accessories.find(a=>a.code===d.dataset.code);if(!acc)return;
@@ -248,11 +244,9 @@ function stepOptions(){
         <textarea class="pe" data-sol="${si}-desc" placeholder="${t('spares_sale_desc_ph')}" style="min-height:56px">${esc(s.desc||'')}</textarea>
       </div>`:!s.custom?'':`<details class="prodedit" open style="margin:8px 0">
       <summary style="cursor:pointer;font-size:12px;color:#4a4a4a;font-weight:700">✏️ ${t('edit_product')}</summary>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:6px;margin-top:8px;align-items:end">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px;margin-top:8px;align-items:end">
         <label class="fl">${t('machine_name')}<input class="pe" data-sol="${si}-name" value="${esc(s.name)}" placeholder="${t('new_machine')}"></label>
         <label class="fl">${t('code')}<input class="pe" data-sol="${si}-code" value="${esc(s.code)}" placeholder="${t('code')}"></label>
-        <label class="fl">${t('unit_price')}<input class="pe" type="number" step="0.01" data-sol="${si}-unit" value="${s.unit}" placeholder="${t('unit_price')}"></label>
-        <label class="fl">${t('discount')} % ${t('machine_disc_sfx')}<input class="pe" type="text" inputmode="decimal" data-sol="${si}-disc" value="${s.disc==null?'':esc(s.disc)}" placeholder="${esc(t('extra_disc_ph'))}" title="${esc(t('extra_disc_tip'))} (${esc(discLabel())})"></label>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
         ${SPEC_FIELDS.map(([k])=>`<label class="fl">${t('spec_'+k)}<input class="pe" data-solspec="${si}-${k}" value="${esc(s.specs[k]||'')}" placeholder="${t('spec_'+k)}"></label>`).join('')}
@@ -280,32 +274,19 @@ function stepOptions(){
   <div class="card"><h2>${t('step_options')}</h2><p class="hint">${t('hint_options')}</p>${solHtml}</div>
   <div class="card"><h2>${t('commercial_terms')}</h2>
     <div class="grid g3">
-      <label class="fld">${t('discount')} % (1°+2°+3°)
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="number" id="o_disc" value="${S.discount}" style="flex:1">
-          <span style="color:#8592a8">+</span>
-          <input type="number" id="o_disc2" value="${S.discount2||''}" placeholder="0" style="flex:1">
-          <span style="color:#8592a8">+</span>
-          <input type="number" id="o_disc3" value="${S.discount3||''}" placeholder="0" style="flex:1">
-        </div>
-      </label>
       <label class="fld">${t('sc_validity')}<input id="o_val" value="${esc(S.validity)}"></label>
       <label class="fld">${t('sc_lead')}<input id="o_lead" value="${esc(S.lead)}"></label>
       <label class="fld">${t('sc_incoterm')}<select id="o_inc">${INCOTERMS.map(x=>`<option value="${x}"${(S.incoterm||INCOTERMS[0])===x?' selected':''}>${x}</option>`).join('')}</select></label>
-      <label class="fld">${t('sc_payment')}<input id="o_pay" value="${esc(S.payment)}" placeholder="${esc(t('def_payment'))}"></label>
     </div>
     <label class="fld" style="margin-top:14px">${t('exclusions')}
       <textarea id="o_excl" placeholder="${esc(t('def_exclusions'))}">${esc(S.exclusions)}</textarea></label>
     <label class="fld" style="margin-top:14px">${t('notes')}<textarea id="o_notes">${esc(S.notes)}</textarea></label>
   </div>${selectedDrawer()}`;
   wireDrawer();
-  $('#o_disc').oninput=e=>{S.discount=Math.max(0,Math.min(100,+e.target.value||0));};
-  $('#o_disc2').oninput=e=>{S.discount2=Math.max(0,Math.min(100,+e.target.value||0));};
-  $('#o_disc3').oninput=e=>{S.discount3=Math.max(0,Math.min(100,+e.target.value||0));};
   const bind=(id,k)=>{$('#'+id).oninput=e=>S[k]=e.target.value;};
   bind('o_val','validity');bind('o_lead','lead');
   $('#o_inc').onchange=e=>{S.incoterm=e.target.value;};
-  bind('o_pay','payment');bind('o_excl','exclusions');bind('o_notes','notes');
+  bind('o_excl','exclusions');bind('o_notes','notes');
   wireMove(v);
   v.querySelectorAll('[data-sameorder]').forEach(inp=>inp.onchange=e=>{S.solutions[+inp.dataset.sameorder].sameOrder=e.target.checked;stepOptions();});
   v.querySelectorAll('[data-sol]').forEach(inp=>inp.oninput=e=>{
